@@ -8,6 +8,9 @@ index.php
 haoid.sql
 addons/*
 !addons/we7_car/
+!addons/we7_car/template/
+!addons/we7_car/template/mobile/
+!addons/we7_car/template/web/
 framework/
 attachment/
 data/

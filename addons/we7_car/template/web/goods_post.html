@@ -1,0 +1,113 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+    <li class="active"><a href="{php echo $this->createWebUrl('goods',array('op'=>'post'));}">添加产品</a></li>
+    <li ><a href="{php echo $this->createWebUrl('goods', array('op'=>'list'))}">产品管理</a></li>
+    <li  ><a href="{php echo $this->createWebUrl('goods', array('op'=>'goods_type'))}">产品类型管理</a></li>
+</ul>
+<div class="main">
+    <form action="" method="post" class="form-horizontal form" enctype="multipart/form-data" onsubmit="return validate(this);">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                修改客服人员设置
+            </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">排序</label>
+                    <div class="col-sm-9 col-xs-12">
+                        <input type="text" name="listorder" class="form-control" value="{$theone['listorder']}" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">名称</label>
+                    <div class="col-sm-9 col-xs-12">
+                        <input type="text" name="name" class="form-control" value="{$theone['name']}" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">图片</label>
+                    <div class="col-sm-9 col-xs-12">
+                        {php echo tpl_form_field_image('headthumb', $theone['headthumb']);}
+                        <span class="help-block" style="clear:both">建议图片大小不超过300K(220 px * 30px),以免影响展示效果</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">所属分类</label>
+                    <div class="col-sm-9 col-xs-12">
+                        <select class="form-control" name="type_id">
+                            {loop $types $type}
+                            <option value="{$type['id']}"  {if $type['id'] == $theone['type_id']} selected="selected"{/if}>{$type['name']}</option>
+                            {/loop}
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">规格</label>
+                    <div class="col-sm-9 col-xs-12">
+                        <input type="text" name="spec" class="form-control" value="{$theone['spec']}" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">价钱</label>
+                    <div class="col-sm-9 col-xs-12">
+                        <input type="text" name="price" class="form-control" value="{$theone['price']}" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">内容</label>
+                    <div class="col-sm-9 col-xs-12">
+                        <textarea style="height:400px; width:100%;" class="richtext-clone" name="description" cols="70" id="reply-add-text">{$newsone['content']}</textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">是否显示</label>
+                    <div class="col-sm-9 col-xs-12">
+                        <label for="istatus1" class="radio-inline"><input type="radio" name="status" value="1" id="istatus1" {if $theone['status'] == 1}  checked="true" {/if}> 是</label>&nbsp;&nbsp;&nbsp;
+                        <label for="isstatus0" class="radio-inline"><input type="radio" name="status" value="0" id="isstatus0"  {if $theone['status'] == 0}  checked="true" {/if}> 否</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group col-sm-12">
+            <input type='hidden' name='id' value="{$theone['id']}" />
+            <input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" />
+            <input type="hidden" name="token" value="{$_W['token']}" />
+        </div>
+    </form>
+</div>
+
+<script type="text/javascript">
+    function message(msg) {
+        require(['util'], function(util) {
+            util.message(msg);
+        })
+    }
+    $('form').submit(function() {
+        if ($.trim($(':text[name="name"]').val()) == '') {
+            message('必须填写产品名.', '', 'error');
+            return false;
+        }
+        if ($.trim($(':text[name="headthumb"]').val()) == '') {
+            message('必须上传图片.', '', 'error');
+            return false;
+        }
+        if ($.trim($(':text[name="spec"]').val()) == '') {
+            message('必须填写产品规格.', '', 'error');
+            return false;
+        }
+        if ($.trim($('textarea[name="description"]').val()) == '') {
+            message('必须填写产品介绍.', '', 'error');
+            return false;
+        }
+        return true;
+    });
+
+    require(['bootstrap'],function($){
+        $('.btn').tooltip();
+    });
+
+    var category = {php echo json_encode($children)};
+    require(['util'],function(util){
+        util.editor( $('.richtext-clone')[0]);
+    })
+</script>
+{template 'common/footer'}

@@ -1,0 +1,61 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+    <li><a href="{php echo $this->createWebUrl('goods',array('op'=>'post'));}">添加产品</a></li>
+    <li  class="active"><a href="{php echo $this->createWebUrl('goods', array('op'=>'list'))}">产品管理</a></li>
+    <li  ><a href="{php echo $this->createWebUrl('goods', array('op'=>'goods_type'))}">产品类型管理</a></li>
+</ul>
+
+<div class="main panel panel-default">
+    <div class="category panel-body table-responsive">
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th >显示顺序</th>
+                <th >主图</th>
+                <th >产品名称</th>
+                <th >所属类型</th>
+                <th >规格</th>
+                <th >价钱</th>
+                <th >是否显示</th>
+                <th >操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            {loop $list $v}
+            <tr>
+                <td><input type="text" class="form-control" name="listorder" value="{$v['listorder']}"></td>
+                <td>{$v['name']}</td>
+                <td>
+                    {$v['system_name']}
+                </td>
+                <td>
+                    {if $v['spacing_km'] > 0 }
+                    {$v['spacing_km']}km/{$v['spacing_day']}天
+                    {else}
+                    无
+                    {/if}
+                </td>
+                <td>{if $v['status']=='1'}<span class="label label-success">显示</span>{else}<span class="label label-danger">不显示</span>{/if}</td>
+                <td><a href="{php echo $this->createWebUrl('services',array('id' => $v['id'],'op'=>'post'))}" title="编辑" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><i class="fa fa-edit"></i></a>
+                    <a href="{php echo $this->createWebUrl('services',array('id' => $v['id'],'op'=>'del'))}" onclick="return confirm('确认删除此服务？');
+                                                        return false;" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm" title="删除"><i class="fa fa-times"></i></a></td>
+            </tr>
+            {/loop}
+            <tr>
+                <td colspan="6">
+                    <a class='btn btn-default' href="{php echo $this->createWebUrl('goods', array('op'=>'post','id'=>0));}"><i class="fa fa-arrows"></i> 添加产品</a>
+                    <button type="submit" class="btn btn-primary" name="submit" value="提交">提交排序</button>
+                    <input type="hidden" name="token" value="{$_W['token']}" />
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    require(['bootstrap'],function($){
+        $('.btn').tooltip();
+    });
+</script>
+
+{template 'common/footer'}
