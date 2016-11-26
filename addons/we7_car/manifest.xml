@@ -345,6 +345,63 @@ CREATE TABLE IF NOT EXISTS `ims_we7car_type` (
   KEY `ims_weid_order` (`weid`,`listorder`)
 ) ENGINE=MyISAM AUTO_INCREMENT=147 DEFAULT CHARSET=utf8;
 
+#汽车系统表
+CREATE TABLE IF NOT EXISTS `ims_we7car_system` (
+  `system_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `weid` int(11) DEFAULT NULL,
+  `listorder` int(11) NOT NULL,
+  `name` varchar(25) NOT NULL,
+  `officialweb` varchar(100) NOT NULL,
+  `description` text NOT NULL,
+  `createtime` int(10) NOT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`system_id`),
+  KEY `idx_weid_order` (`weid`,`listorder`)
+) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+#服务类型表
+CREATE TABLE IF NOT EXISTS `ims_we7car_car_services` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `weid` int(11) DEFAULT NULL,
+  `listorder` int(11) NOT NULL,
+  `name` varchar(25) NOT NULL,
+  `description` text NOT NULL,
+  `spacing_km` int(20),
+  `spacing_day` int(20),
+  `createtime` int(10) NOT NULL,
+  `system_id` int(11) NOT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+#产品分类
+CREATE TABLE IF NOT EXISTS `ims_we7car_goods_type` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `weid` int(11) DEFAULT NULL,
+  `listorder` int(11) NOT NULL,
+  `name` varchar(25) NOT NULL,
+  `createtime` int(10) NOT NULL,
+  `top_id` int(11) NOT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+
+#产品
+CREATE TABLE IF NOT EXISTS `ims_we7car_goods` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `weid` int(11) DEFAULT NULL,
+  `listorder` int(11) NOT NULL,
+  `name` varchar(25) NOT NULL,
+  `spec` varchar(50) NOT NULL,
+  `price` float(20,2) NOT NULL,
+  `image` varchar(255) NOT NULL,
+  `type_id` int(11) NOT NULL,
+  `description` text NOT NULL,
+  `createtime` int(10) NOT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 
 	]]></install>
 	<uninstall><![CDATA[
@@ -364,6 +421,10 @@ CREATE TABLE IF NOT EXISTS `ims_we7car_type` (
 	DROP TABLE IF EXISTS `ims_we7car_set`;
 	DROP TABLE IF EXISTS `ims_we7car_care`;
 	DROP TABLE IF EXISTS `ims_we7car_services`;
+	DROP TABLE IF EXISTS `ims_we7car_system`;
+	DROP TABLE IF EXISTS `ims_we7car_car_services`;
+	DROP TABLE IF EXISTS `ims_we7car_goods`;
+	DROP TABLE IF EXISTS `ims_we7car_goods_type`;
 	]]></uninstall>
 	<upgrade><![CDATA[upgrade.php]]></upgrade>
 </manifest>

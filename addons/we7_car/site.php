@@ -88,6 +88,211 @@ class We7_carModuleSite extends WeModuleSite {
         }
     }
 
+    //维修系统
+    public function doWebSystem(){
+        global $_GPC, $_W;
+        $op = $_GPC['op'] ? $_GPC['op'] : 'list';
+        //列表
+        if ($op == 'list'){
+            $list = pdo_fetchall('SELECT * FROM ' . tablename('we7car_system') . " WHERE weid = :weid ORDER BY listorder DESC", array(':weid' => $_W['uniacid']));
+            if(checksubmit('submit')){
+                foreach ($_GPC['listorder'] as $key => $val) {
+                    pdo_update('we7car_system', array('listorder' => intval($val)), array('system_id' => intval($key)));
+                }
+                message('更新品牌排序成功！', $this->createWebUrl('system', array('op' => 'list')), 'success');
+            }
+            include $this->template('web/system');
+        }
+        //添加/修改
+        if($op == 'post'){
+            $id = intval($_GPC['id']);
+            if ($id > 0) {
+                $theone = pdo_fetch('SELECT * FROM ' . tablename('we7car_system') . " WHERE  weid = :weid  AND system_id = :id", array(':weid' => $_W['uniacid'], ':id' => $id));
+            } else {
+                $theone = array('status' => 1, 'listorder' => 0);
+            }
+
+            if(checksubmit('submit')){
+                $name = trim($_GPC['name']) ? trim($_GPC['name']) : message('请填写类型名称！');
+                $description = trim($_GPC['description']) ? trim($_GPC['description']) : message('请填写类型简介！');
+                $officialweb = trim($_GPC['officialweb']);
+                $listorder = intval($_GPC['listorder']);
+                $status = intval($_GPC['status']);
+                $insert = array(
+                    'name' => $name,
+                    'description' => $description,
+                    'officialweb' => $officialweb,
+                    'listorder' => $listorder,
+                    'status' => $status,
+                    'weid' => $_W['uniacid'],
+                    'createtime' => TIMESTAMP
+                );
+                if (empty($id)) {
+                    pdo_insert('we7car_system', $insert);
+                    !pdo_insertid() ? message('保存品牌数据失败, 请稍后重试.', 'error') : '';
+                } else {
+                    if (pdo_update('we7car_system', $insert, array('id' => $id)) === false) {
+                        message('更新品牌数据失败, 请稍后重试.', 'error');
+                    }
+                }
+                message('更新品牌数据成功！', $this->createWebUrl('system', array('op' => 'list')), 'success');
+            }
+            include $this->template('web/system_post');
+        }
+
+        if ($op == 'del'){
+            $id = intval($_GPC['id']);
+            $temp = pdo_delete("we7car_system", array("weid" => $_W['uniacid'], 'system_id' => $id));
+            if ($temp == false) {
+                message('抱歉，删除数据失败！', '', 'error');
+            } else {
+                message('删除数据成功！', $this->createWebUrl('system', array('op' => 'list')), 'success');
+            }
+        }
+
+    }
+
+    //服务类型
+    public function doWebServices(){
+        global $_GPC, $_W;
+        $op = $_GPC['op'] ? $_GPC['op'] : 'list';
+
+        if($op == 'list'){
+            $list = pdo_fetchall("SELECT s.*, t.name as system_name FROM ". tablename('we7car_car_services') . " as s,". tablename('we7car_system')." as t WHERE s.weid = ".$_W['uniacid']." AND s.system_id = t.system_id");
+
+            if (checksubmit('submit')) {
+                foreach ($_GPC['listorder'] as $key => $val) {
+                    pdo_update('we7car_car_services', array('listorder' => intval($val)), array('id' => intval($key)));
+                }
+                message('更新品牌排序成功！', $this->createWebUrl('services', array('op' => 'list')), 'success');
+            }
+
+            include $this->template('web/services');
+        }
+
+        if($op == 'post'){
+            $id = intval($_GPC['id']);
+            $system = pdo_fetchall('SELECT * FROM ' . tablename('we7car_system') . " WHERE weid = :weid", array('weid' => $_W['uniacid']));
+            if(!empty($id)){
+                $theone = pdo_fetch('SELECT * FROM ' . tablename('we7car_car_services') . " WHERE  weid = :weid  AND id = :id", array(':weid' => $_W['uniacid'], ':id' => $id));
+            } else {
+                $theone = array('status' => 1, 'listorder' => 0);
+            }
+
+            if(checksubmit('submit')){
+                $name = trim($_GPC['name']) ? trim($_GPC['name']) : message('请填写服务名称！');
+                $description = trim($_GPC['description']) ;
+                $listorder = intval($_GPC['listorder']);
+                $status = intval($_GPC['status']);
+                $system_id = $_GPC['system_id'];
+                $spacing_km = $_GPC['spacing_km'];
+                $spacing_day = $_GPC['spacing_day'];
+                $insert = array(
+                    'name' => $name,
+                    'description' => $description,
+                    'listorder' => $listorder,
+                    'status' => $status,
+                    'system_id' => $system_id,
+                    'spacing_day' => $spacing_day,
+                    'spacing_km' => $spacing_km,
+                    'weid' => $_W['uniacid'],
+                    'createtime' => TIMESTAMP,
+                );
+                if(empty($id)){
+                    pdo_insert('we7car_car_services',$insert);
+                    !pdo_insertid() ? message('保存服务数据失败, 请稍后重试.', 'error') : '';
+                }else{
+                    if (pdo_update('we7car_car_services', $insert, array('id' => $id)) === false) {
+                        message('更新服务数据失败, 请稍后重试.', 'error');
+                    }
+                }
+                message('更新服务数据成功！', $this->createWebUrl('services', array('op' => 'list')), 'success');
+            }
+
+            include $this->template('web/services_post');
+        }
+
+        if($op == 'del'){
+            $id = intval($_GPC['id']);
+            $temp = pdo_delete("we7car_car_services", array("weid" => $_W['uniacid'], 'id' => $id));
+            if ($temp == false) {
+                message('抱歉，删除数据失败！', '', 'error');
+            } else {
+                message('删除数据成功！', $this->createWebUrl('services', array('op' => 'list')), 'success');
+            }
+        }
+    }
+
+    //商品
+    public function doWebGoods(){
+        global $_GPC, $_W;
+        $op = $_GPC['op'] ? $_GPC['op'] : 'list';
+
+        //产品列表
+        if($op == 'list'){
+
+            include $this->template('web/goods_list');
+        }
+
+        //添加产品
+        if($op == 'post'){
+            $types = pdo_fetchall("SELECT * FROM ".tablename('we7car_goods_type'). " WHERE weid = :weid", array('weid' => $_W['uniacid']));
+
+            if(checksubmit('submit')){
+                print_r($_GPC);exit;
+            }
+
+            include $this->template('web/goods_post');
+        }
+
+        //产品类型
+        if($op == 'goods_type'){
+            $list = pdo_fetchall("SELECT * FROM ".tablename('we7car_goods_type'). " WHERE weid = :weid", array('weid' => $_W['uniacid']));
+            if(checksubmit('submit')){
+                foreach ($_GPC['listorder'] as $key => $val) {
+                    pdo_update('we7car_goods_type', array('listorder' => intval($val)), array('id' => intval($key)));
+                }
+                message('更新排序成功！', $this->createWebUrl('goods', array('op' => 'goods_type')), 'success');
+            }
+
+            include $this->template('web/goods_type');
+        }
+
+        //添加商品类型
+        if($op == 'add_type'){
+            $name = trim($_POST['name']);
+            $top_id = empty($_POST['top_id']) ? 0 : $_POST['top_id'];
+            $insert = array(
+                'name' => $name,
+                'top_id' => $top_id,
+                'createtime' => TIMESTAMP,
+                'listorder' => 255,
+                'status' => 1,
+                'weid' => $_W['uniacid'],
+            );
+            if(pdo_insert('we7car_goods_type', $insert) == 1){
+                echo 111;
+            }else{
+                echo 222;
+            }
+            exit;
+        }
+
+        //删除产品类型
+        if($op == 'del_type'){
+            $id = $_GPC['id'];
+            $temp = pdo_delete("we7car_goods_type", array("weid" => $_W['uniacid'], 'id' => $id));
+            if ($temp == false) {
+                message('抱歉，删除数据失败！', '', 'error');
+            } else {
+                pdo_delete("we7car_goods_type", array("weid" => $_W['uniacid'], 'top_id' => $id));
+                message('删除数据成功！', $this->createWebUrl('goods', array('op' => 'goods_type')), 'success');
+            }
+        }
+
+    }
+
+
     //汽车品牌管理
     public function doWebBrand() {
         global $_GPC, $_W;
@@ -1823,6 +2028,6 @@ class We7_carModuleSite extends WeModuleSite {
         include $this->template('album_detail');
     }
 
-    
+
 
 }
