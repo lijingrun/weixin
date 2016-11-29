@@ -6,6 +6,7 @@
 
 <div class="main panel panel-default">
     <div class="category panel-body table-responsive">
+        <form action="" method="post">
         <table class="table table-hover">
             <thead>
             <tr>
@@ -13,6 +14,7 @@
                 <th >服务名称</th>
                 <th >所属系统</th>
                 <th >保养周期</th>
+                <th >施工耗时</th>
                 <th >是否显示</th>
                 <th >操作</th>
             </tr>
@@ -20,7 +22,9 @@
             <tbody>
             {loop $list $v}
             <tr>
-                <td><input type="text" class="form-control" name="listorder" value="{$v['listorder']}"></td>
+                <td>
+                    <input type="text" class="form-control" name="listorder[{$v['system_id']}]" value="{$v['listorder']}">
+                </td>
                 <td>{$v['name']}</td>
                 <td>
                     {$v['system_name']}
@@ -31,6 +35,9 @@
                     {else}
                     无
                     {/if}
+                </td>
+                <td>
+                    {$v['user_time']}分钟
                 </td>
                 <td>{if $v['status']=='1'}<span class="label label-success">显示</span>{else}<span class="label label-danger">不显示</span>{/if}</td>
                 <td><a href="{php echo $this->createWebUrl('services',array('id' => $v['id'],'op'=>'post'))}" title="编辑" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><i class="fa fa-edit"></i></a>
@@ -47,6 +54,7 @@
             </tr>
             </tbody>
         </table>
+            </form>
     </div>
 </div>
 <script>

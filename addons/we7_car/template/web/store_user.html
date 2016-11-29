@@ -1,0 +1,63 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+    <li  class="active"><a href="{php echo $this->createWebUrl('store', array('op'=>'store_user','id'=>$store['id']))}">店铺操作员管理</a></li>
+    <li ><a href="{php echo $this->createWebUrl('store', array('op'=>'list'))}">店铺管理</a></li>
+</ul>
+
+<div class="main panel panel-default">
+    <div class="category panel-body table-responsive">
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th >店铺名称</th>
+                <th >登录账号</th>
+                <th >操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            {loop $store_users $v}
+            <tr>
+                <td>
+                    {$store['store_name']}
+                </td>
+                <td>
+                    {$v['username']}
+                </td>
+                <td>
+                    <a href="{php echo $this->createWebUrl('store', array('op'=>'del_store_user','id' => $v['id'], 'store_id' => $store['id']))}" onclick="return confirm('确认删除该店铺操作员吗？');return false;" data-toggle="tooltip" data-placement="bottom" title="删除" class="btn btn-default btn-sm"><i class="fa fa-times"></i></a>
+                </td>
+            </tr>
+            {/loop}
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="main panel panel-default">
+<div class="category panel-body table-responsive">
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th >用户名</th>
+            <th >添加</th>
+        </tr>
+        </thead>
+        <tbody>
+        {loop $users $user}
+        <tr>
+            <td>{$user['username']}</td>
+            <td>
+                <a href="{php echo $this->createWebUrl('store',array('uid' => $user['uid'],'op'=>'store_add_user','store_id' => $store['id']))}" title="添加" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-plus"></span></a>
+            </td>
+        </tr>
+        {/loop}
+        </tbody>
+    </table>
+</div>
+    </div>
+<script>
+    require(['bootstrap'],function($){
+        $('.btn').tooltip();
+    });
+</script>
+
+{template 'common/footer'}

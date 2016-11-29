@@ -38,9 +38,13 @@
 			<entry title="车型相册管理" do="album" direct="false" />
 			<entry title="意见回馈管理" do="message" direct="false" />
 			<entry title="实用工具设置" do="tool" direct="false" />
-			<entry title="保养系统管理" do="system" direct="false" />
+			<entry title="系统管理" do="system" direct="false" />
 			<entry title="保养类型管理" do="services" direct="false" />
-			<entry title="保养产品管理" do="goods" direct="false" />
+			<entry title="产品管理" do="goods" direct="false" />
+			<entry title="店铺管理" do="store" direct="false" />
+			<entry title="订单管理" do="orders" direct="false" />
+			<entry title="库存管理" do="orders" direct="false" />
+
 		</menu>
 		<home>
 			<entry title="汽车首页" do="index" />
@@ -368,6 +372,7 @@ CREATE TABLE IF NOT EXISTS `ims_we7car_car_services` (
   `description` text NOT NULL,
   `spacing_km` int(20),
   `spacing_day` int(20),
+  `user_time` int(80),
   `createtime` int(10) NOT NULL,
   `system_id` int(11) NOT NULL,
   `status` tinyint(4) NOT NULL DEFAULT '1',
@@ -403,6 +408,58 @@ CREATE TABLE IF NOT EXISTS `ims_we7car_goods` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 
+#店铺管理
+CREATE TABLE IF NOT EXISTS `ims_we7car_stores` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `weid` int(11) DEFAULT NULL,
+  `store_name` varchar(255) NOT NULL,
+  `createtime` int(10) NOT NULL,
+  `description` text NOT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT '1',
+  `contacts` varchar(255) NOT NULL,
+  `phone` varchar(11) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+#店铺操作员
+CREATE TABLE IF NOT EXISTS `ims_we7car_store_user` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `uniacid` int(11) DEFAULT NULL,
+  `store_id` int(10) NOT NULL,
+  `uid` int(10) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+#维修订单
+CREATE TABLE IF NOT EXISTS `ims_we7car_orders` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `order_sn` int(100) NOT NULL,
+  `weid` int(11) DEFAULT NULL,
+  `createtime` int(10) NOT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT '1',
+  `store_id` int(11),
+  `service_id` int(11) NOT NULL,
+  `begin_time` int(10),
+  `end_time` int(10),
+  `worker_price` float(10,2),
+  `worker_id` int(10),
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+#订单商品
+CREATE TABLE IF NOT EXISTS `ims_we7car_order_goods` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `weid` int(11) DEFAULT NULL,
+  `createtime` int(10) NOT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT '1',
+  `order_id` int(10) NOT NULL,
+  `goods_id` int(10) NOT NULL,
+  `goods_price` float(10,2) NOT NULL,
+  `quantity` int(10) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
 	]]></install>
 	<uninstall><![CDATA[
 	DROP TABLE IF EXISTS `ims_we7car_order_data`;
@@ -425,6 +482,10 @@ CREATE TABLE IF NOT EXISTS `ims_we7car_goods` (
 	DROP TABLE IF EXISTS `ims_we7car_car_services`;
 	DROP TABLE IF EXISTS `ims_we7car_goods`;
 	DROP TABLE IF EXISTS `ims_we7car_goods_type`;
+	DROP TABLE IF EXISTS `ims_we7car_stores`;
+	DROP TABLE IF EXISTS `ims_we7car_orders`;
+	DROP TABLE IF EXISTS `ims_we7car_orders`;
+	DROP TABLE IF EXISTS `ims_we7car_store_user`;
 	]]></uninstall>
 	<upgrade><![CDATA[upgrade.php]]></upgrade>
 </manifest>

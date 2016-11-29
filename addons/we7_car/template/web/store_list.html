@@ -1,0 +1,57 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+    <li><a href="{php echo $this->createWebUrl('store',array('op'=>'post'));}">添加店铺</a></li>
+    <li  class="active"><a href="{php echo $this->createWebUrl('store', array('op'=>'list'))}">店铺管理</a></li>
+</ul>
+
+<div class="main panel panel-default">
+    <div class="category panel-body table-responsive">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th >店铺名称</th>
+                    <th >联系人</th>
+                    <th >联系电话</th>
+                    <th >建立时间</th>
+                    <th >状态</th>
+                    <th >操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {loop $list $v}
+                <tr>
+                    <td>
+                        {$v['store_name']}
+                    </td>
+                    <td>
+                        {$v['contacts']}
+                    </td>
+                    <td>
+                        {$v['phone']}
+                    </td>
+                    <td>
+                        {php echo date('Y-m-d',$v['createtime'])}
+                    </td>
+                    <td>{if $v['status']=='1'}<span class="label label-success">正常</span>{else}<span class="label label-danger">失效</span>{/if}</td>
+                    <td><a href="{php echo $this->createWebUrl('store',array('id' => $v['id'],'op'=>'post'))}" title="编辑" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><i class="fa fa-edit"></i></a>
+                        <a href="{php echo $this->createWebUrl('store',array('id' => $v['id'],'op'=>'store_user'))}" title="店铺操作员管理" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-log-out"></span></a>
+                        </td>
+                </tr>
+                {/loop}
+                <tr>
+                    <td colspan="6">
+                        <a class='btn btn-default' href="{php echo $this->createWebUrl('store', array('op'=>'post','id'=>0));}"><i class="fa fa-arrows"></i> 添加店铺</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+<script>
+    require(['bootstrap'],function($){
+        $('.btn').tooltip();
+    });
+</script>
+
+{template 'common/footer'}

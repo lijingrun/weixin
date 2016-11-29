@@ -26,7 +26,7 @@
                 <div class="form-group">
                     <label class="col-xs-12 col-sm-3 col-md-2 control-label">图片</label>
                     <div class="col-sm-9 col-xs-12">
-                        {php echo tpl_form_field_image('headthumb', $theone['headthumb']);}
+                        {php echo tpl_form_field_image('image', $theone['image']);}
                         <span class="help-block" style="clear:both">建议图片大小不超过300K(220 px * 30px),以免影响展示效果</span>
                     </div>
                 </div>
@@ -53,9 +53,9 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">内容</label>
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">介绍</label>
                     <div class="col-sm-9 col-xs-12">
-                        <textarea style="height:400px; width:100%;" class="richtext-clone" name="description" cols="70" id="reply-add-text">{$newsone['content']}</textarea>
+                        <textarea style="height:400px; width:100%;" class="richtext-clone" name="description" cols="70" id="reply-add-text">{$theone['description']}</textarea>
                     </div>
                 </div>
                 <div class="form-group">
@@ -86,16 +86,12 @@
             message('必须填写产品名.', '', 'error');
             return false;
         }
-        if ($.trim($(':text[name="headthumb"]').val()) == '') {
+        if ($.trim($(':text[name="image"]').val()) == '') {
             message('必须上传图片.', '', 'error');
             return false;
         }
         if ($.trim($(':text[name="spec"]').val()) == '') {
             message('必须填写产品规格.', '', 'error');
-            return false;
-        }
-        if ($.trim($('textarea[name="description"]').val()) == '') {
-            message('必须填写产品介绍.', '', 'error');
             return false;
         }
         return true;
