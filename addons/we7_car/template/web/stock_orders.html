@@ -1,0 +1,106 @@
+{template 'common/header'}
+
+<script>
+    function find(){
+        var status = $("#status").val();
+        location.href="index.php?c=site&a=entry&op=orders&do=stock&m=we7_car&status="+status;
+    }
+</script>
+
+<ul class="nav nav-tabs">
+    <li ><a href="{php echo $this->createWebUrl('stock', array('op'=>'list'))}">库存管理</a></li>
+    <li class="active"><a href="{php echo $this->createWebUrl('stock', array('op'=>'orders'))}">订单审核</a></li>
+</ul>
+
+<div class="main panel panel-default">
+    <div class="category panel-body table-responsive">
+
+        <div class="panel panel-info">
+            <div class="panel-heading">查询</div>
+            <div class="panel-body">
+                <div class="form-horizontal" role="form">
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">产品类型</label>
+                        <div class="col-sm-8 col-lg-9">
+                            <select class="form-control" id="status">
+                                <option value="0" >全部</option>
+                                <option value="1" {if $status == 1} selected="selected" {/if}>未审核</option>
+                                <option value="2" {if $status == 2} selected="selected" {/if}>审核通过</option>
+                                <option value="3" {if $status == 3} selected="selected" {/if}>审核取消</option>
+                            </select>
+                        </div>
+                        <div class=" col-xs-12 col-sm-2 col-lg-2">
+                            <button class="btn btn-default" onclick="find();"><i class="fa fa-search"></i> 搜索</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th >产品</th>
+                <th >时间</th>
+                <th >产品规格</th>
+                <th >出/入库</th>
+                <th>数量</th>
+                <th>单价</th>
+                <th>状态</th>
+                <th>备注</th>
+                <th >操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            {loop $list $v}
+            <tr>
+                <td>
+                    <img src="../attachment/{$v['image']}" style="width:100%;" />
+                    <p align="center">{$v['name']}</p>
+                </td>
+                <td>
+                    {php echo date('Y-m-d',$v['createtime'])}
+                </td>
+                <td>
+                    {$v['spec']}
+                </td>
+                <td>
+                    {if $v['type'] == 1}
+                     销售出库
+                    {else}
+                    采购入库
+                    {/if}
+                </td>
+                <td>
+                    {$v['quantity']}
+                </td>
+                <td>
+                    {$v['price']}
+                </td>
+                <td>
+                    {if $v['status']=='1'}<span class="label label-success">已审核</span>{else if $v['status'] == 2}<span class="label label-danger">作废</span>{else}未审核{/if}
+                </td>
+                <td>
+                    {$v['remark']}
+                </td>
+                <td>
+                    {if $v['status'] == 0}
+                    <a href="{php echo $this->createWebUrl('stock',array('id' => $v['id'],'type' => 1,'op'=>'examine'))}" title="通过" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-ok"></span></a>
+                    <a href="{php echo $this->createWebUrl('stock',array('id' => $v['id'],'type' => 2,'op'=>'examine'))}" title="取消" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-remove"></span></a>
+                    {/if}
+                </td>
+            </tr>
+            {/loop}
+
+            </tbody>
+        </table>
+        {$pager}
+    </div>
+</div>
+<script>
+    require(['bootstrap'],function($){
+        $('.btn').tooltip();
+    });
+</script>
+
+{template 'common/footer'}

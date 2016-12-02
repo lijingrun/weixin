@@ -1,8 +1,9 @@
 {template 'common/header'}
 <ul class="nav nav-tabs">
-    <li class="active"><a href="{php echo $this->createWebUrl('goods',array('op'=>'post'));}">添加产品</a></li>
+    <li ><a href="{php echo $this->createWebUrl('goods',array('op'=>'post'));}">添加产品</a></li>
     <li ><a href="{php echo $this->createWebUrl('goods', array('op'=>'list'))}">产品管理</a></li>
     <li  ><a href="{php echo $this->createWebUrl('goods', array('op'=>'goods_type'))}">产品类型管理</a></li>
+    <li  ><a href="{php echo $this->createWebUrl('goods', array('op'=>'goods_brand'))}">产品品牌管理</a></li>
 </ul>
 <div class="main">
     <form action="" method="post" class="form-horizontal form" enctype="multipart/form-data" onsubmit="return validate(this);">
@@ -15,56 +16,21 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">名称</label>
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">品牌名称</label>
                     <div class="col-sm-9 col-xs-12">
                         <input type="text" name="name" class="form-control" value="{$theone['name']}" />
                     </div>
                 </div>
+
+
                 <div class="form-group">
-                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">产品编号</label>
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">logo</label>
                     <div class="col-sm-9 col-xs-12">
-                        <input type="text" name="goods_sn" class="form-control" value="{$theone['goods_sn']}" />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">品牌</label>
-                    <div class="col-sm-9 col-xs-12">
-                        <select class="form-control" name="type_id">
-                            {loop $brands $brand}
-                            <option value="{$brand['id']}"  {if $brand['id'] == $theone['brand_id']} selected="selected"{/if}>{$brand['name']}</option>
-                            {/loop}
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">图片</label>
-                    <div class="col-sm-9 col-xs-12">
-                        {php echo tpl_form_field_image('image', $theone['image']);}
+                        {php echo tpl_form_field_image('logo', $theone['logo']);}
                         <span class="help-block" style="clear:both">建议图片大小不超过300K(220 px * 30px),以免影响展示效果</span>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">所属分类</label>
-                    <div class="col-sm-9 col-xs-12">
-                        <select class="form-control" name="type_id">
-                            {loop $types $type}
-                            <option value="{$type['id']}"  {if $type['id'] == $theone['type_id']} selected="selected"{/if}>{$type['name']}</option>
-                            {/loop}
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">规格</label>
-                    <div class="col-sm-9 col-xs-12">
-                        <input type="text" name="spec" class="form-control" value="{$theone['spec']}" />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">价钱</label>
-                    <div class="col-sm-9 col-xs-12">
-                        <input type="text" name="price" class="form-control" value="{$theone['price']}" />
-                    </div>
-                </div>
+
                 <div class="form-group">
                     <label class="col-xs-12 col-sm-3 col-md-2 control-label">介绍</label>
                     <div class="col-sm-9 col-xs-12">
@@ -96,15 +62,11 @@
     }
     $('form').submit(function() {
         if ($.trim($(':text[name="name"]').val()) == '') {
-            message('必须填写产品名.', '', 'error');
+            message('必须填写品牌名.', '', 'error');
             return false;
         }
-        if ($.trim($(':text[name="image"]').val()) == '') {
+        if ($.trim($(':text[name="logo"]').val()) == '') {
             message('必须上传图片.', '', 'error');
-            return false;
-        }
-        if ($.trim($(':text[name="spec"]').val()) == '') {
-            message('必须填写产品规格.', '', 'error');
             return false;
         }
         return true;

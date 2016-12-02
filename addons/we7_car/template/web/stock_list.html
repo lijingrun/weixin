@@ -1,17 +1,17 @@
 {template 'common/header'}
+
 <script>
     function find(){
         var key_word = $("#key_word").val().trim();
         var type_id = $("#type_id").val();
-        location.href="index.php?c=site&a=entry&op=list&do=goods&m=we7_car&key_word="+key_word+"&type_id="+type_id;
+        location.href="index.php?c=site&a=entry&op=list&do=stock&m=we7_car&key_word="+key_word+"&type_id="+type_id;
     }
 </script>
 <ul class="nav nav-tabs">
-    <li><a href="{php echo $this->createWebUrl('goods',array('op'=>'post'));}">添加产品</a></li>
-    <li  class="active"><a href="{php echo $this->createWebUrl('goods', array('op'=>'list'))}">产品管理</a></li>
-    <li  ><a href="{php echo $this->createWebUrl('goods', array('op'=>'goods_type'))}">产品类型管理</a></li>
-    <li  ><a href="{php echo $this->createWebUrl('goods', array('op'=>'goods_brand'))}">产品品牌管理</a></li>
+    <li class="active"><a href="{php echo $this->createWebUrl('stock', array('op'=>'list'))}">库存管理</a></li>
+    <li ><a href="{php echo $this->createWebUrl('stock', array('op'=>'orders'))}">订单审核</a></li>
 </ul>
+
 <div class="main panel panel-default">
     <div class="category panel-body table-responsive">
         <div class="panel panel-info">
@@ -31,7 +31,7 @@
                                 <option value="0" >全部</option>
                                 {loop $types $type}
                                 <option value="{$type['id']}" {if $type['id']==$type_id }selected='selected'{/if}>
-                                    {$type['name']}
+                                {$type['name']}
                                 </option>
                                 {/loop}
                             </select>
@@ -43,17 +43,14 @@
                 </div>
             </div>
         </div>
-        <form action="" method="post">
         <table class="table table-hover">
             <thead>
             <tr>
-                <th >显示顺序</th>
-                <th >主图</th>
-                <th >产品名称</th>
-                <th >所属类型</th>
-                <th >规格</th>
-                <th >价钱</th>
-                <th >是否显示</th>
+                <th >产品</th>
+                <th >产品编号</th>
+                <th >产品规格</th>
+                <th >库存</th>
+                <th>安全库存</th>
                 <th >操作</th>
             </tr>
             </thead>
@@ -61,39 +58,35 @@
             {loop $list $v}
             <tr>
                 <td>
-                    <input type="text" class="form-control" name="listorder[{$v['system_id']}]" value="{$v['listorder']}">
-                </td>
-                <td>
                     <img src="../attachment/{$v['image']}" style="width:100%;" />
+                    <p align="center">{$v['name']}</p>
                 </td>
                 <td>
-                    {$v['name']}
-                </td>
-                <td>
-                    {$v['type_name']}
+                    {$v['goods_sn']}
                 </td>
                 <td>
                     {$v['spec']}
                 </td>
                 <td>
-                    ￥{$v['price']}
+                    {if $v['quantity'] <= $v['safety_sock'] }
+                    <strong style="color:red;">{$v['quantity']}</strong>
+                    {else}
+                    <span >{$v['quantity']}</span>
+                    {/if}
                 </td>
-                <td>{if $v['status']=='1'}<span class="label label-success">显示</span>{else}<span class="label label-danger">不显示</span>{/if}</td>
-                <td><a href="{php echo $this->createWebUrl('goods',array('id' => $v['id'],'op'=>'post'))}" title="编辑" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><i class="fa fa-edit"></i></a>
-                    <a href="{php echo $this->createWebUrl('goods',array('id' => $v['id'],'op'=>'del'))}" onclick="return confirm('确认删除此产品？');
-                                                        return false;" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm" title="删除"><i class="fa fa-times"></i></a></td>
+                <td>
+                    {$v['safety_sock']}
+                </td>
+                <td>
+                    <a href="{php echo $this->createWebUrl('stock',array('stock_id' => $v['stock_id'],'goods_id' => $v['id'],'op'=>'stock_in'))}" title="采购入库" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-log-in"></span></a>
+                    <a href="{php echo $this->createWebUrl('stock',array('stock_id' => $v['stock_id'],'goods_id' => $v['id'],'op'=>'stock_out'))}" title="销售出库" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-log-out"></span></a>
+                    <a href="{php echo $this->createWebUrl('stock',array('stock_id' => $v['stock_id'],'op'=>'save_safety_sock','goods_id' => $v['id']))}" title="设置安全库存" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-bell"></span></a>
+                </td>
             </tr>
             {/loop}
-            <tr>
-                <td colspan="8">
-                    <a class='btn btn-default' href="{php echo $this->createWebUrl('goods', array('op'=>'post','id'=>0));}"><i class="fa fa-arrows"></i> 添加产品</a>
-                    <button type="submit" class="btn btn-primary" name="submit" value="提交">提交排序</button>
-                    <input type="hidden" name="token" value="{$_W['token']}" />
-                </td>
-            </tr>
+
             </tbody>
         </table>
-        </form>
         {$pager}
     </div>
 </div>
