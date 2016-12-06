@@ -15,6 +15,47 @@
             });
         }
     }
+    function get_car(){
+        var car_no = $("#car_no").val().trim();
+        if(car_no != ''){
+            var url = "{php echo $this->createWebUrl('orders',array('op'=>'get_car'));}";
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : {'car_no' : car_no},
+                success : function(data){
+                    $("#car_id").html(data);
+                }
+            });
+        }
+    }
+    function get_car_data(){
+        var car_id = $("#car_id").val();
+        if(car_id != 0){
+            var url = "{php echo $this->createWebUrl('orders',array('op'=>'get_car_data'));}";
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : {'car_id' : car_id},
+                success : function(data){
+                    var json = JSON.parse(data);
+                    $("#car_bst").val(json.brand_cn+"--"+json.series_cn+"--"+json.type_cn);
+                    $("#phone").val(json.car_userName+"("+json.car_mobile+")");
+                    $("#ec_number").val(json.ec_number);
+                    if(json.car_care_lastDate == 0) {
+                        $("#last_time").val("未有保养记录");
+                    }else{
+                        $("#last_time").val(json.car_care_lastDate);
+                    }
+                    if(json.car_care_mileage == 0){
+                        $("#last_mileage").val("未有保养记录");
+                    }else{
+                        $("#last_mileage").val(json.car_care_mileage);
+                    }
+                }
+            });
+        }
+    }
 </script>
 <ul class="nav nav-tabs">
     <li {if !$id} class="active" {/if}><a href="{php echo $this->createWebUrl('services',array('op'=>'post'));}">添加服务类型</a></li>
@@ -29,9 +70,48 @@
             </div>
             <div class="panel-body">
                 <div class="form-group">
-                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">车牌号码</label>
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label" onblur="get_car();">车牌号码</label>
                     <div class="col-sm-9 col-xs-12">
-                        <input type="text" name="listorder" class="form-control" value="{$theone['listorder']}" />
+                        <input type="text" id="car_no" class="form-control" />
+                    </div>
+                    <span class="btn btn-default" onclick="get_car();">查找</span>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">选择会员</label>
+                    <div class="col-sm-9 col-xs-12">
+                        <select class="form-control" id="car_id" name="car_id" onchange="get_car_data();">
+                            <option value="0">请选择客户</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">汽车品牌</label>
+                    <div class="col-sm-9 col-xs-12">
+                        <input type="text" id="car_bst" class="form-control" readonly="readonly" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">联系人信息</label>
+                    <div class="col-sm-9 col-xs-12">
+                        <input type="text" id="phone" class="form-control" readonly="readonly" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">发动机缸数</label>
+                    <div class="col-sm-9 col-xs-12">
+                        <input type="text" id="ec_number" class="form-control" readonly="readonly" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">上次保养时间</label>
+                    <div class="col-sm-9 col-xs-12">
+                        <input type="text" id="last_time" class="form-control" readonly="readonly" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">上次保养里程</label>
+                    <div class="col-sm-9 col-xs-12">
+                        <input type="text" id="last_mileage" class="form-control" readonly="readonly" />
                     </div>
                 </div>
                 <div class="form-group">
@@ -53,7 +133,7 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">车辆品牌</label>
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">保养里程</label>
                     <div class="col-sm-9 col-xs-12">
                         <input type="text" name="name" class="form-control" value="{$theone['name']}" />
                     </div>

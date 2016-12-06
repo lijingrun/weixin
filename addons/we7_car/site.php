@@ -546,9 +546,29 @@ class We7_carModuleSite extends WeModuleSite {
                 $services = pdo_fetchall("SELECT * FROM ".tablename('we7car_car_services')." WHERE system_id =".$system_id);
                 echo "<option value='0'>请选择服务</option>";
                 foreach($services as $service){
-
+                    echo "<option value='".$service['id']."'>".$service['name']."</option>";
                 }
             }
+        }
+
+        //查找车牌
+        if($op == 'get_car'){
+            $car_no = $_GPC['car_no'];
+            $cars = pdo_fetchall("SELECT * FROM ".tablename('we7car_care')." WHERE car_no like '%".$car_no."%' AND weid =".$_W['uniacid']);
+            echo "<option value='0'>请选择客户</option>";
+            foreach($cars as $car){
+                echo "<option value='".$car['id']."'>".$car['car_no']."</option>";
+            }
+            exit;
+        }
+
+        //查找车辆信息
+        if($op == 'get_car_data'){
+            $car_id = $_GPC['car_id'];
+            $car = pdo_fetch("SELECT * FROM ".tablename('we7car_care')." WHERE id =".$car_id." AND weid =".$_W['uniacid']);
+            $car = json_encode($car);
+            echo $car;
+            exit;
         }
 
     }
@@ -1770,6 +1790,122 @@ class We7_carModuleSite extends WeModuleSite {
             }
         }
         include $this->template('web/tool_set');
+    }
+
+    //会员信息，讲客户关怀里面的车主信息系统直接调出来
+    public function doWebCar(){
+        global $_GPC, $_W;
+        $op = trim($_GPC['op']) ? trim($_GPC['op']) : 'list';
+        $pindex = max(1, intval($_GPC['page']));
+        $psize = 50;
+
+        if($op =='list'){
+            $car_no = $_GPC['car_no'];
+            $phone = $_GPC['phone'];
+            $sql = " WHERE weid=".$_W['uniacid'];
+            if(!empty($car_no)){
+                $sql .= " AND car_no like '%".$car_no."%'";
+            }
+            if(!empty($phone)){
+                $sql .= " AND car_mobile = ".$phone;
+            }
+            $total = pdo_fetchcolumn("SELECT COUNT(*) FROM " .tablename('we7car_care') . $sql);
+            $sql .= " ORDER BY `createtime` DESC LIMIT " . ($pindex - 1) * $psize . ',' . $psize;
+            $pager = pagination($total, $pindex, $psize);
+            $list = pdo_fetchall("SELECT * FROM " . tablename('we7car_care') . $sql);
+            include $this->template('web/car_list');
+        }
+
+        //详细页面
+        if($op == 'detail'){
+            $id = $_GPC['id'];
+            $carone = pdo_fetch("SELECT * FROM" . tablename('we7car_care') . " WHERE `id` = :id LIMIT 1", array(':id' => $id));
+            include $this->template('web/car_detail');
+        }
+
+        //修改资料
+        if($op == 'post'){
+            $id = $_GPC['id'];
+            if($id > 0){
+                $car = pdo_fetch("SELECT * FROM" . tablename('we7car_care') . " WHERE `id` = :id LIMIT 1", array(':id' => $id));
+                $series = pdo_fetchall("SELECT * FROM ".tablename('we7car_series')." WHERE id=".$car['series_id']." AND weid=".$_W['uniacid']);
+                $type = pdo_fetchall("SELECT * FROM ".tablename('we7car_type')." WHERE sid=".$car['series_id']." AND bid = ".$car['brand_id']." AND weid=".$_W['uniacid']);
+            }
+            $brand = pdo_fetchall("SELECT * FROM ".tablename('we7car_brand')." WHERE weid =".$_W['uniacid']." ORDER BY listorder");
+
+            if(checksubmit('submit')){
+                $id = $_GPC['id'];
+                $car_no =  !empty($_GPC['car_no']) ? trim($_GPC['car_no']) : message('请填写车牌号码');
+                $image =  $_GPC['image'];
+                $type_id =  !empty($_GPC['type_id']) ? trim($_GPC['type_id']) : message('请选择车型');
+                $car_username =  $_GPC['car_username'];
+                $mobile_phone =  !empty($_GPC['mobile_phone']) ? trim($_GPC['mobile_phone']) : message('请填写电话号码');
+                $car_code =  $_GPC['car_code'];
+                $car_start_time =  $_GPC['car_start_time'];
+                $ec_number =  $_GPC['ec_number'];
+                $ec_type =  $_GPC['ec_type'];
+                $remark =  $_GPC['remark'];
+                $car_brind = pdo_fetch("SELECT t.*,b.title AS bname,s.title AS sname FROM ".tablename('we7car_brand')." AS b,".tablename('we7car_type')." AS t,".tablename('we7car_series')." AS s WHERE t.id=".$type_id." AND b.id=t.bid AND s.id=t.sid");
+                $insert = array(
+                    'weid' => $_W['uniacid'],
+                    'brand_id' => $car_brind['bid'],
+                    'brand_cn' => $car_brind['bname'],
+                    'series_id' => $car_brind['sid'],
+                    'series_cn' => $car_brind['sname'],
+                    'type_id' => $car_brind['id'],
+                    'type_cn' => $car_brind['title'],
+                    'car_no' => $car_no,
+                    'car_userName' => $car_username,
+                    'car_mobile' => $mobile_phone,
+                    'car_startTime' => $car_start_time,
+                    'createtime' => TIMESTAMP,
+                    'isshow' => 1,
+                    'remark' => $remark,
+                    'car_code' => $car_code,
+                    'ec_number' => $ec_number,
+                    'ec_type' => $ec_type,
+                    'car_photo' => $image,
+                );
+                if (empty($id)) {
+                    $check_car = pdo_fetch("SELECT * FROM ".tablename('we7car_care')." WHERE weid=".$_W['uniacid']." AND car_no like'".$car_no."'");
+                    if(!empty($check_car)){
+                        message('车牌号码已经存在！', $this->createWebUrl('car', array('op' => 'list')),'error');
+                    }
+                    pdo_insert('we7car_care', $insert);
+                    !pdo_insertid() ? message('保存数据失败, 请稍后重试.', 'error') : '';
+                } else {
+                    if (pdo_update('we7car_care', $insert, array('id' => $id)) === false) {
+                        message('更新数据失败, 请稍后重试.', 'error');
+                    }
+                }
+                message('更新数据成功！', $this->createWebUrl('car', array('op' => 'list')), 'success');
+            }
+
+            include $this->template('web/car_post');
+        }
+
+        //根据品牌获取车系
+        if($op == 'find_series'){
+            $id = $_GPC['brand_id'];
+            $series = pdo_fetchall("SELECT * FROM ".tablename('we7car_series')." WHERE weid =".$_W['uniacid']." AND bid =".$id);
+            echo "<option value='0'>请选择所属车系</option>";
+            foreach($series as $s){
+                echo "<option value='".$s['id']."'>".$s['title']."</option>";
+            }
+            exit;
+        }
+
+        //根据车系获取车型
+        if($op == 'find_type'){
+            $id = $_GPC['series_id'];
+            $type = pdo_fetchall("SELECT * FROM ".tablename('we7car_type')." WHERE weid =".$_W['uniacid']." AND sid =".$id);
+            echo "<option value='0'>请选择所属车型</option>";
+            foreach($type as $t){
+                echo "<option value='".$t['id']."'>".$t['title']."</option>";
+            }
+            exit;
+        }
+
     }
 
     //客户关怀

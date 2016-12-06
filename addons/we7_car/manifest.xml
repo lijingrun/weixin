@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns="http://www.haoid.cn" versionCode="0.6">
 	<application setting="false">
-		<name><![CDATA[微汽车]]></name>
+		<name><![CDATA[F&E汽车生活]]></name>
 		<identifie><![CDATA[we7_car]]></identifie>
 		<version><![CDATA[3.7]]></version>
 		<type><![CDATA[business]]></type>
-		<ability><![CDATA[微汽车]]></ability>
-		<description><![CDATA[微汽车]]></description>
-		<author><![CDATA[好站长资源网(www.haoid.cn)]]></author>
+		<ability><![CDATA[F&E汽车生活]]></ability>
+		<description><![CDATA[F&E汽车生活]]></description>
+		<author><![CDATA[]]></author>
 		<url><![CDATA[http://www.haoid.cn]]></url>
 	</application>
 	<platform>
@@ -38,12 +38,14 @@
 			<entry title="车型相册管理" do="album" direct="false" />
 			<entry title="意见回馈管理" do="message" direct="false" />
 			<entry title="实用工具设置" do="tool" direct="false" />
-			<entry title="系统管理" do="system" direct="false" />
+			<entry title="保养系统管理" do="system" direct="false" />
+			<entry title="地区管理" do="region" direct="false" />
 			<entry title="保养类型管理" do="services" direct="false" />
 			<entry title="产品管理" do="goods" direct="false" />
 			<entry title="店铺管理" do="store" direct="false" />
 			<entry title="订单管理" do="orders" direct="false" />
 			<entry title="库存管理" do="stock" direct="false" />
+			<entry title="会员管理" do="car" direct="false" />
 			<entry title="销售报表" do="statistics" direct="false" />
 
 		</menu>
@@ -127,6 +129,10 @@ CREATE TABLE IF NOT EXISTS `ims_we7car_care` (
   `car_care_lastCost` mediumint(10) unsigned NOT NULL,
   `createtime` int(10) NOT NULL,
   `isshow` tinyint(1) NOT NULL,
+  `remark` varchar(255),
+  `car_code` varchar(255),
+  `ec_number` int(10),
+  `ec_type` int(10) COMMENT '发动机类型 1为自然吸气 2为涡轮增压 3为电动发动机',
   PRIMARY KEY (`id`),
   KEY `ims_weid` (`weid`),
   KEY `ims_createtime` (`createtime`)
@@ -406,7 +412,7 @@ CREATE TABLE IF NOT EXISTS `ims_we7car_goods_brand` (
 ) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 
 
-#产品
+#产品库，预先录入所有产品
 CREATE TABLE IF NOT EXISTS `ims_we7car_goods` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `weid` int(11) DEFAULT NULL,
@@ -424,6 +430,16 @@ CREATE TABLE IF NOT EXISTS `ims_we7car_goods` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 
+#店铺类型管理
+CREATE TABLE IF NOT EXISTS `ims_we7car_store_type` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `weid` int(11) DEFAULT NULL,
+  `type_name` varchar(255) NOT NULL,
+  `createtime` int(10) NOT NULL,
+  `parent_id` int(10) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
 #店铺管理
 CREATE TABLE IF NOT EXISTS `ims_we7car_stores` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -435,6 +451,17 @@ CREATE TABLE IF NOT EXISTS `ims_we7car_stores` (
   `contacts` varchar(255) NOT NULL,
   `phone` varchar(11) NOT NULL,
   `address` varchar(255) NOT NULL,
+  `region_id` int(11) NOT NULL COMMENT '店铺对应地区id',
+  `type_id` int(11) NOT NULL COMMENT '门店的类型',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+#店铺所属产品管理
+CREATE TABLE IF NOT EXISTS `ims_we7car_store_goods` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `weid` int(11) DEFAULT NULL,
+  `store_id` int(10) NOT NULL,
+  `goods_id` int(10) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 
@@ -444,6 +471,15 @@ CREATE TABLE IF NOT EXISTS `ims_we7car_store_user` (
   `uniacid` int(11) DEFAULT NULL,
   `store_id` int(10) NOT NULL,
   `uid` int(10) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+#省份城市表
+CREATE TABLE IF NOT EXISTS `ims_we7car_region` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `weid` int(11) DEFAULT NULL,
+  `name` int(10) NOT NULL,
+  `parent_id` int(10) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 
@@ -548,6 +584,8 @@ CREATE TABLE IF NOT EXISTS `ims_we7car_stock_log` (
 	DROP TABLE IF EXISTS `ims_we7car_order_log`;
 	DROP TABLE IF EXISTS `ims_we7car_stock`;
 	DROP TABLE IF EXISTS `ims_we7car_stock_log`;
+	DROP TABLE IF EXISTS `ims_we7car_store_type`;
+	DROP TABLE IF EXISTS `ims_we7car_store_goods`;
 	]]></uninstall>
 	<upgrade><![CDATA[upgrade.php]]></upgrade>
 </manifest>

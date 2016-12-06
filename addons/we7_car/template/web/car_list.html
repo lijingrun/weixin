@@ -1,0 +1,112 @@
+{template 'common/header'}
+{php load()->func('tpl')}
+<ul class="nav nav-tabs">
+    <li ><a href="{php echo $this->createWebUrl('car', array('op' => 'post','weid'=>$_W['uniacid']))}" >添加客户资料</a></li>
+    <li class="active"><a href="{php echo $this->createWebUrl('car', array('op' => 'list','weid'=>$_W['uniacid']))}">客户管理</a></li>
+</ul>
+<div class="main">
+    <div class="panel panel-info">
+        <div class="panel-heading">筛选</div>
+        <div class="panel-body">
+            <form action="./index.php" method="get" class="form-horizontal" role="form">
+                <input type="hidden" name="c" value="site" />
+                <input type="hidden" name="a" value="entry" />
+                <input type="hidden" name="m" value="we7_car" />
+                <input type="hidden" name="do" value="car" />
+                <input type="hidden" name="op" value="list" />
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">车牌号码</label>
+                    <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2 ">
+                        <input type="text" class="form-control" value="{$car_no}" name="car_no" />
+                    </div>
+                    <label class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">电话号码</label>
+                    <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2 ">
+                        <input type="text" class="form-control" value="{$phone}" name="phone" />
+                    </div>
+                </div>
+                <div>
+                    <div class=" col-xs-12 col-sm-2 col-lg-2">
+                        <button class="btn btn-default"><i class="fa fa-search"></i> 查找</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="panel panel-info">
+        <div class="panel-heading"><span class="pull-right" style="color:red;">总数：<?php echo $total;?></span>
+            <span class="brand">名单</span></div>
+        <div class="panel-body table-responsive">
+            <form action="" method="post" onsubmit="">
+                <div class="sub-content">
+                    <table class="table table-hover">
+                        <thead class="navbar-inner">
+                        <tr>
+                            <th class="row-hover" style="width:80px;">用户</th>
+                            <th class="row-hover" style="width:100px;">车主姓名</th>
+                            <th class="row-hover" style="width:100px;">电话</th>
+                            <th class="row-hover" style="width:150px;">品牌-车系-车型</th>
+                            <th class="row-hover" style="width:100px;">车牌号码</th>
+                            <th class="row-hover" style="width:120px">上牌时间</th>
+                            <th class="row-hover" style="width:120px;">提交时间</th>
+                            <th class="row-hover" style="width:150px;">操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {loop $list $v}
+                        <tr>
+                            <td>
+                                {if !empty($v['from_user'])}
+                                $v['from_user']
+                                {else}
+                                未关联
+                                {/if}
+                            </td>
+                            <td>
+                                {$v['car_userName']}
+                            </td>
+                            <td>
+                                {$v['car_mobile']}
+                            </td>
+                            <td>
+                                {if $v['brand_cn'] && $v['series_cn']}
+                                {$v['brand_cn']}-{$v['series_cn']}-{$v['type_cn']}-{$v['car_note']}
+                                {else}
+                                {$v['car_note']}
+                                {/if}
+                            </td>
+                            <td>
+                                {$v['car_no']}
+                            </td>
+                            <td>
+                                {php echo date('Y-m-d',$v['car_startTime'])}
+                            </td>
+                            <td>
+                                {php echo date('Y-m-d',$v['createtime'])}
+                            </td>
+                            <td>
+                                <a href="{php echo $this->createWebUrl('car',array('op'=>'detail','id' => $v['id']));}" class="btn btn-default btn-sm" data-toggle="tooltip" data-placement="bottom" title="详情">
+                                    <i class="fa fa-file"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {/loop}
+                        <tr>
+                            <td colspan="6">
+                                <a class='btn btn-default' href="{php echo $this->createWebUrl('car', array('op'=>'post','id'=>0));}"><i class="fa fa-arrows"></i> 添加客户</a>
+                                <input type="hidden" name="token" value="{$_W['token']}" />
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+            {$pager}
+        </div>
+    </div>
+</div>
+<script>
+    require(['bootstrap'],function($){
+        $('.btn').tooltip();
+    });
+</script>
+{template 'common/footer'}
