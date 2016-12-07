@@ -79,16 +79,22 @@
                     ￥{$v['price']}
                 </td>
                 <td>{if $v['status']=='1'}<span class="label label-success">显示</span>{else}<span class="label label-danger">不显示</span>{/if}</td>
-                <td><a href="{php echo $this->createWebUrl('goods',array('id' => $v['id'],'op'=>'post'))}" title="编辑" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><i class="fa fa-edit"></i></a>
+                <td>
+                    {if $store_id == $v['store_id'] || $store_id == 0}
+                    <a href="{php echo $this->createWebUrl('goods',array('id' => $v['id'],'op'=>'post'))}" title="编辑" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><i class="fa fa-edit"></i></a>
                     <a href="{php echo $this->createWebUrl('goods',array('id' => $v['id'],'op'=>'del'))}" onclick="return confirm('确认删除此产品？');
-                                                        return false;" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm" title="删除"><i class="fa fa-times"></i></a></td>
+                                                        return false;" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm" title="删除"><i class="fa fa-times"></i></a>
+                    {/if}
+                </td>
             </tr>
             {/loop}
             <tr>
                 <td colspan="8">
                     <a class='btn btn-default' href="{php echo $this->createWebUrl('goods', array('op'=>'post','id'=>0));}"><i class="fa fa-arrows"></i> 添加产品</a>
+                    {if $store_id == 0}
                     <button type="submit" class="btn btn-primary" name="submit" value="提交">提交排序</button>
                     <input type="hidden" name="token" value="{$_W['token']}" />
+                    {/if}
                 </td>
             </tr>
             </tbody>

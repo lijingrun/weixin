@@ -391,6 +391,7 @@ CREATE TABLE IF NOT EXISTS `ims_we7car_goods_type` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `weid` int(11) DEFAULT NULL,
   `listorder` int(11) NOT NULL,
+  `store_id` int(10) NOT NULL DEFAULT '0',
   `name` varchar(25) NOT NULL,
   `createtime` int(10) NOT NULL,
   `top_id` int(11) NOT NULL,
@@ -402,6 +403,7 @@ CREATE TABLE IF NOT EXISTS `ims_we7car_goods_type` (
 CREATE TABLE IF NOT EXISTS `ims_we7car_goods_brand` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `weid` int(11) DEFAULT NULL,
+  `store_id` int(10) NOT NULL DEFAULT '0',
   `listorder` int(11) NOT NULL,
   `name` varchar(50) NOT NULL,
   `logo` varchar(255) NOT NULL,
@@ -419,6 +421,7 @@ CREATE TABLE IF NOT EXISTS `ims_we7car_goods` (
   `listorder` int(11) NOT NULL,
   `goods_sn` varchar(255),
   `goods_brand` int(10) NOT NULL,
+  `store_id` int(10) NOT NULL DEFAULT '0',
   `name` varchar(25) NOT NULL,
   `spec` varchar(50) NOT NULL,
   `price` float(20,2) NOT NULL,

@@ -9,12 +9,24 @@
 </script>
 <ul class="nav nav-tabs">
     <li class="active"><a href="{php echo $this->createWebUrl('stock', array('op'=>'list'))}">库存管理</a></li>
-    <li ><a href="{php echo $this->createWebUrl('stock', array('op'=>'orders'))}">订单审核</a></li>
-    <li ><a href="{php echo $this->createWebUrl('stock', array('op'=>'goods_add'))}">添加产品</a></li>
+    <li >
+        <a href="{php echo $this->createWebUrl('stock', array('op'=>'orders'))}">订单审核
+            {if $order_count > 0}
+            <span class="badge" style="background-color: red;">{$order_count}</span>
+            {/if}
+        </a>
+    </li>
 </ul>
 
 <div class="main panel panel-default">
     <div class="category panel-body table-responsive">
+        {if $under_safe>0}
+        <a href="{php echo $this->createWebUrl('stock', array('op'=>'list','type' => 'under_safe'))}">
+        <div class="panel panel-danger">
+                <div class="panel-heading">您有{$under_safe}个产品低于安全库存！</div>
+        </div>
+        </a>
+        {/if}
         <div class="panel panel-info">
             <div class="panel-heading">查询</div>
             <div class="panel-body">

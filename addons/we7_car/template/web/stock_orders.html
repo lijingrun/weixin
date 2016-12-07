@@ -9,7 +9,13 @@
 
 <ul class="nav nav-tabs">
     <li ><a href="{php echo $this->createWebUrl('stock', array('op'=>'list'))}">库存管理</a></li>
-    <li class="active"><a href="{php echo $this->createWebUrl('stock', array('op'=>'orders'))}">订单审核</a></li>
+    <li class="active">
+        <a href="{php echo $this->createWebUrl('stock', array('op'=>'orders'))}">订单审核
+            {if $order_count > 0}
+            <span class="badge" style="background-color: red;">{$order_count}</span>
+            {/if}
+        </a>
+    </li>
 </ul>
 
 <div class="main panel panel-default">
