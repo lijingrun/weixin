@@ -1,0 +1,75 @@
+{template 'common/header'}
+
+<ul class="nav nav-tabs">
+    <li class="active"><a>产品详情</a></li>
+    <li><a href="{php echo $this->createWebUrl('stock', array('op'=>'list'))}">库存管理</a></li>
+</ul>
+<div class="main">
+    <form action="" method="post" class="form-horizontal form" enctype="multipart/form-data" onsubmit="return validate(this);">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">名称</label>
+                    <div class="col-sm-9 col-xs-12">
+                        <span class="form-control" >{$goods['name']}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">产品编号</label>
+                    <div class="col-sm-9 col-xs-12">
+                        <span class="form-control" >{$goods['goods_sn']}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">品牌</label>
+                    <div class="col-sm-9 col-xs-12">
+                        <span class="form-control" >{$goods['brand_name']}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">图片</label>
+                    <div class="col-sm-9 col-xs-12">
+                        <img src="../attachment/{$goods['image']}"  />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">所属分类</label>
+                    <div class="col-sm-9 col-xs-12">
+                        <span class="form-control" >{$goods['type_name']}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">规格</label>
+                    <div class="col-sm-9 col-xs-12">
+                        <span class="form-control" >{$goods['spec']}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">指导零售价</label>
+                    <div class="col-sm-9 col-xs-12">
+                        <span class="form-control" >￥{$goods['price']}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">介绍</label>
+                    <div class="col-sm-9 col-xs-12">
+                        <div>{$goods['description']}</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="form-group col-sm-12">
+            <input type='hidden' name='id' value="{$theone['id']}" />
+            <input type="submit" name="submit" value="返回" class="btn btn-primary col-lg-1" />
+            <input type="hidden" name="token" value="{$_W['token']}" />
+        </div>
+    </form>
+</div>
+
+
+
+
+
+
+{template 'common/footer'}

@@ -10,6 +10,7 @@
 <ul class="nav nav-tabs">
     <li class="active"><a href="{php echo $this->createWebUrl('stock', array('op'=>'list'))}">库存管理</a></li>
     <li ><a href="{php echo $this->createWebUrl('stock', array('op'=>'orders'))}">订单审核</a></li>
+    <li ><a href="{php echo $this->createWebUrl('stock', array('op'=>'goods_add'))}">添加产品</a></li>
 </ul>
 
 <div class="main panel panel-default">
@@ -58,7 +59,9 @@
             {loop $list $v}
             <tr>
                 <td>
-                    <img src="../attachment/{$v['image']}" style="width:100%;" />
+                    <a href="{php echo $this->createWebUrl('stock', array('op'=>'goods_detail','goods_id' => $v['id']))}">
+                        <img src="../attachment/{$v['image']}" style="width:100%;" />
+                    </a>
                     <p align="center">{$v['name']}</p>
                 </td>
                 <td>

@@ -1,0 +1,55 @@
+{template 'common/header'}
+<link href="~/Content/Tree1/css/bootstrap.min.css" rel="stylesheet" />
+<link href="~/Content/Tree1/css/style.css" rel="stylesheet" />
+
+<script src="~/Scripts/jquery-1.10.2.js"></script>
+<ul class="nav nav-tabs">
+    <li><a href="{php echo $this->createWebUrl('region',array('op'=>'post'));}">添加服地区</a></li>
+    <li  class="active"><a href="{php echo $this->createWebUrl('region', array('op'=>'list'))}">地区管理</a></li>
+</ul>
+
+<div class="main panel panel-default">
+    <div class="category panel-body table-responsive">
+        <form action="" method="post">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th >地区名称</th>
+                    <th >排序</th>
+                    <th >是否显示</th>
+                    <th >操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {loop $all_regions $region}
+                <tr>
+                    <td>{$region['name']}</td>
+                    <td>
+                        <input type="text" class="form-control" name="listorder[{$region['id']}]" value="{$region['listorder']}">
+                    </td>
+                    <td>{if $region['status']=='1'}<span class="label label-success">显示</span>{else}<span class="label label-danger">不显示</span>{/if}</td>
+                    <td>
+                        <a href="{php echo $this->createWebUrl('region',array('id' => $region['id'],'op'=>'post'))}" title="编辑" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><i class="fa fa-edit"></i></a>
+
+                    </td>
+                </tr>
+                {/loop}
+                <tr>
+                    <td colspan="4">
+                        <a class='btn btn-default' href="{php echo $this->createWebUrl('region',array('op'=>'post'));}"><i class="fa fa-arrows"></i> 添加地区</a>
+                        <button type="submit" class="btn btn-primary" name="submit" value="提交">提交排序</button>
+                        <input type="hidden" name="token" value="{$_W['token']}" />
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+<script>
+    require(['bootstrap'],function($){
+        $('.btn').tooltip();
+    });
+</script>
+
+{template 'common/footer'}

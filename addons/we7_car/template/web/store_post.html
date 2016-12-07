@@ -1,8 +1,39 @@
 {template 'common/header'}
 {php load()->func('tpl')}
+<script>
+    var remove_selector = function() {
+        console.log($(this).parent().index());
+        $('#region_list').find('div:gt('+($(this).parent().index()-1)+')').remove();
+    };
+
+    function get_under_region(id){
+        var region_id = $("#region_id"+id).val();
+        if(region_id > 0){
+            var url ="{php echo $this->createWebUrl('store',array('op'=>'get_under_region'));}";
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : {'type_id' : id, 'parent_id' : region_id},
+                success : function(data){
+                    if(data == 111){
+                        $("#region_id"+id).attr('name','region_id');
+                    }else{
+                        $("#region_list").append(data);
+                        $('#region_list select').bind('change', remove_selector );
+                    }
+                }
+            });
+        }
+    }
+    function change_region(){
+        $("#old_list").remove();
+        $("#new_list").show();
+    }
+</script>
 <ul class="nav nav-tabs">
     <li {if !$id} class="active" {/if}><a href="{php echo $this->createWebUrl('store',array('op'=>'post'));}">添加店铺</a></li>
     <li><a href="{php echo $this->createWebUrl('store', array('op'=>'list'))}">店铺管理</a></li>
+    <li ><a href="{php echo $this->createWebUrl('store', array('op'=>'type'))}">店铺类型管理</a></li>
     {if $id}<li class="active"><a href="{php echo $this->createWebUrl('store',array('op'=>'post'));}">编辑店铺</a></li> {/if}
 </ul>
 <div class="main">
@@ -25,10 +56,47 @@
                         <input type="text" name="store_name" class="form-control" value="{$theone['store_name']}" />
                     </div>
                 </div>
+                <div class="form-group" id="region_list">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">所在地区</label>
+                    {if !empty($region_name)}
+                    <div class="col-sm-9 col-xs-12" id="old_list" >
+                        {$region_name}
+                        <input type="hidden" value="{$theone['region_id']}" name="region_id" />
+                        <a onclick="change_region();" class="btn btn-default btn-sm"><span>修改</span></a>
+                    </div>
+                    <div class="col-sm-2 col-xs-12" id="new_list" style="display: none;">
+                        <select class="form-control" id="region_id1" onchange="get_under_region(1);">
+                            <option value="0">请选择所在区域</option>
+                            {loop $region $re}
+                            <option value="{$re['id']}"  {if $re['id'] == $theone['region_id']} selected="selected"{/if}>{$re['name']}</option>
+                            {/loop}
+                        </select>
+                    </div>
+                    {else}
+                    <div class="col-sm-2 col-xs-12" >
+                        <select class="form-control" id="region_id1" onchange="get_under_region(1);">
+                            <option value="0">请选择所在区域</option>
+                            {loop $region $re}
+                            <option value="{$re['id']}"  {if $re['id'] == $theone['region_id']} selected="selected"{/if}>{$re['name']}</option>
+                            {/loop}
+                        </select>
+                    </div>
+                    {/if}
+                </div>
                 <div class="form-group">
                     <label class="col-xs-12 col-sm-3 col-md-2 control-label">店铺地址</label>
                     <div class="col-sm-9 col-xs-12">
                         <input type="text" name="address" class="form-control"  value="{$theone['address']}" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">类型</label>
+                    <div class="col-sm-9 col-xs-12">
+                        <select class="form-control" name="type_id">
+                            {loop $types $type}
+                            <option value="{$type['id']}"  {if $type['id'] == $theone['type_id']} selected="selected"{/if}>{$type['type_name']}</option>
+                            {/loop}
+                        </select>
                     </div>
                 </div>
                 <div class="form-group">

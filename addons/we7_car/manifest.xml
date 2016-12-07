@@ -437,6 +437,8 @@ CREATE TABLE IF NOT EXISTS `ims_we7car_store_type` (
   `type_name` varchar(255) NOT NULL,
   `createtime` int(10) NOT NULL,
   `parent_id` int(10) NOT NULL DEFAULT '0',
+  `listorder` int(10) NOT NULL,
+  `status` int(10) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 
@@ -478,8 +480,9 @@ CREATE TABLE IF NOT EXISTS `ims_we7car_store_user` (
 CREATE TABLE IF NOT EXISTS `ims_we7car_region` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `weid` int(11) DEFAULT NULL,
-  `name` int(10) NOT NULL,
+  `name` varchar(50) NOT NULL,
   `parent_id` int(10) NOT NULL,
+  `status` int(1) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 

@@ -2,14 +2,34 @@
 <ul class="nav nav-tabs">
     <li><a href="{php echo $this->createWebUrl('store',array('op'=>'post'));}">添加店铺</a></li>
     <li  class="active"><a href="{php echo $this->createWebUrl('store', array('op'=>'list'))}">店铺管理</a></li>
+    <li ><a href="{php echo $this->createWebUrl('store', array('op'=>'type'))}">店铺类型管理</a></li>
 </ul>
 
 <div class="main panel panel-default">
     <div class="category panel-body table-responsive">
+        <div class="panel panel-info">
+            <div class="panel-heading">查询</div>
+            <div class="panel-body">
+                <div class="form-horizontal" role="form">
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">店铺名称</label>
+                        <div class="col-sm-8 col-lg-9">
+                            <input type="text" class="form-control" id="key_word" value="{$key_word}" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class=" col-xs-12 col-sm-2 col-lg-2">
+                            <button class="btn btn-default" onclick="find();"><i class="fa fa-search"></i> 搜索</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
             <table class="table table-hover">
                 <thead>
                 <tr>
                     <th >店铺名称</th>
+                    <th >所在地区</th>
                     <th >联系人</th>
                     <th >联系电话</th>
                     <th >建立时间</th>
@@ -22,6 +42,9 @@
                 <tr>
                     <td>
                         {$v['store_name']}
+                    </td>
+                    <td>
+                        {$v['region_name']}
                     </td>
                     <td>
                         {$v['contacts']}
@@ -39,13 +62,14 @@
                 </tr>
                 {/loop}
                 <tr>
-                    <td colspan="6">
+                    <td colspan="7">
                         <a class='btn btn-default' href="{php echo $this->createWebUrl('store', array('op'=>'post','id'=>0));}"><i class="fa fa-arrows"></i> 添加店铺</a>
                     </td>
                 </tr>
                 </tbody>
             </table>
         </form>
+        {$pager}
     </div>
 </div>
 <script>

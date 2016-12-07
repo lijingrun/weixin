@@ -3,6 +3,7 @@
     <li class="active"><a href="{php echo $this->createWebUrl('goods',array('op'=>'post'));}">添加产品</a></li>
     <li ><a href="{php echo $this->createWebUrl('goods', array('op'=>'list'))}">产品管理</a></li>
     <li  ><a href="{php echo $this->createWebUrl('goods', array('op'=>'goods_type'))}">产品类型管理</a></li>
+    <li  ><a href="{php echo $this->createWebUrl('goods', array('op'=>'goods_brand'))}">产品品牌管理</a></li>
 </ul>
 <div class="main">
     <form action="" method="post" class="form-horizontal form" enctype="multipart/form-data" onsubmit="return validate(this);">
@@ -29,7 +30,7 @@
                 <div class="form-group">
                     <label class="col-xs-12 col-sm-3 col-md-2 control-label">品牌</label>
                     <div class="col-sm-9 col-xs-12">
-                        <select class="form-control" name="type_id">
+                        <select class="form-control" name="goods_brand">
                             {loop $brands $brand}
                             <option value="{$brand['id']}"  {if $brand['id'] == $theone['brand_id']} selected="selected"{/if}>{$brand['name']}</option>
                             {/loop}

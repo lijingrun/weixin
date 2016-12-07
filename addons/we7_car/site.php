@@ -416,9 +416,25 @@ class We7_carModuleSite extends WeModuleSite {
     public function doWebStore(){
         global $_GPC, $_W;
         $op = $_GPC['op'] ? $_GPC['op'] : 'list';
+        $pindex = max(1, intval($_GPC['page']));
+        $psize = 20;
 
         if($op == 'list'){
-            $list = pdo_fetchall('SELECT * FROM ' . tablename('we7car_stores') . " WHERE `weid` = :weid", array(':weid' => $_W['uniacid']));
+
+            $total = pdo_fetchcolumn("SELECT COUNT(*) FROM ".tablename('we7car_stores')." WHERE weid=".$_W['uniacid']);
+            $sql = "SELECT * FROM ".tablename('we7car_stores')." WHERE weid=".$_W['uniacid'];
+
+            $pager = pagination($total,$pindex,$psize);
+            $page_sql = " LIMIT " . ($pindex - 1) * $psize . ',' . $psize;
+
+            $sql .= $page_sql;
+            $list = pdo_fetchall($sql);
+
+            foreach($list as $key=>$l){
+                $region = pdo_fetch("SELECT * FROM ".tablename('we7car_region')." WHERE id =".$l['region_id']);
+                $region_name = $this->find_region($region['parent_id'],$region['name'],$region['weid']);
+                $list[$key]['region_name'] = $region_name;
+            }
             include $this->template('web/store_list');
         }
 
@@ -426,9 +442,15 @@ class We7_carModuleSite extends WeModuleSite {
             $id = intval($_GPC['id']);
             if ($id > 0) {
                 $theone = pdo_fetch('SELECT * FROM ' . tablename('we7car_stores') . " WHERE  weid = :weid  AND id = :id", array(':weid' => $_W['uniacid'], ':id' => $id));
+
+                $one_region = pdo_fetch("SELECT * FROM ".tablename('we7car_region')." WHERE weid=".$_W['uniacid']." AND id=".$theone['region_id']);
+                $region_name = $this->find_region($one_region['parent_id'],$one_region['name'],$one_region['weid']);
             } else {
                 $theone = array('status' => 1, 'listorder' => 0);
             }
+            //店铺类型
+            $types = pdo_fetchall("SELECT * FROM ".tablename('we7car_store_type')." WHERE weid =".$_W['uniacid']);
+            $region = pdo_fetchall("SELECT * FROM ".tablename('we7car_region')." WHERE weid =".$_W['uniacid']." AND parent_id = 1");
             if(checksubmit('submit')){
                 $store_name = trim($_GPC['store_name']) ? trim($_GPC['store_name']) : message('请填写店铺名称！');
                 $address = trim($_GPC['address']) ? trim($_GPC['address']) : message('请填写店铺地址！');
@@ -436,12 +458,16 @@ class We7_carModuleSite extends WeModuleSite {
                 $phone = trim($_GPC['phone']) ? trim($_GPC['phone']) : message('请填写联系电话！');
                 $description = $_GPC['description'];
                 $status = intval($_GPC['status']);
+                $type_id = $_GPC['type'];
+                $region_id = $_GPC['region_id'] != 0 ? $_GPC['region_id'] : message('请选择区域');
                 $insert = array(
                     'store_name' => $store_name,
                     'address' => $address,
                     'contacts' => $contacts,
                     'description' => $description,
                     'phone' => $phone,
+                    'type_id' => $type_id,
+                    'region_id' => $region_id,
                     'status' => $status,
                     'weid' => $_W['uniacid'],
                     'createtime' => TIMESTAMP
@@ -509,6 +535,52 @@ class We7_carModuleSite extends WeModuleSite {
             }
         }
 
+        //店铺类型管理
+        if($op == 'type'){
+            $list = pdo_fetchall("SELECT t1.*, t2.type_name as `top_name` FROM ".tablename('we7car_store_type'). " as T1, ".tablename('we7car_store_type')." as T2 WHERE T1.weid = :weid and T1.parent_id = T2.id UNION SELECT *, '无' FROM ".tablename('we7car_store_type')." where parent_id = 0 ORDER BY listorder", array('weid' => $_W['uniacid']));
+            include $this->template('web/store_type');
+        }
+
+        //增加店铺类型
+        if($op == 'add_type'){
+            $name = trim($_POST['name']);
+            $top_id = empty($_POST['top_id']) ? 0 : $_POST['top_id'];
+            $insert = array(
+                'type_name' => $name,
+                'parent_id' => $top_id,
+                'createtime' => TIMESTAMP,
+                'listorder' => 255,
+                'status' => 1,
+                'weid' => $_W['uniacid'],
+            );
+            if(pdo_insert('we7car_store_type', $insert) == 1){
+                echo 111;
+            }else{
+                echo 222;
+            }
+            exit;
+        }
+
+        //根据id查下级的分类
+        if($op == 'get_under_region'){
+            $parent_id = $_GPC['parent_id'];
+            $type_id = $_GPC['type_id'];
+            $type_id++;
+            $under = pdo_fetchall("SELECT * FROM ".tablename('we7car_region')." WHERE weid =".$_W['uniacid']." AND parent_id =".$parent_id);
+            if(!empty($under)){
+                echo "<div class='col-sm-2 col-xs-12' >";
+                echo "<select class='form-control' id='region_id".$type_id."' onchange='get_under_region(".$type_id.");'>";
+                echo "<option value='0'>请选择所在区域</option>";
+                foreach($under as $un){
+                    echo "<option value='".$un['id']."' >".$un['name']."</option>";
+                }
+                echo "</select></div>";
+            }else{
+                echo 111;
+            }
+            exit;
+        }
+
     }
 
     //订单管理
@@ -571,6 +643,80 @@ class We7_carModuleSite extends WeModuleSite {
             exit;
         }
 
+    }
+
+
+    //地域管理
+    public function doWebRegion(){
+        global $_GPC, $_W;
+        $op = $_GPC['op'] ? $_GPC['op'] : 'list';
+
+        if($op == 'list'){
+            $all_regions = pdo_fetchall("SELECT * FROM ".tablename('we7car_region')." WHERE weid =".$_W['uniacid']);
+
+
+            if(checksubmit('submit')){
+                foreach ($_GPC['listorder'] as $key => $val) {
+                    pdo_update('we7car_region', array('listorder' => intval($val)), array('id' => intval($key)));
+                }
+                message('更新地区排序成功！', $this->createWebUrl('region', array('op' => 'list')), 'success');
+            }
+
+            include $this->template('web/region_list');
+        }
+
+        if($op == 'post'){
+            $id = $_GPC['id'];
+            if(!empty($id)){
+                $region = pdo_fetch("SELECT * FROM ".tablename('we7car_region')." WHERE id =".$id." AND weid =".$_W['uniacid']);
+            }else{
+                $region['listorder'] = 255;
+                $region['status'] = 1;
+            }
+            $all_regions = pdo_fetchall("SELECT * FROM ".tablename('we7car_region')." WHERE weid =".$_W['uniacid']);
+            if(checksubmit('submit')){
+                $name = $_GPC['name'];
+                if(empty($name)){
+                    message("请填写地区名称！",$this->createWebUrl('region',array('op' => 'post')), 'error');
+                }
+                $check = pdo_fetch("SELECT * from ".tablename('we7car_region')." WHERE weid =".$_W['uniacid']." AND name like '".$name."'");
+                if(!empty($check)){
+                    message("地区已经存在！",$this->createWebUrl('region',array('op' => 'post')), 'error');
+                }
+                $listorder = $_GPC['listorder'];
+                $parent_id = $_GPC['parent_id'];
+                $status = $_GPC['status'];
+                $insert = array(
+                    'name' => $name,
+                    'weid' => $_W['uniacid'],
+                    'listorder' => $listorder,
+                    'parent_id' => $parent_id,
+                    'status' => $status,
+                );
+                if (empty($id)) {
+                    pdo_insert('we7car_region', $insert);
+                    !pdo_insertid() ? message('保存数据失败, 请稍后重试.', 'error') : '';
+                } else {
+                    if (pdo_update('we7car_region', $insert, array('id' => $id)) === false) {
+                        message('更新数据失败, 请稍后重试.', 'error');
+                    }
+                }
+                message('更新数据成功！', $this->createWebUrl('region', array('op' => 'list')), 'success');
+            }
+            include $this->template('web/region_post');
+        }
+
+    }
+
+    //根据id递归出区域
+    function find_region($parent_id,$region_name,$weid){
+        if($parent_id>1){
+            $region = pdo_fetch("SELECT * FROM ".tablename('we7car_region')." WHERE id =".$parent_id." AND weid =".$weid);
+            $region_name = $region['name'].'-'.$region_name;
+            return $this->find_region($region['parent_id'],$region_name,$weid);
+        }else {
+            return $region_name;
+        }
     }
 
 
@@ -734,6 +880,12 @@ class We7_carModuleSite extends WeModuleSite {
             include $this->template("web/stock_out");
         }
 
+        if($op == 'goods_detail'){
+            $goods_id = $_GPC['goods_id'];
+            $goods = pdo_fetch("SELECT g.*,b.name as brand_name,t.name as type_name FROM ".tablename('we7car_goods')." AS g,".tablename('we7car_goods_brand')." as b,".tablename('we7car_goods_type')." as t WHERE g.id=".$goods_id." AND g.weid=".$_W['uniacid']." AND g.goods_brand = b.id AND g.type_id = t.id");
+            include $this->template('web/goods_detail');
+        }
+
         //出入库记录
         if($op == 'orders'){
             $user_store = pdo_fetch("SELECT * FROM ".tablename('we7car_store_user')." WHERE uniacid=".$_W['uniacid']." AND uid=".$_W['user']['uid']);
@@ -805,6 +957,11 @@ class We7_carModuleSite extends WeModuleSite {
                 }
                 message('审核成功！！', $this->createWebUrl('stock', array('op' => 'orders')), 'success');
             }
+
+        }
+
+        //门店添加自己的产品，如果客户输入的产品名称已经存在
+        if($op == 'goods_add'){
 
         }
 
