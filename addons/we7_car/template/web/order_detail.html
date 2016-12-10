@@ -1,0 +1,163 @@
+{template 'common/header'}
+<script>
+    function open_car(){
+        $("#car_data").show();
+        $("#car").attr('onclick','close_car()');
+    }
+    function close_car(){
+        $("#car_data").hide();
+        $("#car").attr('onclick','open_car()');
+    }
+</script>
+    <div class="main">
+        <form action="" method="post" class="form-horizontal form" enctype="multipart/form-data">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    订单详情
+                </div>
+                <div class="panel-body">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">订单号：{$order_data['order_sn']}</h3>
+                        </div>
+                        <div class="panel-body" >
+                            <div class="row">
+                                <div class="col-xs-4">
+                                    <div class="panel panel-success">
+                                        <div class="panel-heading" >
+                                            <h3 class="panel-title">订单信息</h3>
+                                        </div>
+                                        <div class="panel-body">
+                                            <div class="row">
+                                                <div class="col-xs-6">
+                                                    <strong>服务类型:</strong>
+                                                </div>
+                                                <div class="col-xs-6">
+                                                    {$order_data['service_name']}
+                                                </div>
+                                                <div class="col-xs-6">
+                                                    <strong>店铺:</strong>
+                                                </div>
+                                                <div class="col-xs-6">
+                                                    {$order_data['store_name']}
+                                                </div>
+                                                <div class="col-xs-6">
+                                                    <strong>工费:</strong>
+                                                </div>
+                                                <div class="col-xs-6">
+                                                    ￥{$order_data['worker_price']}
+                                                </div>
+                                                <div class="col-xs-6">
+                                                    <strong>订单状态:</strong>
+                                                </div>
+                                                <div class="col-xs-6">
+                                                    {if $order_data['status'] == 0}
+                                                    <span style="color:red;">已取消</span>
+                                                    {else if $order_data['status'] == 10 }
+                                                    待开工
+                                                    {else if $order_data['status'] == 11 }
+                                                    待验收
+                                                    {else if $order_data['status'] == 20}
+                                                    待付款
+                                                    {else if $order_data['status'] == 30}
+                                                    待交车
+                                                    {else if $order_data['status'] == 40}
+                                                    已完成
+                                                    {/if}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-4">
+                                    <div class="panel panel-success">
+                                        <div class="panel-heading" >
+                                            <h3 class="panel-title">{$order_data['car_no']} </h3>
+                                        </div>
+                                        <div class="panel-body" id="car_data">
+                                            <div class="row">
+                                                <div class="col-xs-6">
+                                                    <strong>车主:</strong>
+                                                </div>
+                                                <div class="col-xs-6">
+                                                    {$car['car_userName']}
+                                                </div>
+                                                <div class="col-xs-6">
+                                                    <strong>联系电话:</strong>
+                                                </div>
+                                                <div class="col-xs-6">
+                                                    {$car['car_mobile']}
+                                                </div>
+                                                <div class="col-xs-6">
+                                                    <strong>车型:</strong>
+                                                </div>
+                                                <div class="col-xs-6">
+                                                    {$car['brand_cn']}{$car['series_cn']}{$car['type_cn']}
+                                                </div>
+                                                <div class="col-xs-6">
+                                                    <strong>上次保养时间:</strong>
+                                                </div>
+                                                <div class="col-xs-6">
+                                                    {if empty($car['car_care_lastDate'])}
+                                                    未有保养记录
+                                                    {else}
+                                                    {echo date('Y-M-d',$car['car_care_lastDate'])}
+                                                    {/if}
+                                                </div>
+                                                <div class="col-xs-6">
+                                                    <strong>上次保养里程:</strong>
+                                                </div>
+                                                <div class="col-xs-6">
+                                                    {if empty($car['car_care_mileage'])}
+                                                    未有保养记录
+                                                    {else}
+                                                    {$car['car_care_mileage']}
+                                                    {/if}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-4">
+                                    <div class="panel panel-success">
+                                        <div class="panel-heading" >
+                                            <h3 class="panel-title">产品</h3>
+                                        </div>
+                                        <div class="panel-body">
+                                            {if $goods}
+                                                <div class="row">
+                                                    <div class="col-xs-5"><strong>产品</strong></div>
+                                                    <div class="col-xs-3"><strong>数量</strong></div>
+                                                    <div class="col-xs-4"><strong>单价</strong></div>
+                                                    {loop $goods $good}
+                                                    <div class="col-xs-5">{$good['name']}</div>
+                                                    <div class="col-xs-3">{$good['quantity']}</div>
+                                                    <div class="col-xs-4">￥{$good['goods_price']}</div>
+                                                    {/loop}
+                                                </div>
+                                                <div>
+                                                    <div class="col-xs-5"></div>
+                                                    <div class="col-xs-3"><strong>总计</strong></div>
+                                                    <div class="col-xs-4"><strong>￥{$goods_total}</strong></div>
+                                                </div>
+                                            {else}
+                                            未选择产品
+                                            {/if}
+                                            <div>
+                                                <a href="{php echo $this->createWebUrl('orders',array('op'=>'goods_add','order_id' => $order_data['id']));}">
+                                                    <input type="button" class="btn-success" value="添加商品"  />
+                                                </a>
+                                            </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+
+
+{template 'common/footer'}

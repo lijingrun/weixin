@@ -1,11 +1,12 @@
 {template 'common/header'}
 {php load()->func('tpl')}
 <script>
-    var remove_selector = function() {
-        console.log($(this).parent().index());
-        $('#region_list').find('div:gt('+($(this).parent().index()-1)+')').remove();
-    };
-
+    $(function() {
+        $('#region_list select').on('change', function() {
+            console.log($(this).parent().index());
+            $('#region_list').find('div:gt('+($(this).parent().index()-1)+')').remove();
+        } );
+    });
     function get_under_region(id){
         var region_id = $("#region_id"+id).val();
         if(region_id > 0){
@@ -19,7 +20,6 @@
                         $("#region_id"+id).attr('name','region_id');
                     }else{
                         $("#region_list").append(data);
-                        $('#region_list select').bind('change', remove_selector );
                     }
                 }
             });

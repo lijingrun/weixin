@@ -1,0 +1,184 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+    <li  class="active"><a >添加商品</a></li>
+</ul>
+<div class="main panel panel-default">
+    <div>
+    {if $order_goods}
+        <div class="category panel-body table-responsive">
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th style="width: 128px;" >产品</th>
+                <th >数量</th>
+                <th >金额</th>
+                <th >小计</th>
+                <th >操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            {loop $order_goods $goods}
+            <tr>
+                <td>
+                    <img src="../attachment/{$goods['image']}" style="width: 50%;" />
+                    <p>{$goods['name']}</p>
+                </td>
+                <td>
+                    <input type="text" id="quantity{$goods['id']}" value="{$goods['quantity']}" class="form-control" style="width: 60px;" />
+                </td>
+                <td>
+                    <input type="text" id="price{$goods['id']}" value="{$goods['goods_price']}" class="form-control" style="width: 50%;" />
+                </td>
+                <td>
+                    ￥{$goods['total']}
+                </td>
+                <td>
+                    <a onclick="change_data({$goods['id']});" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm" title="修改"><span class="glyphicon glyphicon-floppy-save"></span>
+                    </a>
+                    <a href="{php echo $this->createWebUrl('orders',array('id' => $goods['id'],'op'=>'del_goods','order_id'=>$order_id))}" onclick="return confirm('确认删除 ？'); return false;" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm" title="删除"><span class="glyphicon glyphicon-trash"></span>
+                    </a>
+                </td>
+            </tr>
+            {/loop}
+            <tr>
+                <td colspan="5">
+                    <p align="right" style="padding-right: 15%;color: red;">总计：￥{$goods_total}</p>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+            </div>
+    {/if}
+    </div>
+    <div class="category panel-body table-responsive">
+        <div class="panel panel-info">
+            <div class="panel-heading">查询</div>
+            <div class="panel-body">
+                <div class="form-horizontal" role="form">
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">产品名称/编号</label>
+                        <div class="col-sm-8 col-lg-9">
+                            <input type="text" class="form-control" id="key_word" value="{$key_word}" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">产品类型</label>
+                        <div class="col-sm-8 col-lg-9">
+                            <select class="form-control" id="type_id">
+                                <option value="0" >全部</option>
+                                {loop $types $type}
+                                <option value="{$type['id']}" {if $type['id']==$type_id }selected='selected'{/if}>
+                                {$type['name']}
+                                </option>
+                                {/loop}
+                            </select>
+                        </div>
+                        <div class=" col-xs-12 col-sm-2 col-lg-2">
+                            <button class="btn btn-default" onclick="find();"><i class="fa fa-search"></i> 搜索</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <form action="" method="post">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th >产品</th>
+                    <th >规格</th>
+                    <th >价钱</th>
+                    <th >库存数</th>
+                    <th >数量</th>
+                    <th >操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {loop $list $v}
+                <tr>
+                    <td>
+                        <div align="center">
+                            <img src="../attachment/{$v['image']}" style="width:50%;" />
+                            <p>{$v['name']}</p>
+                        </div>
+                    </td>
+                    <td>
+                        {$v['spec']}
+                    </td>
+                    <td>
+                        <input type="text" id="price{$v['id']}" class="form-control" value="{$v['price']}" style="width:100%;" />
+                    </td>
+                    <td>
+                        {$v['stock']}
+                    </td>
+                    <td>
+                        <input type="text" id="quantity{$v['id']}" class="form-control" value="1" style="width:50%;" />
+                    </td>
+                    <td>
+                        <a href="javascript:add_goods({$v['id']});" title="添加" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-plus"></span></a>
+                    </td>
+                </tr>
+                {/loop}
+                </tbody>
+            </table>
+        </form>
+        {$pager}
+    </div>
+</div>
+<script>
+    require(['bootstrap'],function($){
+        $('.btn').tooltip();
+    });
+    function find(){
+        var key_word = $("#key_word").val().trim();
+        var type_id = $("#type_id").val();
+        location.href="index.php?c=site&a=entry&op=goods_add&do=orders&m=we7_car&key_word="+key_word+"&type_id="+type_id;
+    }
+    function add_goods(id){
+        var price = $("#price"+id).val();
+        var quantity = $("#quantity"+id).val();
+        var order_id = {$order_id};
+        if(price < 0 || quantity < 0){
+            alert("请填写相关的内容");
+        }else{
+            var url = "{php echo $this->createWebUrl('orders',array('op'=>'add'));}";
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : {'price' : price, 'quantity' : quantity,'goods_id' : id,'order_id':order_id},
+                success : function(data){
+                    var return_data = JSON.parse(data);
+                    if(return_data.error == 0){
+                        location.reload();
+                    }else{
+                        alert(return_data.error);
+                    }
+                }
+            });
+        }
+    }
+    function change_data(id){
+        var quantity = $("#quantity"+id).val();
+        var price = $("#price"+id).val();
+        var order_id = {$order_id};
+        if(quantity <= 0 || price <= 0){
+            alert("请输入正确内容！");
+        }else{
+            var url = "{php echo $this->createWebUrl('orders',array('op'=>'change_goods'))}";
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : {'price' : price, 'quantity' : quantity, 'order_id' : order_id,'id' : id},
+                success : function(data){
+                    var return_data = JSON.parse(data);
+                    if(return_data.error == 0){
+                        alert("修改成功！");
+                        location.reload();
+                    }else{
+                        alert(return_data.error);
+                    }
+                }
+            });
+        }
+    }
+</script>
+{template 'common/footer'}

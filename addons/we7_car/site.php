@@ -637,22 +637,68 @@ class We7_carModuleSite extends WeModuleSite {
     public function doWebOrders(){
         global $_GPC, $_W;
         $op = $_GPC['op'] ? $_GPC['op'] : 'list';
+        $pindex = max(1, intval($_GPC['page']));
+        $psize = 20;
 
         if($op == 'list'){
-            $sql = "SELECT * FROM ".tablename('we7car_orders')." WHERE weid = ".$_W['uniacid'];
+            $total = pdo_fetchcolumn("SELECT COUNT(*) FROM ".tablename('we7car_orders')." WHERE weid=".$_W['uniacid']);
+            $sql = "SELECT o.*,c.car_no,s.name as service_name,st.store_name FROM ".tablename('we7car_orders')." AS o,".tablename('we7car_care')." AS c,".tablename('we7car_car_services')." AS s,".tablename('we7car_stores')." as st WHERE o.weid = ".$_W['uniacid']." AND o.car_id=c.id AND o.store_id=st.id AND o.service_id=s.id";
+            $pager = pagination($total,$pindex,$psize);
+            $page_sql = " ORDER BY o.createtime desc LIMIT " . ($pindex - 1) * $psize . ',' . $psize;
             //查是否某个店铺的操作员，是的话，就只查这个店铺，不是的话，查所有
             $store_user = pdo_fetch("SELECT * FROM ".tablename('we7car_store_user')." WHERE uid =".$_W['user']['uid']);
             if(!empty($store_user)){
-                $sql .= " AND store_id =".$store_user['store_id'];
+                $sql .= " AND o.store_id =".$store_user['store_id'];
             }
+            $sql .= $page_sql;
             $list = pdo_fetchall($sql);
-
-
             include $this->template('web/order_list');
+        }
+
+        if($op == 'cancle'){
+            $id = $_GPC['id'];
+            if(!empty($id)){
+                $order = pdo_fetch("SELECT * FROM ".tablename('we7car_orders')." WHERE id =".$id." AND weid=".$_W['uniacid']);
+                $order['status'] = 0;
+                if (pdo_update('we7car_orders', $order, array('id' => $id)) === false) {
+                    message('更新数据失败, 请稍后重试.', 'error');
+                }
+                message('更新数据成功！', $this->createWebUrl('orders', array('op' => 'list')), 'success');
+            }
         }
 
         if($op == 'post'){
             $system = pdo_fetchall("SELECT * from ".tablename('we7car_system')." where weid =".$_W['uniacid']);
+//查所属店铺
+            $user_store = pdo_fetch("SELECT * FROM ".tablename('we7car_store_user')." WHERE uniacid=".$_W['uniacid']." AND uid=".$_W['user']['uid']);
+            if(empty($user_store)){
+                message('对不起，你还没有关联到任何的店铺！',$this->createWebUrl('orders', array('op' => 'list')), 'error') ;
+            }
+            if(checksubmit('submit')){
+                $car_id = $_GPC['car_id'];
+                $service_id = $_GPC['service_id'];
+                $mileage = $_GPC['mileage'];
+                $order_sn = $this->get_order_sn($_W['uniacid']);
+                $insert = array(
+                    'order_sn' => $order_sn,
+                    'weid' => $_W['uniacid'],
+                    'createtime' => TIMESTAMP,
+                    'status' => 10,
+                    'store_id' => $user_store['store_id'],
+                    'service_id' => $service_id,
+                    'car_id' => $car_id,
+                    'mileage' => $mileage,
+                );
+                if (empty($id)) {
+                    pdo_insert('we7car_orders', $insert);
+                    !pdo_insertid() ? message('保存数据失败, 请稍后重试.', 'error') : '';
+                } else {
+                    if (pdo_update('we7car_orders', $insert, array('id' => $id)) === false) {
+                        message('更新数据失败, 请稍后重试.', 'error');
+                    }
+                }
+                message('更新数据成功！', $this->createWebUrl('orders', array('op' => 'list')), 'success');
+            }
             include $this->template('web/order_post');
         }
 
@@ -688,6 +734,153 @@ class We7_carModuleSite extends WeModuleSite {
             exit;
         }
 
+        //查看订单详情
+        if($op == 'order_detail'){
+            $order_id = $_GPC['id'];
+            $order_data = pdo_fetch("SELECT o.*,s.name as service_name,c.car_no,st.store_name FROM ".tablename('we7car_orders')." as o, ".tablename('we7car_car_services')." as s,".tablename('we7car_care')." as c, ".tablename('we7car_stores')." as st WHERE o.weid=".$_W['uniacid']." AND o.id =".$order_id." AND o.service_id = s.id AND o.car_id = c.id AND o.store_id=st.id");
+            $car = pdo_fetch("SELECT * FROM ".tablename('we7car_care')." WHERE id =".$order_data['car_id']);
+            $goods = pdo_fetchall("SELECT og.*,g.name,g.image FROM ".tablename('we7car_order_goods')." as og,".tablename('we7car_goods')." as g WHERE og.order_id =".$order_id." AND og.weid =".$_W['uniacid']." AND og.goods_id=g.id");
+            $goods_total = 0;
+            foreach($goods as $key=>$val){
+                $total = $val['quantity']*$val['goods_price'];
+                $goods_total += $total;
+                $order_goods[$key]['total'] = $total;
+            }
+            $goods_total = round($goods_total,2);
+            $goods_total = number_format($goods_total, 2, '.', '');
+            include $this->template('web/order_detail');
+        }
+
+        //添加产品
+        if($op == 'goods_add'){
+            //查所属店铺
+            $store_user = pdo_fetch("SELECT * FROM ".tablename('we7car_store_user')." WHERE uid =".$_W['user']['uid']." AND uniacid =".$_W['uniacid']);
+            if(!empty($store_user)) {
+                $store_id = $store_user['store_id'];
+            }else{
+                $store_id = 0;
+            }
+            if($store_id == 0){
+                message('对不起，你还没有关联到任何的店铺！',$this->createWebUrl('orders', array('op' => 'list')), 'error') ;
+            }
+            $order_id = $_GPC['order_id'];
+            $key_word = $_GPC['key_word'];
+            $type_id = empty($_GPC['type_id'])? 0 : $_GPC['type_id'];
+            $sql = "SELECT g.*, t.name as type_name FROM ". tablename('we7car_goods')." AS g, ".tablename('we7car_goods_type')." AS t WHERE g.weid = ".$_W['uniacid']." AND g.type_id = t.id";
+            $total = pdo_fetchcolumn("SELECT COUNt(*) FROM ". tablename('we7car_goods')." AS g, ".tablename('we7car_goods_type')." AS t WHERE g.weid = ".$_W['uniacid']." AND g.type_id = t.id");
+            $pager = pagination($total,$pindex,$psize);
+            $page_sql = " LIMIT " . ($pindex - 1) * $psize . ',' . $psize;
+            if(!empty($key_word)){
+                $sql .= " AND (g.name like '%".$key_word."%' OR g.goods_sn like '%".$key_word."%')";
+            }
+            if($type_id != 0){
+                $sql .= " AND type_id =".$type_id;
+            }
+            $sql .= $page_sql;
+            $list = pdo_fetchall($sql);
+            foreach($list as $key=>$l){
+                $stock = pdo_fetch("SELECT * FROM ".tablename('we7car_stock')." WHERE store_id =".$store_id." AND weid=".$_W['uniacid']." AND goods_id =".$l['id']);
+                $list[$key]['stock'] = $stock['quantity'] == 0 ? 0 : $stock['quantity'];
+            }
+            $types = pdo_fetchall("SELECT * FROM ".tablename('we7car_goods_type')."  WHERE weid = :weid",array('weid' => $_W['uniacid']));
+            $order_goods = pdo_fetchall("SELECT og.*,g.name,g.image FROM ".tablename('we7car_order_goods')." as og,".tablename('we7car_goods')." as g WHERE og.order_id =".$order_id." AND og.weid =".$_W['uniacid']." AND og.goods_id=g.id");
+            $goods_total = 0;
+            foreach($order_goods as $key=>$val){
+                $total = $val['quantity']*$val['goods_price'];
+                $goods_total += $total;
+                $order_goods[$key]['total'] = number_format($total, 2, '.', '');
+            }
+            $goods_total = round($goods_total,2);
+            $goods_total = number_format($goods_total, 2, '.', '');
+            include $this->template('web/goods_add');
+        }
+
+        if($op == 'add') {
+            $quantity = $_GPC['quantity'];
+            $price = $_GPC['price'];
+            $goods_id = $_GPC['goods_id'];
+            $order_id = $_GPC['order_id'];
+            $return = array();
+            if ($quantity <= 0 || $price <= 0 || $goods_id <= 0 || $order_id <= 0) {
+                $return['error'] = '输入参数不正确';
+            } else {
+                //查所属店铺
+                $store_user = pdo_fetch("SELECT * FROM " . tablename('we7car_store_user') . " WHERE uid =" . $_W['user']['uid'] . " AND uniacid =" . $_W['uniacid']);
+                if (!empty($store_user)) {
+                    $store_id = $store_user['store_id'];
+                } else {
+                    $store_id = 0;
+                }
+                //先查是否有足够的库存
+                $stock = pdo_fetch("SELECT * FROM " . tablename('we7car_stock') . " WHERE weid=" . $_W['uniacid'] . " AND goods_id =" . $goods_id . " AND store_id =" . $store_id);
+                    if (empty($stock) || $stock['quantity'] == 0) {
+                        $return['error'] = '库存不足！';
+                    } else {
+                        $check = pdo_fetch("SELECT * FROM " . tablename('we7car_order_goods') . " WHERE weid=" . $_W['uniacid'] . " AND order_id =" . $order_id . " AND goods_id =" . $goods_id);
+                        if (!empty($check)) {
+                            $return['error'] = '该产品已经添加了';
+                        } else {
+                            $insert = array(
+                                'weid' => $_W['uniacid'],
+                                'createtime' => TIMESTAMP,
+                                'order_id' => $order_id,
+                                'goods_id' => $goods_id,
+                                'goods_price' => $price,
+                                'quantity' => $quantity,
+                                'status' => 1,
+                            );
+                            pdo_insert('we7car_order_goods', $insert);
+                            if (!pdo_insertid()) {
+                                $return['error'] = '保存失败，请稍后重试！';
+                            } else {
+                                $return['error'] = 0;
+                            }
+                        }
+                    }
+                }
+                $return = json_encode($return);
+                echo $return;
+                exit;
+            }
+
+        //删除产品
+        if($op == 'del_goods'){
+            $id = $_GPC['id'];
+            $order_id = $_GPC['order_id'];
+            pdo_delete('we7car_order_goods',array('id'=>$id,'order_id'=>$order_id,'weid'=>$_W['uniacid']));
+            message("删除成功！",$this->createWebUrl('orders',array('op'=>'goods_add','order_id'=>$order_id)),'success');
+        }
+
+        //修改商品价格/数量
+        if($op == 'change_goods'){
+            $price = $_GPC['price'];
+            $quantity = $_GPC['quantity'];
+            $order_id = $_GPC['order_id'];
+            $id = $_GPC['id'];
+            $return = array();
+            //审核订单状态，只有未付款的订单才能进行该类操作
+            $order = pdo_fetch("SELECT * FROM ".tablename('we7car_orders')." WHERE id=".$order_id." AND weid=".$_W['uniacid']);
+            if($order['status'] < 11 || $order['status'] > 30){
+                $return['error'] = '订单当前状态不允许修改！';
+            }else {
+                if ($price < 0 || $quantity <= 0 || $order_id <= 0 || $id <= 0) {
+                    $return['error'] = '参数不正确！';
+                } else {
+                    $insert = array(
+                        'quantity' => $quantity,
+                        'goods_price' => $price
+                    );
+                    if (pdo_update('we7car_order_goods', $insert, array('order_id' => $order_id, 'id' => $id, 'weid' => $_W['uniacid'])) == false) {
+                        $return['error'] = '服务器繁忙，请稍后重试！';
+                    } else {
+                        $return['error'] = 0;
+                    }
+                }
+            }
+            $return = json_encode($return);
+            echo $return;
+            exit;
+        }
     }
 
 
@@ -759,8 +952,21 @@ class We7_carModuleSite extends WeModuleSite {
             $region = pdo_fetch("SELECT * FROM ".tablename('we7car_region')." WHERE id =".$parent_id." AND weid =".$weid);
             $region_name = $region['name'].'-'.$region_name;
             return $this->find_region($region['parent_id'],$region_name,$weid);
-        }else {
+        }else{
             return $region_name;
+        }
+    }
+
+    //自动生成订单号
+    function get_order_sn($weid){
+        $date = date("Ymd",time());
+        $rand = rand(100000,999999);
+        $order_sn = $date.$rand;
+        $check_sn = pdo_fetchcolumn("SELECT COUNT(*) FROM ".tablename('we7car_orders')." WHERE weid =".$weid." AND order_sn =".$order_sn);
+        if($check_sn > 0){
+            return $this->get_order_sn($weid);
+        }else{
+            return $order_sn;
         }
     }
 
