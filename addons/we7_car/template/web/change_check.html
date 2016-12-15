@@ -1,0 +1,125 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+    <li ><a href="{php echo $this->createWebUrl('check', array('op'=>'list'))}">检测清单</a></li>
+    <li class="active"><a >管理检测项</a></li>
+</ul>
+<div class="main panel panel-default">
+    <div class="category panel-body table-responsive">
+        <form action="" method="post">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th >显示顺序</th>
+                    <th >名称</th>
+                    <th >简介</th>
+                    <th >是否显示</th>
+                    <th >操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {loop $list $v}
+                <tr>
+                    <td><input type="text" class="form-control" name="listorder[{$v['id']}]" value="{$v['listorder']}"></td>
+                    <td>{$v['name']}</td>
+                    <td>
+                        {$v['description']}
+                    </td>
+                    <td>{if $v['status']=='1'}<span class="label label-success">显示</span>{else}<span class="label label-danger">不显示</span>{/if}</td>
+                    <td>
+                        <a href="{php echo $this->createWebUrl('check',array('id' => $v['id'],'op'=>'del'))}" onclick="return confirm('确认删除此项？');
+                                                        return false;" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm" title="删除"><i class="fa fa-times"></i></a>
+                    </td>
+                </tr>
+                {/loop}
+                <tr>
+                    <td colspan="5">
+                        {if $store_id == 0}
+                        <button type="submit" class="btn btn-primary" name="submit" value="提交">提交排序</button>
+                        <input type="hidden" name="token" value="{$_W['token']}" />
+                        {/if}
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+    <div class="row">
+        <div class="col-lg-2">
+            检测项标题：
+        </div>
+        <div class="col-lg-3">
+            <input type="text" class="form-control" placeholder="标题" id="name" />
+        </div>
+        <div class="col-lg-7">
+
+        </div>
+    </div>
+    <div class="row" style="padding-top: 10px;" >
+        <div class="col-lg-2">
+            需要维修显示字眼：
+        </div>
+        <div class="col-lg-3">
+            <input type="text" class="form-control" placeholder="如需要" id="title1" />
+        </div>
+        <div class="col-lg-7">
+
+        </div>
+    </div>
+    <div class="row" style="padding-top: 10px;" >
+        <div class="col-lg-2">
+            不需要维修显示字眼：
+        </div>
+        <div class="col-lg-3">
+            <input type="text" class="form-control" placeholder="如不需要" id="title2" />
+        </div>
+        <div class="col-lg-7">
+
+        </div>
+    </div>
+    <div class="row" style="padding-top: 10px;" >
+        <div class="col-lg-2">
+            简介：
+        </div>
+        <div class="col-lg-3">
+            <textarea id="description" class="form-control"></textarea>
+        </div>
+        <div class="col-lg-7">
+
+        </div>
+    </div>
+    <div class="row" style="padding-top: 10px;padding-bottom: 20px;padding-left: 20px;">
+        <button type="button" class="btn btn-primary" name="submit" value="添加" onclick="add_check();">提交</button>
+    </div>
+</div>
+<script>
+    require(['bootstrap'],function($){
+        $('.btn').tooltip();
+    });
+    function add_check(){
+        var name = $("#name").val().trim();
+        var description = $("#description").val().trim();
+        var title1 = $("#title1").val().trim();
+        var title2 = $("#title2").val().trim();
+        if(name == '' || title1 == '' || title2 == ''){
+            alert("请输入相关名称！");
+        }else{
+            var url = "{php echo $this->createWebUrl('check', array('op'=>'add'))}";
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : {'name':name , 'description' : description,'title1' : title1, 'title2' : title2},
+                success : function(data){
+                    if(data == 111){
+                        alert("添加成功！");
+                        location.reload();
+                    }else{
+                        alert("服务器繁忙，请稍后重试！");
+                    }
+                }
+            });
+        }
+    }
+
+    </script>
+
+{template 'common/footer'}

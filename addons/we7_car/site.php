@@ -628,6 +628,63 @@ class We7_carModuleSite extends WeModuleSite {
 
     }
 
+    //检测项管理
+    public function doWebCheck(){
+        global $_GPC, $_W;
+        $op = $_GPC['op'] ? $_GPC['op'] : 'list';
+
+        if($op == 'list'){
+            $check = pdo_fetchall("SELECT * FROM ".tablename('we7car_check')." WHERE weid =".$_W['uniacid']." ORDER BY listorder");
+            include $this->template('web/check');
+        }
+
+        if($op == 'change'){
+            $list = pdo_fetchall("SELECT * FROM ".tablename('we7car_check')." WHERE weid =".$_W['uniacid']." ORDER BY listorder");
+
+            if (checksubmit('submit')) {
+                foreach ($_GPC['listorder'] as $key => $val) {
+                    pdo_update('we7car_check', array('listorder' => intval($val)), array('id' => intval($key)));
+                }
+                message('更新排序成功！', $this->createWebUrl('check', array('op' => 'change')), 'success');
+            }
+
+            include $this->template('web/change_check');
+        }
+
+        if($op == 'del'){
+            $id = $_GPC['id'];
+            pdo_delete('we7car_check',array('id'=>$id,'weid'=>$_W['uniacid']));
+            message("删除成功！",$this->createWebUrl('check',array('op'=>'change')),'success');
+        }
+
+        if($op == 'add'){
+            $name = $_GPC['name'];
+            $description = $_GPC['description'];
+            if(empty($name)){
+                echo 222;
+                exit;
+            }else{
+                $insert = array(
+                    'name' => $name,
+                    'description' => $description,
+                    'listorder' => 255,
+                    'status' => 1,
+                    'weid' => $_W['uniacid'],
+                    'title1' => $_GPC['title1'],
+                    'title2' => $_GPC['title2'],
+                );
+                pdo_insert('we7car_check',$insert);
+                if(pdo_insertid()){
+                    echo 111;
+                }else{
+                    echo 222;
+                }
+                exit;
+            }
+        }
+
+    }
+
     //订单管理
     /*
      * 订单管理需要用到多店铺，但是里面的用户是分不开，而且登录都是用user表，暂时直接在user表中数据库添加店铺id，如果id为空的话，

@@ -41,6 +41,7 @@
 			<entry title="保养系统管理" do="system" direct="false" />
 			<entry title="地区管理" do="region" direct="false" />
 			<entry title="保养类型管理" do="services" direct="false" />
+			<entry title="车辆检测项管理" do="check" direct="false" />
 			<entry title="产品管理" do="goods" direct="false" />
 			<entry title="店铺管理" do="store" direct="false" />
 			<entry title="订单管理" do="orders" direct="false" />
@@ -512,6 +513,31 @@ CREATE TABLE IF NOT EXISTS `ims_we7car_orders` (
   `finish_time` int(10),
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+#检测项目
+CREATE TABLE IF NOT EXISTS `ims_we7car_check` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `weid` int(11) DEFAULT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT '1',
+  `name` varchar(255) NOT NULL,
+  `description` varchar(255),
+  `listorder` int(10) NOT NULL,
+  `title1` varchar(50) NOT NULL COMMENT '检测结果正',
+  `title2` varchar(50) NOT NULL COMMENT '检测结果负',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+#检测记录
+CREATE TABLE IF NOT EXISTS `ims_we7car_car_check` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `weid` int(11) DEFAULT NULL,
+  `check_id` tinyint(4) NOT NULL DEFAULT '1',
+  `car_id` int(10) NOT NULL,
+  `worker_id` int(10) NOT NULL,
+  `check_time` varchar(255),
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
 
 #订单商品
 CREATE TABLE IF NOT EXISTS `ims_we7car_order_goods` (
