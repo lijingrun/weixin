@@ -114,24 +114,6 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">所属系统</label>
-                    <div class="col-sm-9 col-xs-12">
-                        <select class="form-control" id="system_id" onchange="find_service();">
-                            <option value="0">请选择所属系统</option>
-                            {loop $system $sy}
-                            <option value="{$sy['system_id']}"  {if $sy['system_id'] == $theone['system_id']} selected="selected"{/if}>{$sy['name']}</option>
-                            {/loop}
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">服务类型</label>
-                    <div class="col-sm-9 col-xs-12">
-                        <select class="form-control" name="service_id" id="service_id">
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
                     <label class="col-xs-12 col-sm-3 col-md-2 control-label">保养里程(km)</label>
                     <div class="col-sm-9 col-xs-12">
                         <input type="text" name="mileage" class="form-control" value="{$theone['name']}" />
@@ -156,10 +138,6 @@
         });
     }
     $('form').submit(function() {
-        if($.trim($('select[name="service_id"]').val()) == '') {
-            message('必须选择所属系统.', '', 'error');
-            return false;
-        }
         if($.trim($('select[name="car_id"]').val()) == '') {
             message('请选择客户.', '', 'error');
             return false;

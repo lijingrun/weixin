@@ -11,10 +11,7 @@
                 <tr>
                     <th style="width: 128px;" >订单编号</th>
                     <th >车牌号码</th>
-                    <th >应用服务</th>
                     <th >店铺</th>
-                    <th >耗时</th>
-                    <th >工费</th>
                     <th >订单状态</th>
                     <th >操作</th>
                 </tr>
@@ -31,16 +28,7 @@
                         {$v['car_no']}
                     </td>
                     <td>
-                        {$v['service_name']}
-                    </td>
-                    <td>
                         {$v['store_name']}
-                    </td>
-                    <td>
-
-                    </td>
-                    <td>
-
                     </td>
                     <td>
                         {if $v['status'] == 0}
@@ -57,9 +45,8 @@
                         已完成
                         {/if}
                     </td>
-                    <td><a href="{php echo $this->createWebUrl('services',array('id' => $v['id'],'op'=>'post'))}" title="编辑" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><i class="fa fa-edit"></i></a>
-                        <a href="{php echo $this->createWebUrl('orders',array('id' => $v['id'],'op'=>'cancle'))}" onclick="return confirm('确认取消此订单？');
-                                                        return false;" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm" title="删除"><i class="fa fa-times"></i></a></td>
+                    <td>
+                        <a href="{php echo $this->createWebUrl('orders',array('id' => $v['id'],'op'=>'cancle'))}" onclick="return confirm('确认取消此订单？');return false;" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm" title="取消"><i class="fa fa-times"></i></a></td>
                 </tr>
                 {/loop}
                 <tr>

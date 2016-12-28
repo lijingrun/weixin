@@ -493,26 +493,61 @@ CREATE TABLE IF NOT EXISTS `ims_we7car_region` (
 #维修订单
 CREATE TABLE IF NOT EXISTS `ims_we7car_orders` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `order_sn` int(100) NOT NULL,
+  `order_sn` varchar(20) NOT NULL,
   `weid` int(11) DEFAULT NULL,
   `createtime` int(10) NOT NULL,
   `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0:取消 10：未选店铺 11 未开工 20 未验收 30 未支付 40 未交车 50 已完成',
   `store_id` int(11),
-  `service_id` int(11) NOT NULL,
-  `begin_time` int(10),
-  `end_time` int(10),
-  `worker_price` float(10,2),
   `worker_id` int(10),
   `car_id` int(10) NOT NULL,
   `mileage` int(10) NOT NULL DEFAULT '0',
-  `check_time` int(10),
-  `check_id` int(10),
   `pay_tiem` int(10),
   `pay_type` varchar(50),
   `get_time` int(10),
   `finish_time` int(10),
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+#维修订单包含的服务
+CREATE TABLE IF NOT EXISTS `ims_we7car_orders_services` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `order_id` int(10) NOT NULL,
+  `weid` int(11) DEFAULT NULL,
+  `createtime` int(10) NOT NULL,
+  `service_id` int(10) NOT NULL,
+  `worker_id` int(10),
+  `goods_price` float(10,2),
+  `begin_time` varchar(100),
+  `end_time` varchar(100),
+  `worker_price` float(10,2) DEFAULT 0,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+#订单商品
+CREATE TABLE IF NOT EXISTS `ims_we7car_order_goods` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `weid` int(11) DEFAULT NULL,
+  `createtime` int(10) NOT NULL,
+  `order_service_id` int(10) NOT NULL,
+  `goods_id` int(10) NOT NULL,
+  `goods_price` float(10,2) NOT NULL,
+  `quantity` int(10) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+#订单记录
+CREATE TABLE IF NOT EXISTS `ims_we7car_order_log` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `weid` int(11) DEFAULT NULL,
+  `order_id` int(11) NOT NULL,
+  `before_status` int(11) NOT NULL,
+  `change_status` int(10) NOT NULL,
+  `user_id` int(10) NOT NULL,
+  `createtime` int(10) NOT NULL,
+  `remark` varchar(255),
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
 
 #检测项目
 CREATE TABLE IF NOT EXISTS `ims_we7car_check` (
@@ -535,33 +570,8 @@ CREATE TABLE IF NOT EXISTS `ims_we7car_car_check` (
   `car_id` int(10) NOT NULL,
   `worker_id` int(10) NOT NULL,
   `check_time` varchar(255),
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
-
-
-#订单商品
-CREATE TABLE IF NOT EXISTS `ims_we7car_order_goods` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `weid` int(11) DEFAULT NULL,
-  `createtime` int(10) NOT NULL,
-  `status` tinyint(4) NOT NULL DEFAULT '1',
   `order_id` int(10) NOT NULL,
-  `goods_id` int(10) NOT NULL,
-  `goods_price` float(10,2) NOT NULL,
-  `quantity` int(10) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
-
-#订单记录
-CREATE TABLE IF NOT EXISTS `ims_we7car_order_log` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `weid` int(11) DEFAULT NULL,
-  `order_id` int(11) NOT NULL,
-  `before_status` int(11) NOT NULL,
-  `change_status` int(10) NOT NULL,
-  `user_id` int(10) NOT NULL,
-  `createtime` int(10) NOT NULL,
-  `remark` varchar(255),
+  `check_result` int(1),
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 

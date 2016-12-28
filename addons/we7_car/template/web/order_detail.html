@@ -1,16 +1,95 @@
 {template 'common/header'}
 <script>
-    function open_car(){
-        $("#car_data").show();
-        $("#car").attr('onclick','close_car()');
+    function open_check(){
+        $("#check_data").show();
+        $("#check_title").attr('onclick','close_check()');
     }
-    function close_car(){
-        $("#car_data").hide();
-        $("#car").attr('onclick','open_car()');
+    function close_check(){
+        $("#check_data").hide();
+        $("#check_title").attr('onclick','open_check()');
+    }
+    function add_check(id){
+        if(id > 0){
+            var url = "{php echo $this->createWebUrl('orders',array('op'=>'add_check'));}";
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : {'order_id' : id},
+                success : function(data){
+                    if(data == 111){
+                        alert("检查单生成成功！");
+                        location.reload();
+                    }else if(data == 333){
+                        alert("订单已经存在检测单");
+                    }else{
+                        alert("服务器繁忙，请稍后重试！");
+                    }
+                }
+            });
+        }
+    }
+    function find_services(){
+        var system_id = $("#system").val();
+        if(system_id != 0){
+            var url = "{php echo $this->createWebUrl('orders',array('op'=>'find_service'));}";
+            $.ajax({
+                type : 'get',
+                url : url,
+                data : {system_id : system_id},
+                success : function(data){
+                    $("#service_id").html(data);
+                }
+            });
+        }
+    }
+
+    function add_service(order_id){
+        var service_id = $("#service_id").val();
+        if(service_id > 0 && order_id > 0){
+            var url = "{php echo $this->createWebUrl('orders',array('op'=>'add_service'));}";
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : {'service_id' : service_id,'order_id' : order_id},
+                success : function(data){
+                    if(data == 111){
+                        alert("添加成功！");
+                        location.reload();
+                    }else if(data == 222){
+                        alert("已经添加了该服务了！");
+                    }else{
+                        alert("服务器繁忙，请稍后重试！");
+                    }
+                }
+            });
+        }
+    }
+    function del(id){
+        if(confirm("是否确定删除？")){
+            var url = "{php echo $this->createWebUrl('orders',array('op'=>'del_goods'));}";
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : {'id' : id},
+                success : function(data){
+                    if(data == 111){
+                        alert("操作成功！");
+                        location.reload();
+                    }
+                }
+            });
+        }
+    }
+    function worker_price(id){
+        var htm = "<input type='text' style='width:50px;' id='new_price"+id+"' />";
+        $("#service"+id).html(htm);
     }
 </script>
+<ul class="nav nav-tabs">
+    <li><a href="{php echo $this->createWebUrl('orders',array('op'=>'list'));}">订单管理</a></li>
+</ul>
     <div class="main">
-        <form action="" method="post" class="form-horizontal form" enctype="multipart/form-data">
+        <!--<form class="form-horizontal form" >-->
             <div class="panel panel-default">
                 <div class="panel-heading">
                     订单详情
@@ -25,54 +104,7 @@
                                 <div class="col-xs-4">
                                     <div class="panel panel-success">
                                         <div class="panel-heading" >
-                                            <h3 class="panel-title">订单信息</h3>
-                                        </div>
-                                        <div class="panel-body">
-                                            <div class="row">
-                                                <div class="col-xs-6">
-                                                    <strong>服务类型:</strong>
-                                                </div>
-                                                <div class="col-xs-6">
-                                                    {$order_data['service_name']}
-                                                </div>
-                                                <div class="col-xs-6">
-                                                    <strong>店铺:</strong>
-                                                </div>
-                                                <div class="col-xs-6">
-                                                    {$order_data['store_name']}
-                                                </div>
-                                                <div class="col-xs-6">
-                                                    <strong>工费:</strong>
-                                                </div>
-                                                <div class="col-xs-6">
-                                                    ￥{$order_data['worker_price']}
-                                                </div>
-                                                <div class="col-xs-6">
-                                                    <strong>订单状态:</strong>
-                                                </div>
-                                                <div class="col-xs-6">
-                                                    {if $order_data['status'] == 0}
-                                                    <span style="color:red;">已取消</span>
-                                                    {else if $order_data['status'] == 10 }
-                                                    待开工
-                                                    {else if $order_data['status'] == 11 }
-                                                    待验收
-                                                    {else if $order_data['status'] == 20}
-                                                    待付款
-                                                    {else if $order_data['status'] == 30}
-                                                    待交车
-                                                    {else if $order_data['status'] == 40}
-                                                    已完成
-                                                    {/if}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-xs-4">
-                                    <div class="panel panel-success">
-                                        <div class="panel-heading" >
-                                            <h3 class="panel-title">{$order_data['car_no']} </h3>
+                                            <h3 class="panel-title">{$car['car_no']} </h3>
                                         </div>
                                         <div class="panel-body" id="car_data">
                                             <div class="row">
@@ -118,44 +150,141 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-xs-4">
-                                    <div class="panel panel-success">
-                                        <div class="panel-heading" >
-                                            <h3 class="panel-title">产品</h3>
+                                <div class="col-xs-8">
+                                    {if $check}
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading" id="check_title" onclick="open_check();" >
+                                            <h3 class="panel-title">检测报告&nbsp;&nbsp;<a style="font-size: 13px;" href="javascript:display;">点击展开</a></h3>
                                         </div>
-                                        <div class="panel-body">
-                                            {if $goods}
-                                                <div class="row">
-                                                    <div class="col-xs-5"><strong>产品</strong></div>
-                                                    <div class="col-xs-3"><strong>数量</strong></div>
-                                                    <div class="col-xs-4"><strong>单价</strong></div>
-                                                    {loop $goods $good}
-                                                    <div class="col-xs-5">{$good['name']}</div>
-                                                    <div class="col-xs-3">{$good['quantity']}</div>
-                                                    <div class="col-xs-4">￥{$good['goods_price']}</div>
-                                                    {/loop}
-                                                </div>
-                                                <div>
-                                                    <div class="col-xs-5"></div>
-                                                    <div class="col-xs-3"><strong>总计</strong></div>
-                                                    <div class="col-xs-4"><strong>￥{$goods_total}</strong></div>
-                                                </div>
-                                            {else}
-                                            未选择产品
-                                            {/if}
-                                            <div>
-                                                <a href="{php echo $this->createWebUrl('orders',array('op'=>'goods_add','order_id' => $order_data['id']));}">
-                                                    <input type="button" class="btn-success" value="添加商品"  />
-                                                </a>
-                                            </div>
+                                        <div class="panel-body" style="display: none;" id="check_data">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                <tr>
+                                                    <th >检测项目</th>
+                                                    <th >检测结果</th>
+                                                    <th >备注</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {loop $check $c}
+                                                    <tr>
+                                                        <td>{$c['name']}</td>
+                                                        <td>
+                                                            {if empty($c['check_result'])}
+                                                            未开始检测
+                                                            {else if $c['check_result'] == 1}
+                                                            {$c['title1']}
+                                                            {else if $c['check_result'] == 2}
+                                                            {$c['title2']}
+                                                            {/if}
+                                                        </td>
+                                                        <td>
+                                                            {$c['remark']}
+                                                        </td>
+                                                {/loop}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    {else}
+                                    <button class="btn-default" onclick="add_check({$order_data['id']});">进行检测服务</button>
+                                    {/if}
+                            </div>
+                        </div>
+                            {if !empty($services)}
+                            <div>
+                                <div class="panel panel-success">
+                                    <div class="panel-heading" >
+                                        <h3 class="panel-title">保养内容</h3>
+                                    </div>
+                                    <div class="panel-body" >
+                                        <table class="table table-hover">
+                                            <thead>
+                                            <tr>
+                                                <th >服务</th>
+                                                <th >工时费</th>
+                                                <th >产品</th>
+                                                <th >价格</th>
+                                                <th >数量</th>
+                                                <th >备注</th>
+                                                <th >操作</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {loop $services $s}
+
+                                            <tr>
+                                                <td rowspan="2">
+                                                    <p>
+                                                        {$s['name']}
+                                                    </p>
+                                                    <a href="{php echo $this->createWebUrl('orders',array('op'=>'add_goods','service_id' => $s['id'],'order_id'=>$order_id));}">
+                                                        添加产品
+                                                    </a>
+                                                </td>
+                                                <td rowspan="2" id="service{$s['id']}" ondblclick="worker_price({$s['id']});">{$s['worker_price']}</td>
+                                                {loop $s['goods'] $goods}
+                                                <td>{$goods['name']}</td>
+                                                <td>￥{$goods['goods_price']}</td>
+                                                <td>{$goods['quantity']}</td>
+                                                <td></td>
+                                                <td>
+                                                    <a href="javascript:display;" onclick="del({$goods['id']});">
+                                                        <span class="glyphicon glyphicon-remove" title="删除"></span>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                                {/loop}
+                                            {/loop}
+                                            </tbody>
+                                        </table>
+                                        <div class="row">
+                                            <div></div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                            {/if}
+                            <!-- 添加服务 -->
+                            <!-- Button trigger modal -->
+                            <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
+                                添加服务
+                            </button>
+
+                            <!-- Modal -->
+                            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                            <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <select class="form-control" onchange="find_services();" id="system">
+                                                <option>请选择维护系统</option>
+                                                {loop $all_system $system}
+                                                    <option value="{$system['system_id']}">{$system['name']}</option>
+                                                {/loop}
+                                                </select>
+                                            </select>
+                                            <br />
+                                            <select class="form-control" id="service_id">
+                                                <option>请选择需要服务</option>
+                                            </select>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                                            <button type="button" onclick="add_service({$order_id});" class="btn btn-primary">确定</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 结束 -->
                     </div>
                 </div>
             </div>
-        </form>
+        <!--</form>-->
     </div>
 
 

@@ -1,0 +1,75 @@
+{template 'common/header'}
+<script>
+    function find_goods(){
+        var key_word = $("#key_word").val();
+        if(key_word != ''){
+            var url = "{php echo $this->createWebUrl('orders',array('op'=>'find_goods'));}";
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : {'key_word' : key_word},
+                success : function(data){
+                    $("#goods_list").html(data);
+                }
+            });
+        }else{
+            alert("请输入内容！");
+        }
+    }
+</script>
+<div class="main">
+    <ul class="nav nav-tabs">
+        <li><a href="{php echo $this->createWebUrl('orders',array('op'=>'list'));}">订单管理</a></li>
+    </ul>
+    <form action="" method="post" class="form-horizontal form" enctype="multipart/form-data" onsubmit="return validate(this);">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">产品名称</label>
+                    <div class="col-sm-9 col-xs-12">
+                        <div class="input-group">
+                              <input type="text" class="form-control" id="key_word"  />
+                              <span class="input-group-btn">
+                                <button class="btn btn-default" type="button" onclick="find_goods();">搜索</button>
+                              </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">产品</label>
+                    <div class="col-sm-9 col-xs-12">
+                        <select class="form-control" id="goods_list" name="goods_id">
+                            <option value="0" >未获取产品</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group col-sm-12">
+            <input type='hidden' name='id' value="{$theone['id']}" />
+            <input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" />
+            <input type="hidden" name="token" value="{$_W['token']}" />
+        </div>
+    </form>
+</div>
+
+<script type="text/javascript">
+    function message(msg) {
+        require(['util'], function(util) {
+            util.message(msg);
+        })
+    }
+    $('form').submit(function() {
+        return true;
+    });
+
+    require(['bootstrap'],function($){
+        $('.btn').tooltip();
+    });
+
+    var category = {php echo json_encode($children)};
+    require(['util'],function(util){
+        util.editor( $('.richtext-clone')[0]);
+    })
+</script>
+{template 'common/footer'}

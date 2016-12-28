@@ -699,7 +699,7 @@ class We7_carModuleSite extends WeModuleSite {
 
         if($op == 'list'){
             $total = pdo_fetchcolumn("SELECT COUNT(*) FROM ".tablename('we7car_orders')." WHERE weid=".$_W['uniacid']);
-            $sql = "SELECT o.*,c.car_no,s.name as service_name,st.store_name FROM ".tablename('we7car_orders')." AS o,".tablename('we7car_care')." AS c,".tablename('we7car_car_services')." AS s,".tablename('we7car_stores')." as st WHERE o.weid = ".$_W['uniacid']." AND o.car_id=c.id AND o.store_id=st.id AND o.service_id=s.id";
+            $sql = "SELECT o.*,c.car_no,st.store_name FROM ".tablename('we7car_orders')." AS o,".tablename('we7car_care')." AS c,".tablename('we7car_stores')." as st WHERE o.weid = ".$_W['uniacid']." AND o.car_id=c.id AND o.store_id=st.id";
             $pager = pagination($total,$pindex,$psize);
             $page_sql = " ORDER BY o.createtime desc LIMIT " . ($pindex - 1) * $psize . ',' . $psize;
             //查是否某个店铺的操作员，是的话，就只查这个店铺，不是的话，查所有
@@ -733,7 +733,6 @@ class We7_carModuleSite extends WeModuleSite {
             }
             if(checksubmit('submit')){
                 $car_id = $_GPC['car_id'];
-                $service_id = $_GPC['service_id'];
                 $mileage = $_GPC['mileage'];
                 $order_sn = $this->get_order_sn($_W['uniacid']);
                 $insert = array(
@@ -742,7 +741,6 @@ class We7_carModuleSite extends WeModuleSite {
                     'createtime' => TIMESTAMP,
                     'status' => 10,
                     'store_id' => $user_store['store_id'],
-                    'service_id' => $service_id,
                     'car_id' => $car_id,
                     'mileage' => $mileage,
                 );
@@ -794,18 +792,113 @@ class We7_carModuleSite extends WeModuleSite {
         //查看订单详情
         if($op == 'order_detail'){
             $order_id = $_GPC['id'];
-            $order_data = pdo_fetch("SELECT o.*,s.name as service_name,c.car_no,st.store_name FROM ".tablename('we7car_orders')." as o, ".tablename('we7car_car_services')." as s,".tablename('we7car_care')." as c, ".tablename('we7car_stores')." as st WHERE o.weid=".$_W['uniacid']." AND o.id =".$order_id." AND o.service_id = s.id AND o.car_id = c.id AND o.store_id=st.id");
+            $order_data = pdo_fetch("SELECT * FROM ".tablename('we7car_orders')." WHERE weid=".$_W['uniacid']." AND id =".$order_id);
             $car = pdo_fetch("SELECT * FROM ".tablename('we7car_care')." WHERE id =".$order_data['car_id']);
-            $goods = pdo_fetchall("SELECT og.*,g.name,g.image FROM ".tablename('we7car_order_goods')." as og,".tablename('we7car_goods')." as g WHERE og.order_id =".$order_id." AND og.weid =".$_W['uniacid']." AND og.goods_id=g.id");
-            $goods_total = 0;
-            foreach($goods as $key=>$val){
-                $total = $val['quantity']*$val['goods_price'];
-                $goods_total += $total;
-                $order_goods[$key]['total'] = $total;
+            $check = pdo_fetchall("SELECT *,c.name,c.title1,c.title2 FROM ".tablename('we7car_car_check')." AS oc,".tablename('we7car_check')." AS c WHERE oc.weid =".$_W['uniacid']." AND oc.order_id =".$order_id." AND oc.check_id = c.id");
+            //服务类型
+            $all_system = pdo_fetchall("SELECT * FROM ".tablename('we7car_system'));
+            $services = pdo_fetchall("SELECT s.*,sy.name FROM ".tablename('we7car_orders_services')." AS s,".tablename('we7car_car_services')." AS sy WHERE order_id =".$order_id." AND s.service_id = sy.id");
+            foreach($services as $key=>$service){
+                $services_goods = pdo_fetchall("SELECT sg.*,g.name,g.goods_sn FROM ".tablename('we7car_order_goods')." as sg,".tablename('we7car_goods')." as g WHERE sg.order_service_id =".$service['id']." AND sg.weid =".$_W['uniacid']." AND sg.goods_id = g.id");
+                $services[$key]['goods'] = $services_goods;
             }
-            $goods_total = round($goods_total,2);
-            $goods_total = number_format($goods_total, 2, '.', '');
             include $this->template('web/order_detail');
+        }
+
+        //增加服务
+        if($op == 'add_service'){
+            $order_id = $_GPC['order_id'];
+            $service_id = $_GPC['service_id'];
+            if($order_id > 0 && $service_id > 0){
+                $check = pdo_fetch("SELECT * FROM ".tablename('we7car_orders_services')." WHERE order_id=".$order_id." AND service_id =".$service_id);
+                if(empty($check)){
+                    $insert = array(
+                        'order_id' => $order_id,
+                        'weid' => $_W['uniacid'],
+                        'createtime' => TIMESTAMP,
+                        'service_id' => $service_id,
+                    );
+                    pdo_insert('we7car_orders_services',$insert);
+                    echo 111;
+                }else{
+                    echo 222;
+                }
+                exit;
+            }
+        }
+
+        //删除产品
+        if($op == 'del_goods'){
+            $id = $_GPC['id'];
+            pdo_delete('we7car_order_goods',array('id' => $id,'weid' => $_W['uniacid']));
+            echo 111;
+            exit;
+        }
+
+        //增加检测项目
+        if($op == 'add_check'){
+            $order_id = $_GPC['order_id'];
+            $order = pdo_fetch("SELECT * FROM ".tablename('we7car_orders')." WHERE weid =".$_W['uniacid']." AND id =".$order_id);
+            $car_check = pdo_fetch("SELECT * FROM ".tablename('we7car_car_check')." WHERE order_id =".$order_id." AND weid =".$_W['uniacid']);
+            if(!empty($car_check)){
+                echo 333;
+                exit;
+            }
+            $check = pdo_fetchall("SELECT * FROM ".tablename('we7car_check')." WHERE weid =".$_W['uniacid']." AND status = 1 ORDER BY listorder");
+            foreach($check as $c){
+                $insert = array(
+                    'weid' => $_W['uniacid'],
+                    'check_id' => $c['id'],
+                    'car_id' => $order['car_id'],
+                    'order_id' => $order_id,
+                );
+                pdo_insert('we7car_car_check',$insert);
+            }
+            echo 111;
+            exit;
+        }
+
+        //搜索产品
+        if($op == 'find_goods'){
+            $key_word = $_GPC['key_word'];
+            $goods = pdo_fetchall("SELECT * FROM ".tablename('we7car_goods')." WHERE name like '%".$key_word."%' "." OR goods_sn like '%".$key_word."%'"." AND weid =".$_W['uniacid']);
+            echo "<option value='0'>请选择产品</option>";
+            foreach($goods as $good){
+                echo "<option value='".$good['id']."'>".$good['name']."</option>";
+            }
+            exit;
+        }
+
+        //添加产品 20161225
+        if($op == 'add_goods'){
+            $service_id = $_GPC['service_id'];
+            $order_id = $_GPC['order_id'];
+            if(empty($service_id) || empty($order_id)){
+                message('参数错误',$this->createWebUrl('add_goods', array('op' => 'list')), 'error') ;
+            }
+            if(checksubmit('submit')){
+                $goods_id = $_GPC['goods_id'];
+                if($goods_id > 0){
+                    $goods = pdo_fetch("SELECT * FROM ".tablename('we7car_goods')." WHERE id =".$goods_id);
+                    $check = pdo_fetch("SELECT * FROM ".tablename('we7car_order_goods')." WHERE goods_id =".$goods_id." AND order_service_id =".$service_id);
+                    if(!empty($check)){
+                        message('您已经添加过产品了',$this->createWebUrl('orders', array('op' => 'add_goods','service_id' => $service_id,'order_id' => $order_id)), 'error') ;
+                    }else{
+                        $insert = array(
+//                            'order_id' => $order_id,
+                            'goods_id' => $goods_id,
+                            'order_service_id' => $service_id,
+                            'goods_price' => $goods['price'],
+                            'quantity' => 1,
+                            'weid' => $_W['uniacid'],
+                            'createtime' => TIMESTAMP,
+                        );
+                        pdo_insert('we7car_order_goods',$insert);
+                        message('添加成功！',$this->createWebUrl('orders', array('op' => 'order_detail','id' => $order_id)), 'success') ;
+                    }
+                }
+            }
+            include $this->template('web/add_goods');
         }
 
         //添加产品
