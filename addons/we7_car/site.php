@@ -628,6 +628,140 @@ class We7_carModuleSite extends WeModuleSite {
 
     }
 
+    //施工管理
+    public function doWebWorker(){
+        global $_GPC, $_W;
+        $op = $_GPC['op'] ? $_GPC['op'] : 'list';
+
+        if($op == 'list'){
+            $uid = $_W['user']['uid'];
+            $store = pdo_fetch("SELECT * FROM ".tablename('we7car_store_user')." WHERE uid=".$uid." AND uniacid =".$_W['uniacid']);
+            //找等待开工的订单
+            $list = pdo_fetchall("SELECT o.*,c.car_no FROM ".tablename('we7car_orders')." AS o,".tablename('we7car_care')." AS c WHERE o.status = 11 AND o.worker_id = 0 AND o.car_id=c.id AND o.weid =".$_W['uniacid']." ORDER BY createtime");
+            include $this->template('web/worker_orders');
+        }
+
+        //工人接单
+        if($op == 'get'){
+            $id = $_GPC['id'];
+            $uid = $_W['user']['uid'];
+            $store = pdo_fetch("SELECT * FROM ".tablename('we7car_store_user')." WHERE uid = ".$uid." AND uniacid=".$_W['uniacid']);
+            $check = pdo_fetchcolumn("SELECT count(*) FROM ".tablename('we7car_orders')." WHERE worker_id =".$uid." AND status <= 20 AND store_id =".$store['store_id']);
+            if($check > 0){
+                message('您还有未完成的工单，不能接单！!',$this->createWebUrl('worker',array('op'=>'list')),'error');
+            }
+            $insert = array(
+                'worker_id' => $uid,
+                'get_time' => TIMESTAMP,
+                'status' => 20,
+            );
+            if(pdo_update('we7car_orders',$insert,array('id' => $id,'weid' => $_W['uniacid'],'worker_id' => 0)) == false){
+                message('接单失败，请稍后重试!',$this->createWebUrl('worker',array('op'=>'list')),'error');
+            }else{
+                message('接单成功!',$this->createWebUrl('worker',array('op'=>'worker_order')),'success');
+            }
+        }
+
+        //工人工单
+        if($op == 'worker_order'){
+            $uid = $_W['user']['uid'];
+            $store = pdo_fetch("SELECT * FROM ".tablename('we7car_store_user')." WHERE uid = ".$uid." AND uniacid=".$_W['uniacid']);
+            $order_data = pdo_fetch("SELECT * FROM ".tablename('we7car_orders')." WHERE worker_id =".$uid." AND weid =".$_W['uniacid']." AND store_id =".$store['store_id']." AND status < 30");
+            if(!empty($order_data)) {
+                $order_id = $order_data['id'];
+                $car = pdo_fetch("SELECT * FROM " . tablename('we7car_care') . " WHERE id =" . $order_data['car_id']);
+                $check = pdo_fetchall("SELECT *,c.name,c.title1,c.title2 FROM " . tablename('we7car_car_check') . " AS oc," . tablename('we7car_check') . " AS c WHERE oc.weid =" . $_W['uniacid'] . " AND oc.order_id =" . $order_id . " AND oc.check_id = c.id");
+                //服务类型
+//            $all_system = pdo_fetchall("SELECT * FROM ".tablename('we7car_system'));
+                $services = pdo_fetchall("SELECT s.*,sy.name FROM " . tablename('we7car_orders_services') . " AS s," . tablename('we7car_car_services') . " AS sy WHERE order_id =" . $order_id . " AND s.service_id = sy.id");
+
+                $total_price = 0;
+                $worker_price = 0;
+                foreach ($services as $key => $service) {
+                    $worker_price += $service['worker_price'];
+                    $services_goods = pdo_fetchall("SELECT sg.*,g.name,g.goods_sn FROM " . tablename('we7car_order_goods') . " as sg," . tablename('we7car_goods') . " as g WHERE sg.order_service_id =" . $service['id'] . " AND sg.weid =" . $_W['uniacid'] . " AND sg.goods_id = g.id");
+                    if (!empty($services_goods)) {
+                        foreach ($services_goods as $key2 => $g) {
+                            $goods_price = $g['quantity'] * $g['goods_price'];
+                            $services_goods[$key2]['total_price'] = $goods_price;
+                            $total_price += $goods_price;
+                        }
+                        $services[$key]['goods'] = $services_goods;
+                        $services[$key]['count'] = count($services_goods);
+                    } else {
+                        $services[$key]['count'] = 1;
+                    }
+                }
+                $order_price = $total_price + $worker_price;
+                include $this->template('web/worker_order_detail');
+            }else{
+                message('请先接单！！', $this->createWebUrl('worker', array('op' => 'list')), 'error');
+            }
+        }
+
+        //修改维修里程
+        if($op == 'change_mileage'){
+            $mileage = $_GPC['mileage'];
+            $order_id = $_GPC['order_id'];
+            pdo_update('we7car_orders',array('mileage' => intval($mileage)), array('id' => intval($order_id)));
+            echo 111;
+            exit;
+        }
+
+        //填写检测报告
+        if($op == 'input_check'){
+            $check = $_GPC['check'];
+            $remark = $_GPC['remark'];
+            $order_id = $_GPC['order_id'];
+            $worker_id = $_W['user']['uid'];
+            foreach($check as $key=>$c){
+                pdo_update('we7car_car_check',array('worker_id' => $worker_id,'check_result' => $c,'remark' => $remark[$key],'check_time' => TIMESTAMP),array('check_id' => $key,'order_id' => $order_id));
+            }
+            message('操作成功！！', $this->createWebUrl('worker', array('op' => 'worker_order')), 'success');
+        }
+
+        //开始施工
+        if($op == 'begin_work'){
+            $service_id = $_GPC['service_id'];
+            $order_id = $_GPC['order_id'];
+            $worker_id = $_W['user']['uid'];
+            pdo_update('we7car_orders_services',array('begin_time' => TIMESTAMP,'worker_id' => $worker_id),array('order_id' => $order_id,'service_id' => $service_id,'weid' => $_W['uniacid']));
+            echo 111;
+            exit;
+        }
+
+        //完工
+        if($op == 'finish'){
+            $service_id = $_GPC['service_id'];
+            $order_id = $_GPC['order_id'];
+            $worker_id = $_W['user']['uid'];
+            pdo_update('we7car_orders_services',array('end_time' => TIMESTAMP),array('order_id' => $order_id,'service_id' => $service_id,'weid' => $_W['uniacid']));
+            echo 111;
+            exit;
+        }
+
+        //申请验收
+        if($op == 'finish_order'){
+            $order_id = $_GPC['order_id'];
+            $order_services = pdo_fetchall("SELECT end_time FROM ".tablename('we7car_orders_services')." WHERE order_id =".$order_id." AND weid =".$_W['uniacid']);
+            $can_finish = true;
+            //先检查所有工作是否已经完成
+            foreach($order_services as $s){
+                if(empty($s['end_time'])){
+                    $can_finish = false;
+                    break;
+                }
+            }
+            if($can_finish){
+                pdo_update('we7car_orders',array('status' => 30),array('id' => $order_id,'weid' => $_W['uniacid']));
+                echo 111;
+            }else{
+                echo 222;
+            }
+            exit;
+        }
+    }
+
     //检测项管理
     public function doWebCheck(){
         global $_GPC, $_W;
@@ -739,7 +873,7 @@ class We7_carModuleSite extends WeModuleSite {
                     'order_sn' => $order_sn,
                     'weid' => $_W['uniacid'],
                     'createtime' => TIMESTAMP,
-                    'status' => 10,
+                    'status' => 11,
                     'store_id' => $user_store['store_id'],
                     'car_id' => $car_id,
                     'mileage' => $mileage,
@@ -784,6 +918,11 @@ class We7_carModuleSite extends WeModuleSite {
         if($op == 'get_car_data'){
             $car_id = $_GPC['car_id'];
             $car = pdo_fetch("SELECT * FROM ".tablename('we7car_care')." WHERE id =".$car_id." AND weid =".$_W['uniacid']);
+            $last_order = pdo_fetch("SELECT * FROM ".tablename('we7car_orders')." WHERE car_id =".$car_id." AND weid =".$_W['uniacid']." AND status = 50 ORDER BY 'createtime'");
+            if(!empty($last_order)){
+                $car['car_care_lastDate'] = date("Y-m-d",$last_order['finish_time']);
+                $car['car_care_mileage'] = $last_order['mileage'];
+            }
             $car = json_encode($car);
             echo $car;
             exit;
@@ -798,10 +937,25 @@ class We7_carModuleSite extends WeModuleSite {
             //服务类型
             $all_system = pdo_fetchall("SELECT * FROM ".tablename('we7car_system'));
             $services = pdo_fetchall("SELECT s.*,sy.name FROM ".tablename('we7car_orders_services')." AS s,".tablename('we7car_car_services')." AS sy WHERE order_id =".$order_id." AND s.service_id = sy.id");
+
+            $total_price = 0;
+            $worker_price = 0;
             foreach($services as $key=>$service){
+                $worker_price += $service['worker_price'];
                 $services_goods = pdo_fetchall("SELECT sg.*,g.name,g.goods_sn FROM ".tablename('we7car_order_goods')." as sg,".tablename('we7car_goods')." as g WHERE sg.order_service_id =".$service['id']." AND sg.weid =".$_W['uniacid']." AND sg.goods_id = g.id");
-                $services[$key]['goods'] = $services_goods;
+                if(!empty($services_goods)) {
+                    foreach ($services_goods as $key2 => $g) {
+                        $goods_price = $g['quantity'] * $g['goods_price'];
+                        $services_goods[$key2]['total_price'] = $goods_price;
+                        $total_price += $goods_price;
+                    }
+                    $services[$key]['goods'] = $services_goods;
+                    $services[$key]['count'] = count($services_goods);
+                }else{
+                    $services[$key]['count'] = 1;
+                }
             }
+            $order_price = $total_price+$worker_price;
             include $this->template('web/order_detail');
         }
 
@@ -864,7 +1018,7 @@ class We7_carModuleSite extends WeModuleSite {
             $goods = pdo_fetchall("SELECT * FROM ".tablename('we7car_goods')." WHERE name like '%".$key_word."%' "." OR goods_sn like '%".$key_word."%'"." AND weid =".$_W['uniacid']);
             echo "<option value='0'>请选择产品</option>";
             foreach($goods as $good){
-                echo "<option value='".$good['id']."'>".$good['name']."</option>";
+                echo "<option value='".$good['id']."'>".$good['name']."(".$good['goods_sn'].")"."</option>";
             }
             exit;
         }
@@ -899,6 +1053,57 @@ class We7_carModuleSite extends WeModuleSite {
                 }
             }
             include $this->template('web/add_goods');
+        }
+
+        //修改工时费
+        if($op == 'worker_price_change'){
+            $id = $_GPC['id'];
+            $price = $_GPC['price'];
+            if($price >= 0){
+                $insert = array(
+                    'worker_price' => $price,
+                );
+                if(pdo_update('we7car_orders_services',$insert,array('id' => $id,'weid' => $_W['uniacid'])) == false){
+                    echo 222;
+                }else{
+                    echo 111;
+                }
+            }
+            exit;
+        }
+
+        //修改产品价格
+        if($op == 'goods_price_change'){
+            $id = $_GPC['id'];
+            $price = $_GPC['price'];
+            if($price >= 0){
+                $insert = array(
+                    'goods_price' => $price,
+                );
+                if(pdo_update('we7car_order_goods',$insert,array('id' => $id,'weid' => $_W['uniacid'])) == false){
+                    echo 222;
+                }else{
+                    echo 111;
+                }
+            }
+            exit;
+        }
+
+        //修改产品数量
+        if($op == 'goods_quantity_change'){
+            $id = $_GPC['id'];
+            $quantity = $_GPC['quantity'];
+            if($quantity >= 0){
+                $insert = array(
+                    'quantity' => $quantity,
+                );
+                if(pdo_update('we7car_order_goods',$insert,array('id' => $id,'weid' => $_W['uniacid'])) == false){
+                    echo 222;
+                }else{
+                    echo 111;
+                }
+            }
+            exit;
         }
 
         //添加产品
@@ -1030,6 +1235,35 @@ class We7_carModuleSite extends WeModuleSite {
             $return = json_encode($return);
             echo $return;
             exit;
+        }
+
+        //确认收钱
+        if($op == 'get_money'){
+            $id = $_GPC['id'];
+            $insert = array(
+                'pay_time' => TIMESTAMP,
+                'pay_type' => '现金支付',
+                'status' => 40,
+            );
+            if (pdo_update('we7car_orders', $insert, array('id' => $id, 'weid' => $_W['uniacid'])) == false) {
+                message('操作失败，请稍后重试！', $this->createWebUrl('orders', array('op' => 'list')), 'error');
+            } else {
+                message('操作成功！！', $this->createWebUrl('orders', array('op' => 'list')), 'success');
+            }
+        }
+
+        //确认交车
+        if($op == 'leave'){
+            $id = $_GPC['id'];
+            $insert = array(
+                'finish_time' => TIMESTAMP,
+                'status' => 50,
+            );
+            if (pdo_update('we7car_orders', $insert, array('id' => $id, 'weid' => $_W['uniacid'])) == false) {
+                message('操作失败，请稍后重试！', $this->createWebUrl('orders', array('op' => 'list')), 'error');
+            } else {
+                message('操作成功！！', $this->createWebUrl('orders', array('op' => 'list')), 'success');
+            }
         }
     }
 

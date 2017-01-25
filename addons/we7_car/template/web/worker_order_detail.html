@@ -1,0 +1,404 @@
+{template 'common/header'}
+<script>
+    function open_check(){
+        $("#check_data").show();
+        $("#check_title").attr('onclick','close_check()');
+    }
+    function close_check(){
+        $("#check_data").hide();
+        $("#check_title").attr('onclick','open_check()');
+    }
+    function add_check(id){
+        if(id > 0){
+            var url = "{php echo $this->createWebUrl('orders',array('op'=>'add_check'));}";
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : {'order_id' : id},
+                success : function(data){
+                    if(data == 111){
+                        alert("检查单生成成功！");
+                        location.reload();
+                    }else if(data == 333){
+                        alert("订单已经存在检测单");
+                    }else{
+                        alert("服务器繁忙，请稍后重试！");
+                    }
+                }
+            });
+        }
+    }
+    function find_services(){
+        var system_id = $("#system").val();
+        if(system_id != 0){
+            var url = "{php echo $this->createWebUrl('orders',array('op'=>'find_service'));}";
+            $.ajax({
+                type : 'get',
+                url : url,
+                data : {system_id : system_id},
+                success : function(data){
+                    $("#service_id").html(data);
+                }
+            });
+        }
+    }
+
+    function add_service(order_id){
+        var service_id = $("#service_id").val();
+        if(service_id > 0 && order_id > 0){
+            var url = "{php echo $this->createWebUrl('orders',array('op'=>'add_service'));}";
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : {'service_id' : service_id,'order_id' : order_id},
+                success : function(data){
+                    if(data == 111){
+                        alert("添加成功！");
+                        location.reload();
+                    }else if(data == 222){
+                        alert("已经添加了该服务了！");
+                    }else{
+                        alert("服务器繁忙，请稍后重试！");
+                    }
+                }
+            });
+        }
+    }
+    function del(id){
+        if(confirm("是否确定删除？")){
+            var url = "{php echo $this->createWebUrl('orders',array('op'=>'del_goods'));}";
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : {'id' : id},
+                success : function(data){
+                    if(data == 111){
+                        alert("操作成功！");
+                        location.reload();
+                    }
+                }
+            });
+        }
+    }
+    function worker_price(id){
+        var htm = "<input type='text' style='width:50px;' id='new_price"+id+"' onblur='worker_price_change("+id+");' />";
+        $("#service"+id).html(htm);
+    }
+    function worker_price_change(id){
+        var price = $("#new_price"+id).val();
+        var url = "{php echo $this->createWebUrl('orders',array('op'=>'worker_price_change'));}";
+        if(price >= 0){
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : {'id' : id,'price' : price},
+                success : function(data){
+                    if(data == 111){
+                        alert("修改成功！");
+                        location.reload();
+                    }else{
+                        alert("服务器繁忙，请稍后重试！");
+                        location.reload();
+                    }
+                }
+            });
+        }
+    }
+    function goods_price(id){
+        var htm = "<input type='text' style='width:50px;' id='new_goods_price"+id+"' onblur='goods_price_change("+id+");' />";
+        $("#goods_price"+id).html(htm);
+    }
+    function goods_price_change(id){
+        var price = $("#new_goods_price"+id).val();
+        var url = "{php echo $this->createWebUrl('orders',array('op'=>'goods_price_change'));}";
+        if(price >= 0){
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : {'id' : id,'price' : price},
+                success : function(data){
+                    if(data == 111){
+                        alert("操作成功！");
+                        location.reload();
+                    }else{
+                        alert("服务器繁忙，请稍后重试！");
+                        location.reload();
+                    }
+                }
+            });
+        }
+    }
+    function goods_quantity(id){
+        var htm = "<input type='text' style='width:50px;' id='new_goods_quantity"+id+"' onblur='goods_quantity_change("+id+");' />";
+        $("#goods_quantity"+id).html(htm);
+    }
+    function goods_quantity_change(id){
+        var quantity = $("#new_goods_quantity"+id).val();
+        var url = "{php echo $this->createWebUrl('orders',array('op'=>'goods_quantity_change'));}";
+        if(quantity >= 0){
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : {'id' : id,'quantity' : quantity},
+                success : function(data){
+                    if(data == 111){
+                        alert("操作成功！");
+                        location.reload();
+                    }else{
+                        alert("服务器繁忙，请稍后重试！");
+                        location.reload();
+                    }
+                }
+            });
+        }
+    }
+    function change_mileage(){
+        var new_mileage = $("#mileage").val().trim();
+        var url = "{php echo $this->createWebUrl('worker',array('op'=>'change_mileage'));}";
+        var order_id = "{$order_data['id']}";
+        $.ajax({
+            type : 'post',
+            url : url,
+            data : {'mileage' : new_mileage,'order_id' : order_id},
+            success : function(data){
+                if(data == 111){
+                    alert("修改成功！");
+                    location.reload();
+                }
+            }
+        });
+    }
+    //开始施工
+    function begin_service(id){
+        if(confirm("是否确定开始施工？")){
+            var order_id = "{$order_data['id']}";
+            var url = "{php echo $this->createWebUrl('worker',array('op'=>'begin_work'));}";
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : {'order_id' : order_id,'service_id' : id},
+                success : function(data){
+                    if(data == '111'){
+                        alert("操作成功！");
+                        location.reload();
+                    }
+                }
+            });
+        }
+    }
+    //服务完工
+    function finish_service(id){
+        if(confirm("是否确定已经完工？")){
+            var order_id = "{$order_data['id']}";
+            var url = "{php echo $this->createWebUrl('worker',array('op'=>'finish'));}";
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : {'order_id' : order_id,'service_id' : id},
+                success : function(data){
+                    if(data == '111'){
+                        alert("操作成功！");
+                        location.reload();
+                    }
+                }
+            });
+        }
+    }
+    //工单完成
+    function finish_orders(order_id){
+        if(confirm("是否确定申请验收？")){
+            var url = "{php echo $this->createWebUrl('worker',array('op'=>'finish_order'));}";
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : {'order_id' : order_id},
+                success : function(data){
+                    if(data == 111){
+                        alert("操作成功！");
+                        location.reload();
+                    }else{
+                        alert("未完成所有项目，不能结束！");
+                    }
+                }
+            });
+        }
+    }
+</script>
+<ul class="nav nav-tabs">
+    <li><a href="{php echo $this->createWebUrl('worker',array('op'=>'list'));}">待接订单</a></li>
+    <li class="active"><a href="{php echo $this->createWebUrl('worker', array('op'=>'worker_order'))}">我的订单</a></li>
+</ul>
+<div class="main">
+    <!--<form class="form-horizontal form" >-->
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            订单详情
+        </div>
+        <div class="panel-body">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">订单号：{$order_data['order_sn']}</h3>
+                </div>
+                <div class="panel-body" >
+                    <div class="row">
+                        <div class="col-xs-4">
+                            <div class="panel panel-success">
+                                <div class="panel-heading" >
+                                    <h3 class="panel-title">{$car['car_no']} </h3>
+                                </div>
+                                <div class="panel-body" id="car_data">
+                                    <div class="row">
+                                        <div class="col-xs-6">
+                                            <strong>车主:</strong>
+                                        </div>
+                                        <div class="col-xs-6">
+                                            {$car['car_userName']}
+                                        </div>
+                                        <div class="col-xs-6">
+                                            <strong>联系电话:</strong>
+                                        </div>
+                                        <div class="col-xs-6">
+                                            {$car['car_mobile']}
+                                        </div>
+                                        <div class="col-xs-6">
+                                            <strong>车型:</strong>
+                                        </div>
+                                        <div class="col-xs-6">
+                                            {$car['brand_cn']}{$car['series_cn']}{$car['type_cn']}
+                                        </div>
+                                        <div class="col-xs-6">
+                                            <strong>上次保养时间:</strong>
+                                        </div>
+                                        <div class="col-xs-6">
+                                            {if empty($car['car_care_lastDate'])}
+                                            未有保养记录
+                                            {else}
+                                            {echo date('Y-M-d',$car['car_care_lastDate'])}
+                                            {/if}
+                                        </div>
+                                        <div class="col-xs-6">
+                                            <strong>上次保养里程:</strong>
+                                        </div>
+                                        <div class="col-xs-6">
+                                            {if empty($car['car_care_mileage'])}
+                                            未有保养记录
+                                            {else}
+                                            {$car['car_care_mileage']}
+                                            {/if}
+                                        </div>
+                                        <div class="col-xs-6">
+                                            <strong>本次保养里程:</strong>
+                                        </div>
+                                        <div class="col-xs-6">
+                                            <input type="text" value="{$order_data['mileage']}" id="mileage" style="width:80px;" onblur="change_mileage();" />km
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-8">
+                            {if $check}
+                            <div class="panel panel-default">
+                                <div class="panel-heading" id="check_title" onclick="close_check();" >
+                                    <h3 class="panel-title">检测报告</h3>
+                                </div>
+                                <div class="panel-body"  id="check_data">
+                                    <form method="post" action="{php echo $this->createWebUrl('worker',array('op'=>'input_check'));}">
+                                    <table class="table table-hover">
+                                        <thead>
+                                        <tr>
+                                            <th >检测项目</th>
+                                            <th >检测结果</th>
+                                            <th >备注</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {loop $check $c}
+                                        <tr>
+                                            <td>{$c['name']}</td>
+                                            <td>
+                                                <select name="check[{$c['check_id']}]">
+                                                    <option value="1">{$c['title1']}</option>
+                                                    <option value="2">{$c['title2']}</option>
+                                                </select>
+                                            </td>
+                                            <input type="hidden" value="{$order_data['id']}" name="order_id" />
+                                            <td>
+                                                <input type="text" value="{$c['remark']}" name="remark[{$c['check_id']}]" />
+                                            </td>
+                                            {/loop}
+                                        <tr>
+                                            <td colspan="3">
+                                                <input type="submit" value="提交" class="btn-success" />
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                    </form>
+                                </div>
+                            </div>
+                            {else}
+                            <button class="btn-default" onclick="add_check({$order_data['id']});">进行检测服务</button>
+                            {/if}
+                        </div>
+                    </div>
+                    {if !empty($services)}
+                    <div>
+                        <div class="panel panel-success">
+                            <div class="panel-heading" >
+                                <h3 class="panel-title">保养内容</h3>
+                            </div>
+                            <div class="panel-body" >
+                                <table class="table table-hover">
+                                    <thead>
+                                    <tr>
+                                        <th >服务</th>
+                                        <!--<th >工时费</th>-->
+                                        <th >产品</th>
+                                        <!--<th >价格</th>-->
+                                        <th >数量</th>
+                                        <!--<th >小计</th>-->
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {loop $services $s}
+
+                                    <tr>
+                                        <td rowspan="{$s['count']}">
+                                                {$s['name']}
+                                            {if empty($s['begin_time'])}
+                                            &nbsp;&nbsp;<input type="button" onclick="begin_service({$s['service_id']});" value="开始施工" class="btn-success" />
+                                            {/if}
+                                            {if empty($s['end_time']) && !empty($s['begin_time'])}
+                                            &nbsp;&nbsp;<input type="button" onclick="finish_service({$s['service_id']});" value="&nbsp;完工&nbsp;" class="btn-danger" />
+                                            {/if}
+                                            {if !empty($s['end_time'])}
+                                            <span style="color:red;">&nbsp;&nbsp;已经完工</span>
+                                            {/if}
+                                        </td>
+                                        {loop $s['goods'] $goods}
+                                        <td>{$goods['name']}({$goods['goods_sn']})</td>
+                                        <td ondblclick="goods_quantity({$goods['id']});" id="goods_quantity{$goods['id']}">{$goods['quantity']}</td>
+                                    </tr>
+                                    {/loop}
+                                    {/loop}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    {/if}
+                </div>
+            </div>
+        </div>
+        <!--</form>-->
+        {if $order_data['status'] == 20}
+        <div align="center" style="padding:10px;font-size: 20px;">
+            <input type="button" value="申请验收" class="btn-success" onclick="finish_orders({$order_data['id']});" />
+        </div>
+        {/if}
+    </div>
+
+
+
+    {template 'common/footer'}

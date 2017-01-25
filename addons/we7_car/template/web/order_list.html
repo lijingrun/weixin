@@ -34,23 +34,41 @@
                         {if $v['status'] == 0}
                         <span style="color:red;">已取消</span>
                         {else if $v['status'] == 10 }
-                        待开工
+                        未选择店铺
                         {else if $v['status'] == 11 }
-                        待验收
+                        排队中
                         {else if $v['status'] == 20}
-                        待付款
+                        施工中
                         {else if $v['status'] == 30}
-                        待交车
+                        待付款
                         {else if $v['status'] == 40}
+                        待交车
+                        {else if $v['status'] == 50}
                         已完成
                         {/if}
                     </td>
                     <td>
-                        <a href="{php echo $this->createWebUrl('orders',array('id' => $v['id'],'op'=>'cancle'))}" onclick="return confirm('确认取消此订单？');return false;" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm" title="取消"><i class="fa fa-times"></i></a></td>
+                        {if $v['status'] == 10}
+                        <a href="{php echo $this->createWebUrl('orders',array('id' => $v['id'],'op'=>'cancle'))}" onclick="return confirm('确认取消此订单？');return false;" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm" title="取消">
+                            <i class="fa fa-times"></i>
+                        </a>
+                        {else if $v['status'] == 30}
+                        <a href="{php echo $this->createWebUrl('orders',array('id' => $v['id'],'op'=>'get_money'))}" onclick="return confirm('确认收款？');return false;" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm" title="确认收款">
+                            <span class="glyphicon glyphicon-usd" aria-hidden="true"></span>
+                        </a>
+                        {else if $v['status'] == 40}
+                        <a href="{php echo $this->createWebUrl('orders',array('id' => $v['id'],'op'=>'leave'))}" onclick="return confirm('确认交车？');return false;" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm" title="交车">
+                            <span class="glyphicon glyphicon-circle-arrow-right" aria-hidden="true"></span>
+                        </a>
+                        {/if}
+                        <a href="{php echo $this->createWebUrl('orders',array('id' => $v['id'],'op'=>'order_detail'))}"   data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm" title="查看详细">
+                            <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                        </a>
+                    </td>
                 </tr>
                 {/loop}
                 <tr>
-                    <td colspan="8">
+                    <td colspan="5">
                         <a class='btn btn-default' href="{php echo $this->createWebUrl('orders  ', array('op'=>'post','id'=>0));}"><i class="fa fa-arrows"></i> 添加订单</a>
                     </td>
                 </tr>

@@ -1,0 +1,52 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+    <li  class="active"><a href="{php echo $this->createWebUrl('worker',array('op'=>'list'));}">待接订单</a></li>
+    <li ><a href="{php echo $this->createWebUrl('worker', array('op'=>'worker_order'))}">我的订单</a></li>
+</ul>
+<div class="main panel panel-default">
+    <div class="category panel-body table-responsive">
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th >订单编号</th>
+                <th >车牌号码</th>
+                <th >订单状态</th>
+                <th >操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            {loop $list $v}
+            <tr>
+                <td>
+                    {$v['order_sn']}
+                </td>
+                <td>
+                    {$v['car_no']}
+                </td>
+                <td>
+                    {if $v['status'] == 0}
+                    <span style="color:red;">已取消</span>
+                    {else if $v['status'] == 10 }
+                    待开工
+                    {else if $v['status'] == 11 }
+                    待开工
+                    {else if $v['status'] == 20}
+                    施工中
+                    {else if $v['status'] == 30}
+                    待付款
+                    {else if $v['status'] == 40}
+                    待交车
+                    {else if $v['status'] == 50}
+                    已完成
+                    {/if}
+                </td>
+                <td>
+                    <a href="{php echo $this->createWebUrl('worker',array('id' => $v['id'],'op'=>'get'))}" onclick="return confirm('确认接该订单？');return false;" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm" title="接单"><span class="glyphicon glyphicon-cog">接单</span>
+                    </a>
+                </td>
+            </tr>
+            {/loop}
+            </tbody>
+        </table>
+    </div>
+{template 'common/footer'}

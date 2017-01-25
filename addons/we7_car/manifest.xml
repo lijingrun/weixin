@@ -45,6 +45,7 @@
 			<entry title="产品管理" do="goods" direct="false" />
 			<entry title="店铺管理" do="store" direct="false" />
 			<entry title="订单管理" do="orders" direct="false" />
+			<entry title="施工管理" do="worker" direct="false" />
 			<entry title="库存管理" do="stock" direct="false" />
 			<entry title="会员管理" do="car" direct="false" />
 			<entry title="销售报表" do="statistics" direct="false" />
@@ -498,7 +499,7 @@ CREATE TABLE IF NOT EXISTS `ims_we7car_orders` (
   `createtime` int(10) NOT NULL,
   `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0:取消 10：未选店铺 11 未开工 20 未验收 30 未支付 40 未交车 50 已完成',
   `store_id` int(11),
-  `worker_id` int(10),
+  `worker_id` int(10) DEFAULT 0,
   `car_id` int(10) NOT NULL,
   `mileage` int(10) NOT NULL DEFAULT '0',
   `pay_tiem` int(10),
