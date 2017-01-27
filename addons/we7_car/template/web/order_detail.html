@@ -194,6 +194,7 @@
                                                 <div class="col-xs-6">
                                                     {$car['brand_cn']}{$car['series_cn']}{$car['type_cn']}
                                                 </div>
+                                                {if $order_data['status'] < 40 }
                                                 <div class="col-xs-6">
                                                     <strong>上次保养时间:</strong>
                                                 </div>
@@ -201,7 +202,7 @@
                                                     {if empty($car['car_care_lastDate'])}
                                                     未有保养记录
                                                     {else}
-                                                    {echo date('Y-M-d',$car['car_care_lastDate'])}
+                                                    <?php echo date('Y-m-d',$car['car_care_lastDate']) ?>
                                                     {/if}
                                                 </div>
                                                 <div class="col-xs-6">
@@ -214,6 +215,7 @@
                                                     {$car['car_care_mileage']}
                                                     {/if}
                                                 </div>
+                                                {/if}
                                             </div>
                                         </div>
                                     </div>

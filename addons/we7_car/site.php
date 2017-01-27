@@ -626,6 +626,42 @@ class We7_carModuleSite extends WeModuleSite {
             exit;
         }
 
+        //摄像枪设置
+        if($op == 'camera'){
+            $store_id = $_GPC['id'];
+            $camera = pdo_fetchall("SELECT * FROM ".tablename('we7car_camera')." WHERE store_id =".$store_id." AND weid =".$_W['uniacid']);
+            include $this->template('web/camera');
+        }
+
+        //添加摄像枪
+        if($op == 'add_camera'){
+            $store_id = $_GPC['store_id'];
+            $name = $_GPC['name'];
+            $url = $_GPC['url'];
+            if(empty($store_id) || empty($name) || empty($url)){
+                message('录入信息错误，请重新录入',$this->createWebUrl('store', array('op' => 'camera', 'id' => $store_id)),'error');
+            }
+            $insert = array(
+                'name' => $name,
+                'url' => $url,
+                'store_id' => $store_id,
+                'weid' => $_W['uniacid']
+            );
+            if(pdo_insert('we7car_camera',$insert) == 1) {
+                message('操作成功！', $this->createWebUrl('store', array('op' => 'camera', 'id' => $store_id)), 'success');
+            }else{
+                message('系统繁忙，请稍后重试',$this->createWebUrl('store', array('op' => 'camera', 'id' => $store_id)),'error');
+            }
+        }
+
+        //删除摄像枪
+        if($op == 'cancel_camera'){
+            $id = $_GPC['id'];
+            $camera = pdo_fetch("SELECT * FROM ".tablename('we7car_camera')." WHERE id =".$id." AND weid =".$_W['uniacid']);
+            pdo_delete('we7car_camera',array('id' => $id,'weid' => $_W['uniacid']));
+            message('操作成功！', $this->createWebUrl('store', array('op' => 'camera', 'id' => $camera['store_id'])), 'success');
+        }
+
     }
 
     //施工管理
@@ -667,6 +703,8 @@ class We7_carModuleSite extends WeModuleSite {
             $uid = $_W['user']['uid'];
             $store = pdo_fetch("SELECT * FROM ".tablename('we7car_store_user')." WHERE uid = ".$uid." AND uniacid=".$_W['uniacid']);
             $order_data = pdo_fetch("SELECT * FROM ".tablename('we7car_orders')." WHERE worker_id =".$uid." AND weid =".$_W['uniacid']." AND store_id =".$store['store_id']." AND status < 30");
+            //店铺摄像头
+            $camera = pdo_fetchall("SELECT * FROM ".tablename('we7car_camera')." WHERE store_id =".$store['store_id']." AND weid =".$_W['uniacid']);
             if(!empty($order_data)) {
                 $order_id = $order_data['id'];
                 $car = pdo_fetch("SELECT * FROM " . tablename('we7car_care') . " WHERE id =" . $order_data['car_id']);
@@ -696,6 +734,35 @@ class We7_carModuleSite extends WeModuleSite {
                 include $this->template('web/worker_order_detail');
             }else{
                 message('请先接单！！', $this->createWebUrl('worker', array('op' => 'list')), 'error');
+            }
+        }
+
+        //选择摄像头
+        if($op == 'change_camera'){
+            $order_id = $_GPC['order_id'];
+            $camera_id = $_GPC['camera_id'];
+            $camera = pdo_fetch("SELECT * FROM ".tablename('we7car_camera')." WHERE id =".$camera_id);
+            //如果摄像头有施工中的订单，就不能修改
+            if(!empty($camera['order_id'])){
+                $order = pdo_fetch("SELECT * FROM ".tablename('we7car_orders')." WHERE id =".$camera['order_id']);
+                if($order['status'] == 20){
+                    echo 222;
+                    exit;
+                }
+            }
+            $camera['order_id'] = $order_id;
+            //修改之前，将之前选择的摄像头order_id清了
+            $cameras = pdo_fetchall("SELECT * FROM ".tablename('we7car_camera')." WHERE order_id =".$order_id);
+            foreach($cameras as $c){
+                $c['order_id'] = 0;
+                pdo_update('we7car_camera',$c,array('id' => $c['id']));
+            }
+            if(pdo_update('we7car_camera',$camera,array('id' => $camera['id'])) == false){
+                echo 333;
+                exit;
+            }else{
+                echo 111;
+                exit;
             }
         }
 
@@ -1245,6 +1312,9 @@ class We7_carModuleSite extends WeModuleSite {
                 'pay_type' => '现金支付',
                 'status' => 40,
             );
+            //扣除库存
+            $this->change_stock($id,'reduce',$_W['uniacid'],$_W['user']['uid']);
+            //先查所有的服务
             if (pdo_update('we7car_orders', $insert, array('id' => $id, 'weid' => $_W['uniacid'])) == false) {
                 message('操作失败，请稍后重试！', $this->createWebUrl('orders', array('op' => 'list')), 'error');
             } else {
@@ -1259,6 +1329,9 @@ class We7_carModuleSite extends WeModuleSite {
                 'finish_time' => TIMESTAMP,
                 'status' => 50,
             );
+            //更新汽车信息
+            $order = pdo_fetch("SELECT * FROM ".tablename('we7car_orders')." WHERE id =".$id);
+            pdo_update('we7car_care',array('car_care_lastDate' => TIMESTAMP,'car_care_mileage' => $order['mileage']),array('id' => $order['car_id'],'weid' => $_W['uniacid']));
             if (pdo_update('we7car_orders', $insert, array('id' => $id, 'weid' => $_W['uniacid'])) == false) {
                 message('操作失败，请稍后重试！', $this->createWebUrl('orders', array('op' => 'list')), 'error');
             } else {
@@ -1267,6 +1340,43 @@ class We7_carModuleSite extends WeModuleSite {
         }
     }
 
+
+    //改变库存  $type为改变类型，reduce为减，add为加
+    public function change_stock($order_id,$type,$weid,$user_id){
+        $order_services = pdo_fetchall("SELECT * FROM ".tablename('we7car_orders_services')." WHERE order_id =".$order_id);
+        $service_ids = array();
+        foreach($order_services as $service){
+            $service_ids[] = $service['id'];
+        }
+        $service_id = implode(',',$service_ids);
+        $goods = pdo_fetchall("SELECT * FROM ".tablename('we7car_order_goods')." WHERE order_service_id in (".$service_id.") AND weid=".$weid);
+        //查所属店铺
+        $store_user = pdo_fetch("SELECT * FROM " . tablename('we7car_store_user') . " WHERE uid =" . $user_id . " AND uniacid =" . $weid);
+        foreach($goods as $good){
+            $stock = pdo_fetch("SELECT * FROM ".tablename('we7car_stock')." WHERE weid=".$weid." AND store_id =".$store_user['store_id']." AND goods_id =".$good['goods_id']);
+            switch($type){
+                case 'reduce':$stock['quantity'] -= $good['quantity'];
+                    break;
+                case 'add' : $stock['quantity'] += $good['quantity'];
+                    break;
+            }
+            pdo_update('we7car_stock',$stock,array('id' => $stock['id']));
+            $new_log = array(
+                'weid' => $weid,
+                'store_id' => $store_user['store_id'],
+                'goods_id' => $good['goods_id'],
+                'quantity' => $good['quantity'],
+                'user_id' => $user_id,
+                'remark' => '客户汽车保养',
+                'price' => $good['goods_price'],
+                'status' => 1,
+                'createtime' => TIMESTAMP,
+                'order_id' => $order_id,
+                'type' => 1
+            );
+            pdo_insert('we7car_stock_log',$new_log);
+        }
+    }
 
     //地域管理
     public function doWebRegion(){

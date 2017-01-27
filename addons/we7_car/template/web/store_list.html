@@ -56,9 +56,11 @@
                         {php echo date('Y-m-d',$v['createtime'])}
                     </td>
                     <td>{if $v['status']=='1'}<span class="label label-success">正常</span>{else}<span class="label label-danger">失效</span>{/if}</td>
-                    <td><a href="{php echo $this->createWebUrl('store',array('id' => $v['id'],'op'=>'post'))}" title="编辑" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><i class="fa fa-edit"></i></a>
+                    <td>
+                        <a href="{php echo $this->createWebUrl('store',array('id' => $v['id'],'op'=>'post'))}" title="编辑" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><i class="fa fa-edit"></i></a>
                         <a href="{php echo $this->createWebUrl('store',array('id' => $v['id'],'op'=>'store_user'))}" title="店铺操作员管理" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-log-out"></span></a>
-                        </td>
+                        <a href="{php echo $this->createWebUrl('store',array('id' => $v['id'],'op'=>'camera'))}" title="摄像枪管理" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-camera"></span></a>
+                    </td>
                 </tr>
                 {/loop}
                 <tr>

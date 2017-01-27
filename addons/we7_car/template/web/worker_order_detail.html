@@ -223,6 +223,28 @@
             });
         }
     }
+    function change_camera(camera_id){
+        var order_id = "{$order_data['id']}";
+        var url = "{php echo $this->createWebUrl('worker',array('op' => 'change_camera'))}";
+        if(confirm("是否确定修改摄像头？")){
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : {'camera_id' : camera_id, 'order_id' : order_id},
+                success : function(data){
+                    if(data == 111){
+                        alert("操作成功！");
+                        location.reload();
+                    }else if(data == 222){
+                        alert("该摄像枪还有施工中的车辆");
+                    }else{
+                        alert(data);
+//                        alert("操作失败，请重试！");
+                    }
+                }
+            });
+        }
+    }
 </script>
 <ul class="nav nav-tabs">
     <li><a href="{php echo $this->createWebUrl('worker',array('op'=>'list'));}">待接订单</a></li>
@@ -273,7 +295,7 @@
                                             {if empty($car['car_care_lastDate'])}
                                             未有保养记录
                                             {else}
-                                            {echo date('Y-M-d',$car['car_care_lastDate'])}
+                                            <?php echo date('Y-m-d',$car['car_care_lastDate']) ?>
                                             {/if}
                                         </div>
                                         <div class="col-xs-6">
@@ -295,6 +317,20 @@
                                     </div>
                                 </div>
                             </div>
+                            {if $camera}
+                            <ul class="nav nav-pills" role="tablist">
+                                {loop $camera $c}
+                                <li role="presentation" {if $c['order_id'] == $order_data['id']}class='active'{/if}>
+                                    <a href="#" onclick="change_camera({$c['id']});">{$c['name']}
+                                        {if $c['order_id'] == $order_data['id']}
+                                        &nbsp;
+                                        <span class="glyphicon glyphicon-eye-open"></span>
+                                        {/if}
+                                    </a>
+                                </li>
+                                {/loop}
+                            </ul>
+                            {/if}
                         </div>
                         <div class="col-xs-8">
                             {if $check}

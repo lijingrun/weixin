@@ -1,0 +1,59 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+    <li class="active"><a href="javascript:display">店铺摄像枪列表</a></li>
+    <li><a href="{php echo $this->createWebUrl('store',array('op' => 'list'))}">店铺列表</a></li>
+</ul>
+<div class="main panel panel-default">
+    <div class="category panel-body table-responsive">
+        <form  method="post" action="{php echo $this->createWebUrl('store',array('op'=>'add_camera'));}" >
+            <input type="hidden" value="{$store_id}" name="store_id" />
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th>摄像枪名称</th>
+                    <th>摄像枪地址</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>
+                        <input type="text" name="name" />
+                    </td>
+                    <td>
+                        <input type="text" name="url" />
+                    </td>
+                    <td>
+                        <input type="submit" name="submit" value="添加" class="btn btn-primary col-lg-1" style="width: 100px;" />
+                    </td>
+                </tr>
+                {loop $camera $c}
+                <tr>
+                    <td>{$c['name']}</td>
+                    <td>{$c['url']}</td>
+                    <td>
+                        <a href="{php echo $this->createWebUrl('store',array('id' => $c['id'],'op'=>'cancel_camera'))}" onclick="return confirm('确认删除该摄像枪？');return false;" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm" title="删除">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </td>
+                </tr>
+                {/loop}
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+<script>
+    $('form').submit(function() {
+        if ($.trim($(':text[name="name"]').val()) == '') {
+            message('必须填写摄像枪名称.', '', 'error');
+            return false;
+        }
+        if ($.trim($(':text[name="url"]').val()) == '') {
+            message('必须填写摄像枪链接地址.', '', 'error');
+            return false;
+        }
+        return true;
+    });
+</script>
+{template 'common/footer'}
