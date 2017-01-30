@@ -41,47 +41,59 @@
 		<nav>
 			<ul class="nav_links box">
 				<li><a href="{php echo $this->createMobileUrl('index',array('op'=>'about'))}">关于我们</a></li>
-											
+
 				<li><a href="{php echo $this->createMobileUrl('album')}">车型欣赏</a></li>
-											
+
 				<li><a href="{php echo murl('mc')}">会员中心</a></li>
-											
+
 				<li><a href="{php echo $this->createMobileUrl('tool')}">实用小工具</a></li>
 			</ul>
 		</nav>
 		<div>
 			<ul class="ofh ul_list">
+					<!--<li>-->
+						<!--<a href="{php echo $this->createMobileUrl('series', array('op'=>''))}" style="background-image:url({php echo tomedia($theone['typethumb']);}); background-size:cover; vertical-align:middle;">-->
+							<!--<label>全部车型</label>-->
+						<!--</a>-->
+					<!--</li>-->
+					<!--<li>-->
+						<!--<a href="{php echo $this->createMobileUrl('yuyue', array('yytype'=>1))}" style="background-image:url({php echo tomedia($theone['yuyue1thumb']);}); background-size:cover; vertical-align:middle;">-->
+							<!--<label>预约试驾</label>-->
+						<!--</a>-->
+					<!--</li>-->
+					<!---->
+					<!--<li>-->
+						<!--<a href="{php echo $this->createMobileUrl('yuyue',  array('yytype'=>2))}" style="background-image:url({php echo tomedia($theone['yuyue2thumb']);}); background-size:cover; vertical-align:middle;">-->
+							<!--<label>预约保养维修</label>-->
+						<!--</a>-->
+					<!--</li>-->
+					<!---->
+					<!--<li>-->
+						<!--<a href="{php echo $this->createMobileUrl('kefu')}" style="background-image:url({php echo tomedia($theone['kefuthumb']);}); background-size:cover; vertical-align:middle;">-->
+							<!--<label>联系销售</label>-->
+						<!--</a>-->
+					<!--</li>-->
 					<li>
-						<a href="{php echo $this->createMobileUrl('series', array('op'=>''))}" style="background-image:url({php echo tomedia($theone['typethumb']);}); background-size:cover; vertical-align:middle;">
-							<label>全部车型</label>
-						</a>
-					</li>
-					<li>
-						<a href="{php echo $this->createMobileUrl('yuyue', array('yytype'=>1))}" style="background-image:url({php echo tomedia($theone['yuyue1thumb']);}); background-size:cover; vertical-align:middle;">
-							<label>预约试驾</label>
-						</a>
-					</li>
-					
-					<li>
-						<a href="{php echo $this->createMobileUrl('yuyue',  array('yytype'=>2))}" style="background-image:url({php echo tomedia($theone['yuyue2thumb']);}); background-size:cover; vertical-align:middle;">
-							<label>预约保养维修</label>
-						</a>
-					</li>
-					
-					<li>
-						<a href="{php echo $this->createMobileUrl('kefu')}" style="background-image:url({php echo tomedia($theone['kefuthumb']);}); background-size:cover; vertical-align:middle;">
-							<label>联系销售</label>
-						</a>
-					</li>
-					<li>
-						<a href="{php echo $this->createMobileUrl('message')}" style="background-image:url({php echo tomedia($theone['messagethumb']);}); background-size:cover; vertical-align:middle;">
-							<label>意见反馈</label>
+						<a href="{php echo $this->createMobileUrl('store')}" style="background-image:url({php echo tomedia($theone['messagethumb']);}); background-size:cover; vertical-align:middle;">
+							<label>门店导航</label>
 						</a>
 					</li>
 					
 					<li>
 						<a href="{php echo $this->createMobileUrl('guanhuai')}" style="background-image:url({php echo tomedia($theone['carethumb']);}); background-size:cover; vertical-align:middle;">
-							<label>车主关怀</label>
+							<label>我的爱车</label>
+						</a>
+					</li>
+
+					<li>
+						<a href="{php echo $this->createMobileUrl('orders')}" style="background-image:url({php echo tomedia($theone['carethumb']);}); background-size:cover; vertical-align:middle;">
+							<label>我的订单</label>
+						</a>
+					</li>
+
+					<li>
+						<a href="{php echo $this->createMobileUrl('message')}" style="background-image:url({php echo tomedia($theone['messagethumb']);}); background-size:cover; vertical-align:middle;">
+							<label>意见反馈</label>
 						</a>
 					</li>
 					{loop $news_category $new_category}

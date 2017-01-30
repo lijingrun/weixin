@@ -1,0 +1,107 @@
+<script>
+    function open_check(){
+        $("#check_data").show();
+        $("#check_title").attr('onclick','close_check()');
+    }
+    function close_check(){
+        $("#check_data").hide();
+        $("#check_title").attr('onclick','open_check()');
+    }
+</script>
+
+{template 'header'}
+<link rel="stylesheet" type="text/css" href="../addons/we7_car/style/css/common.css" media="all"/>
+<link rel="stylesheet" type="text/css" href="../addons/we7_car/style/css/reset.css" media="all"/>
+<div style="padding:10px;">
+    <div class="panel panel-default">
+        <div class="panel-heading" >
+            <h3 class="panel-title">
+                订单状态：
+                {if $order_data['status'] == 20}
+                <span>施工中</span>
+                {else if $order_data['status'] == 0}
+                <span style="color: red;">已取消</span>
+                {else if $order_data['status'] == 11}
+                <span>排队中</span>
+                {else if $order_data['status'] == 30}
+                <span>待付款</span>
+                {else if $order_data['status'] == 40}
+                <span>待交车</span>
+                {else if $order_data['status'] == 50}
+                <span>已完成</span>
+                {/if}
+            </h3>
+        </div>
+    </div>
+    {if $check}
+    <div class="panel panel-default">
+        <div class="panel-heading" id="check_title" onclick="open_check();" >
+            <h3 class="panel-title">检测报告&nbsp;&nbsp;<a style="font-size: 13px;" href="javascript:display;">点击展开</a></h3>
+        </div>
+        <div class="panel-body" style="display: none;" id="check_data">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th >检测项目</th>
+                    <th >检测结果</th>
+                </tr>
+                </thead>
+                <tbody>
+                {loop $check $c}
+                <tr>
+                    <td>{$c['name']}</td>
+                    <td>
+                        {if empty($c['check_result'])}
+                        未开始检测
+                        {else if $c['check_result'] == 1}
+                        {$c['title1']}
+                        {else if $c['check_result'] == 2}
+                        {$c['title2']}
+                        {/if}
+                        {if $c['remark']}
+                        <p>({$c['remark']})</p>
+                        {/if}
+                    </td>
+                    {/loop}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {/if}
+
+    {if !empty($services)}
+    {loop $services $s}
+    <div class="panel panel-success">
+        <div class="panel-heading" >
+            <h3 class="panel-title">{$s['name']}</h3>
+        </div>
+        <div class="panel-body" >
+            <p>保养工时费：￥{$s['worker_price']}</p>
+            {loop $s['goods'] $goods}
+            <div style="border: solid #FFE1FF 1px;padding: 3px;background-color: white">
+            <p>产品：{$goods['name']}({$goods['goods_sn']})</p>
+            <p>数量：{$goods['quantity']}</p>
+            <p>单价：￥{$goods['goods_price']}</p>
+            <p>小计：￥{$goods['total_price']}</p>
+            </div>
+            {/loop}
+        </div>
+    </div>
+    {/loop}
+    <div align="right">
+        <p>工时费总计：￥{$worker_price}</p>
+        <p>商品总价：￥{$total_price}</p>
+        <p>订单总价：￥{$order_price}</p>
+    </div>
+    {/if}
+    {if $order_data['status'] == 20}
+    <div align="center">
+        <a href="{php echo $this->createMobileUrl('orders', array('op'=>'online_view','id'=>$order_data['id']));}" data-toggle="tooltip" data-placement="bottom" title="" class="btn btn-success btn-sm" data-original-title="编辑">查看现场&nbsp;&nbsp;<span class="glyphicon glyphicon-eye-open"></span></a>
+    </div>
+    {/if}
+</div>
+
+
+{template 'share'}
+
+{template 'footer'}

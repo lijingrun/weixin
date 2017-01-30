@@ -1,9 +1,23 @@
 {template 'header'}
-
+<style>
+    a:link {
+        color: #000000;
+        text-decoration: none;
+    }
+    a:visited {
+        color: #000000;
+        text-decoration: none;
+    }
+    a:hover {
+        color: #999999;
+        text-decoration: underline;
+    }
+</style>
 <link rel="stylesheet" type="text/css" href="../addons/we7_car/style/css/common.css" media="all"/>
 <link rel="stylesheet" type="text/css" href="../addons/we7_car/style/css/reset.css" media="all"/>
 <body class="portrait">
 <div class="top">
+    {loop $my_cars $car}
     <div class="stage_container relative">
         <div class="ofh relative">
             <ul class="" style="padding:0;">
@@ -34,38 +48,46 @@
 <div class="main" style="padding-top: 10px;">
     <ul class="car_detail">
         {if empty($car['id']) }
-        <div style="margin:5px;border: 1px solid #ccc;line-height:35px;text-indent:10px;border-radius:5px;background: -webkit-gradient(linear, 0 0, 0 100%, from(#fff), to(#eee));-webkit-box-shadow: 0 1px 1px #fff;">
-            <a href="{php echo $this->createMobileUrl('guanhuai', array('op'=>'caredit', 'weid' => $weid,'from_user'=>$from_user))}"
-               style="color:#666;display:block;text-align:center;">添加您的爱车信息</a>
-        </div>
-        <div class="careInfo">
-            <p>添加爱车信息，享受车主关怀</p>
+        <!--<div style="margin:5px;border: 1px solid #ccc;line-height:35px;text-indent:10px;border-radius:5px;background: -webkit-gradient(linear, 0 0, 0 100%, from(#fff), to(#eee));-webkit-box-shadow: 0 1px 1px #fff;">-->
+            <!--<a href="{php echo $this->createMobileUrl('guanhuai', array('op'=>'caredit', 'weid' => $weid,'from_user'=>$from_user))}"-->
+               <!--style="color:#666;display:block;text-align:center;">添加您的爱车信息</a>-->
+        <!--</div>-->
+        <!--<div class="careInfo">-->
+            <!--<p>添加爱车信息，享受车主关怀</p>-->
 
-            <p>关怀1：爱车保养信息和下次保养提醒</p>
+            <!--<p>关怀1：爱车保养信息和下次保养提醒</p>-->
 
-            <p>关怀2：爱车保险信息和下次保险提醒</p>
+            <!--<p>关怀2：爱车保险信息和下次保险提醒</p>-->
 
-            <p>关怀3：爱车年检信息和下次年检提醒</p>
-        </div>
+            <!--<p>关怀3：爱车年检信息和下次年检提醒</p>-->
+        <!--</div>-->
         {else}
         <div style="margin:5px;border: 1px solid #ccc;line-height:35px;text-indent:10px;border-radius:5px;background: -webkit-gradient(linear, 0 0, 0 100%, from(#fff), to(#eee));-webkit-box-shadow: 0 1px 1px #fff;">
-            <a href="{php echo $this->createMobileUrl('guanhuai', array('op'=>'caredit', 'weid' => $weid,'from_user'=>$from_user))}"
+            <a href="{php echo $this->createMobileUrl('guanhuai', array('op'=>'caredit', 'weid' => $weid,'from_user'=>$from_user, 'car_id' => $car['id']))}"
                style="color:#666;display:block;text-align:center;">修改您的爱车信息</a>
         </div>
         <div>
             <ul class="list3">
                 <li>
-                    <div>
-                        <p>下次保养</p>
-                        <p><img src="../addons/we7_car/style/img/repare.png"/></p>
-                        <p>{$insurance_days}天</p>
-                    </div>
+                        <div>
+                            <a href="{php echo $this->createMobileUrl('guanhuai', array('op'=>'check_myself', 'weid' => $weid, 'car_id' => $car['id']))}">
+                            <p>保养检测</p>
+                            <p><img src="../addons/we7_car/style/img/repare.png"/></p>
+                            <p>点击自检</p>
+                            </a>
+                        </div>
                 </li>
                 <li>
                     <div>
                         <p>下次保险</p>
                         <p><img src="../addons/we7_car/style/img/care.png"/></p>
-                        <p>{$care_days}天</p>
+                        <p>
+                            {if $car['new_insurance']}
+                            {$car['new_insurance']}天
+                            {else}
+                            先完善信息
+                            {/if}
+                        </p>
                     </div>
                 </li>
                 <li>
@@ -78,15 +100,23 @@
             </ul>
         </div>
         {/if}
-        <li class="box group_btn">
-            <div>
-                <a href="{php echo $this->createMobileUrl('yuyue', array('yytype'=>2, 'weid' => $weid,'from_user' =>$from_user))}" class="gray">预约保养</a>
-            </div>
-            <div>
-                <a href="{php echo $this->createMobileUrl('kefu', array( 'weid' => $weid,'from_user' =>$from_user))}" class="gray">联系销售</a>
-            </div>
-        </li>
+        <!--<li class="box group_btn">-->
+            <!--<div>-->
+                <!--<a href="{php echo $this->createMobileUrl('yuyue', array('yytype'=>2, 'weid' => $weid,'from_user' =>$from_user))}" class="gray">预约保养</a>-->
+            <!--</div>-->
+            <!--<div>-->
+                <!--<a href="{php echo $this->createMobileUrl('kefu', array( 'weid' => $weid,'from_user' =>$from_user))}" class="gray">联系销售</a>-->
+            <!--</div>-->
+        <!--</li>-->
+        {/loop}
     </ul>
+    <div style="margin:5px;border: 1px solid #ccc;line-height:35px;text-indent:10px;border-radius:5px;background: -webkit-gradient(linear, 0 0, 0 100%, from(#fff), to(#eee));-webkit-box-shadow: 0 1px 1px #fff;">
+        <a href="{php echo $this->createMobileUrl('guanhuai', array('op'=>'caredit', 'weid' => $weid,'from_user'=>$from_user))}"
+           style="color:#666;display:block;text-align:center;">添加您的爱车信息</a>
+    </div>
+    <div style="padding-bottom: 50px;">
+
+    </div>
 </div>
 
 {template 'share'}

@@ -1,0 +1,27 @@
+{template 'header'}
+<link rel="stylesheet" type="text/css" href="../addons/we7_car/style/css/common.css" media="all"/>
+<link rel="stylesheet" type="text/css" href="../addons/we7_car/style/css/reset.css" media="all"/>
+
+<div style="padding-top:20px;">
+    {loop $stores $store}
+    <div class="alert alert-success" role="alert">
+        <h4>{$store['store_name']}</h4>
+        <p>
+            地址：{$store['region_name']}
+        </p>
+        <div  style="padding-top: 20px;padding-left: 20px;">
+            <p >
+                <a href="tel:{$store['phone']}" data-toggle="tooltip" data-placement="bottom" title="" class="btn btn-default btn-sm" data-original-title="编辑">联系店铺&nbsp;&nbsp;<span class="glyphicon glyphicon-earphone"></span></a>
+                &nbsp;&nbsp;&nbsp;
+                <a href="tel:{$store['phone']}" data-toggle="tooltip" data-placement="bottom" title="" class="btn btn-default btn-sm" data-original-title="编辑">一键导航&nbsp;&nbsp;<span class="glyphicon glyphicon-map-marker"></span></a>
+            </p>
+        </div>
+    </div>
+    {/loop}
+</div>
+
+
+
+{template 'share'}
+
+{template 'footer'}

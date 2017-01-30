@@ -1,0 +1,26 @@
+{template 'header'}
+<link rel="stylesheet" type="text/css" href="../addons/we7_car/style/css/common.css" media="all"/>
+<link rel="stylesheet" type="text/css" href="../addons/we7_car/style/css/reset.css" media="all"/>
+<script>
+    window.onload = function() {
+        var ua = navigator.userAgent.toLowerCase();
+        if (/iphone|ipad|ipod/.test(ua)) {
+            document.getElementById('open_in_safari').style.display = 'block';
+            document.getElementById('android_video').style.display = 'none';
+            location.href="vlc-x-callback://x-callback-url/stream?url={$camera['url']}";
+        }
+    }
+</script>
+<video id='android_video' src="{$camera['url']}"  controls autoplay loop>
+    <source type='video/mp4' />
+</video>
+
+<p>
+    如果播放不了，请：
+    <a id='open_in_safari' href="javascript:location.href='https://appsto.re/cn/QR_WM.i';"><h3>请先下载vlc来查看</h3></a>
+    <a href="javascript:location.href='vlc-x-callback://x-callback-url/stream?url={$camera['url']}'"><h3>如果您已经下载了，请点击打开</h3></a>
+</p>
+
+{template 'share'}
+
+{template 'footer'}

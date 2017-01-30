@@ -2827,6 +2827,118 @@ class We7_carModuleSite extends WeModuleSite {
 
     }
 
+    //门店导航
+    public function doMobileStore(){
+        global $_GPC, $_W;
+        $op = trim($_GPC['op']) ? trim($_GPC['op']) : 'index';
+        $weid = $_W['uniacid'];
+
+        if($op == 'index'){
+            $stores = pdo_fetchall("SELECT * FROM ".tablename('we7car_stores')." WHERE weid =".$_W['uniacid']." AND weid =".$_W['uniacid']);
+            foreach($stores as $key=>$store){
+                $region = pdo_fetch("SELECT * FROM ".tablename('we7car_region')." WHERE id =".$store['region_id']);
+                $region_name = $this->get_by_region($store['region_id'],$region['name'].$store['address'],$_W['uniacid']);
+                $stores[$key]['region_name'] = $region_name;
+            }
+            include $this->template('stores');
+        }
+    }
+
+    //根据region_id获取省份城市
+    public function get_by_region($region_id,$region_name,$weid){
+        $region = pdo_fetch("SELECT * FROM ".tablename('we7car_region')." WHERE id =".$region_id." AND weid =".$weid);
+        if($region['parent_id'] > 0) {
+            $up = pdo_fetch("SELECT * FROM " . tablename('we7car_region') . " WHERE id =" . $region['parent_id']." AND weid =".$weid);
+            $region_name = $up['name'].$region_name;
+            $region_name = $this->get_by_region($up['id'],$region_name,$weid);
+        }
+        return $region_name;
+    }
+
+    //客户订单
+    public function doMobileOrders(){
+        global $_GPC, $_W;
+        $op = trim($_GPC['op']) ? trim($_GPC['op']) : 'index';
+        $weid = $_W['uniacid'];
+        $pindex = max(1, intval($_GPC['page']));
+        $psize = 10;
+
+
+        //工单列表
+        if($op == 'index'){
+            $status = $_GPC['status'];
+            $car_ids = $_GPC['car_ids'];
+            if(empty($car_ids)){
+                $my_cars = pdo_fetchall("SELECT * FROM ".tablename('we7car_care')." WHERE weid =".$weid." AND from_user=".$_W['openid']);
+                if(!empty($my_cars)) {
+                    $car_ids = array();
+                    foreach ($my_cars as $car) {
+                        $car_ids[] = $car['id'];
+                    }
+                    $car_ids = implode(',', $car_ids);
+                }else{
+                    message('您还未登记车辆信息，请先登记',$this->createMobileUrl('guanhuai', array('op' => 'caredit', 'weid' => $weid)), 'error');
+                }
+            }
+            $sql = "SELECT o.*,c.car_no,s.store_name FROM ".tablename("we7car_orders")." AS o,".tablename("we7car_care")." AS c,".tablename('we7car_stores')." AS s WHERE o.weid =".$_W['uniacid']." AND o.car_id in(".$car_ids.") AND o.car_id = c.id AND s.id = o.store_id";
+            $total_sql = "SELECT COUNT(*) FROM ".tablename('we7car_orders')." WHERE weid=".$_W['uniacid']." AND car_id in(".$car_ids.")";
+            if(!empty($status)){
+                $sql .= " AND o.status =".$status;
+                $total_sql .= " AND status =".$status;
+            }
+            $total = pdo_fetchcolumn($total_sql);
+            $sql .= " ORDER BY o.createtime DESC LIMIT " . ($pindex - 1) * $psize . ",{$psize}";
+            $pager = pagination($total, $pindex, $psize);
+            $orders = pdo_fetchall($sql);
+
+            include $this->template('orders');
+        }
+
+        //订单详细
+        if($op == 'detail'){
+            $order_id = $_GPC['id'];
+            $order_data = pdo_fetch("SELECT * FROM ".tablename('we7car_orders')." WHERE weid=".$_W['uniacid']." AND id =".$order_id);
+            $car = pdo_fetch("SELECT * FROM ".tablename('we7car_care')." WHERE id =".$order_data['car_id']);
+            $check = pdo_fetchall("SELECT *,c.name,c.title1,c.title2 FROM ".tablename('we7car_car_check')." AS oc,".tablename('we7car_check')." AS c WHERE oc.weid =".$_W['uniacid']." AND oc.order_id =".$order_id." AND oc.check_id = c.id");
+            //服务类型
+            $all_system = pdo_fetchall("SELECT * FROM ".tablename('we7car_system'));
+            $services = pdo_fetchall("SELECT s.*,sy.name FROM ".tablename('we7car_orders_services')." AS s,".tablename('we7car_car_services')." AS sy WHERE order_id =".$order_id." AND s.service_id = sy.id");
+
+            $total_price = 0;
+            $worker_price = 0;
+            foreach($services as $key=>$service){
+                $worker_price += $service['worker_price'];
+                $services_goods = pdo_fetchall("SELECT sg.*,g.name,g.goods_sn FROM ".tablename('we7car_order_goods')." as sg,".tablename('we7car_goods')." as g WHERE sg.order_service_id =".$service['id']." AND sg.weid =".$_W['uniacid']." AND sg.goods_id = g.id");
+                if(!empty($services_goods)) {
+                    foreach ($services_goods as $key2 => $g) {
+                        $goods_price = $g['quantity'] * $g['goods_price'];
+                        $services_goods[$key2]['total_price'] = $goods_price;
+                        $total_price += $goods_price;
+                    }
+                    $services[$key]['goods'] = $services_goods;
+                    $services[$key]['count'] = count($services_goods);
+                }else{
+                    $services[$key]['count'] = 1;
+                }
+            }
+            $order_price = $total_price+$worker_price;
+            include $this->template('order_detail');
+
+        }
+
+        //查看现场
+        if($op == 'online_view'){
+            $order_id = $_GPC['id'];
+            $camera = pdo_fetch("SELECT * FROM ".tablename('we7car_camera')." WHERE weid =".$_W['uniacid']." AND order_id =".$order_id);
+            if(empty($camera)){
+                message("没有找到车辆对应的摄像头，请联系客服！", $this->createMobileUrl('orders', array('op' => 'detail', 'from_user' => $_W['fans']['from_user'],'id' => $order_id)), 'error');
+            }
+            include $this->template('camera');
+        }
+
+    }
+
+
     //客户关怀
     public function doMobileGuanhuai() {
         global $_GPC, $_W;
@@ -2868,10 +2980,54 @@ class We7_carModuleSite extends WeModuleSite {
         }
 
         if ($op == 'index') {
+            $my_cars = pdo_fetchall("SELECT * FROM ".tablename('we7car_care')." WHERE weid =".$_W['uniacid']." AND from_user =".$_W['openid']);
+
+            foreach($my_cars as $key => $car){
+                if(!empty($car['car_insurance_lastDate'])) {
+                    $next_insurance_year = (date("Y", $car['car_insurance_lastDate']) + 1)."-".date("m-d", $car['car_insurance_lastDate']); //下一个保单周期
+
+                    $my_cars[$key]['new_insurance'] = intval((strtotime($next_insurance_year) - TIMESTAMP) / 86400);
+                }
+            }
             include $this->template('guanhuai_index');
         }
 
+        //客户自检
+        if($op == 'check_myself'){
+            $car_id = $_GPC['car_id'];
+            $now_mileage = $_GPC['now_mileage'];
+            //根据车辆的id查询所有做过的保养，然后查保养间隔
+            $sql = "SELECT os.end_time,os.service_id,o.mileage,s.name,s.spacing_km,s.spacing_day FROM".tablename('we7car_orders_services')." AS os,".tablename('we7car_orders')." AS o,".tablename('we7car_car_services')." AS s WHERE o.car_id =".$car_id." AND os.order_id = o.id AND o.status = 50 AND os.service_id = s.id AND o.weid =".$_W['uniacid']." GROUP BY os.service_id ORDER BY os.end_time";
+            $services = pdo_fetchall($sql);
+            if(empty($services)){
+                message('系统还未有您车的保养信息！',$this->createMobileUrl('guanhuai'),'error');
+            }
+            foreach($services as $key=>$service){
+                if($service['spacing_day'] > 0) {
+                    //先计算时间上面是否需要做保养
+                    $next_time = $service['end_time'] + ($service['spacing_day'] * 86400);
+                    if ($next_time > TIMESTAMP) {
+                        $services[$key]['next_time'] = date("Y-m-d", $next_time);
+                    }
+                }
+                if($service['spacing_km'] > 0) {
+                    //先计算时间上面是否需要做保养
+                    $next_mileage = $service['mileage'] + $service['spacing_km'];
+                    if ($next_mileage > $now_mileage && $now_mileage>0) {
+                        $services[$key]['next_mileage'] = $next_mileage-$now_mileage;
+                    }
+                }
+            }
+            include $this->template('check_myself');
+        }
+
         if ($op == 'caredit') {
+            $car_id = $_GPC['car_id'];
+            if(!empty($car_id)) {
+                $car = pdo_fetch("SELECT * FROM " . tablename('we7car_care') . " where weid =" . $_W['uniacid'] . " AND id =" . $car_id . " AND from_user =" . $_W['openid']);
+            }else{
+                $car = null;
+            }
             $where .= ' AND `status` = :status';
             unset($params[':from_user']);
             // 获取汽车品牌

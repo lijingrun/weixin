@@ -1,0 +1,36 @@
+{template 'header'}
+<link rel="stylesheet" type="text/css" href="../addons/we7_car/style/css/common.css" media="all"/>
+<link rel="stylesheet" type="text/css" href="../addons/we7_car/style/css/reset.css" media="all"/>
+<div style="padding:10px;">
+    {if $services && $now_mileage}
+    {loop $services $service}
+    <div {if empty($service['next_time']) || empty($service['next_mileage'])}class="alert alert-warning"{else} class="alert alert-success" {/if} role="alert">
+        <p>{$service['name']}</p>
+        <p>上次保养时间：{php echo date('Y-m-d',$service['end_time'])}</p>
+        <p>上次保养里程：{$service['mileage']}km</p>
+        {if empty($service['next_time']) || empty($service['next_mileage'])}
+            已经到了下次保养时间，请马上到店进行保养！
+        {else}
+            <p>下次保养时间：{$service['next_time']}</p>
+            <p>还有{$service['next_mileage']}km就需要进行下次保养</p>
+        {/if}
+    </div>
+    {/loop}
+
+    {else}
+    <form method="post" id="form" action="{php echo $this->createMobileUrl('guanhuai', array('op'=>'check_myself', 'car_id' => $car_id))}">
+        <div class="input-group">
+            <input type="text" name="now_mileage" class="form-control" placeholder="请输入当前里程数" aria-describedby="basic-addon2">
+            <span class="input-group-addon" id="basic-addon2" onclick="begin();">开始自检</span>
+        </div>
+    </form>
+    {/if}
+</div>
+{template 'share'}
+
+{template 'footer'}
+<script>
+    function begin(){
+        $("#form").submit();
+    }
+</script>

@@ -81,7 +81,7 @@
 					<dd class="tbox">
 						<div><label>上牌时间：</label></div>
 						<div>
-							{php echo tpl_form_field_date('car_startTime', $car['car_startTime'])}
+							<input type="date" value="{php echo date('Y-m-d',$car['car_startTime'])}" name="car_startTime" />
 						</div>
 					</dd>
 
@@ -123,7 +123,7 @@
 					<dd class="tbox">
 						<div><label style="width:105px;">上次保险日期：</label></div>
 						<div>
-							{php echo tpl_form_field_date('car_insurance_lastDate', $car['car_insurance_lastDate'])}
+							<input type="date" value="{php echo date('Y-m-d',$car['car_insurance_lastDate'])}" name="car_insurance_lastDate" />
 						</div>
 					</dd>
 					<dd class="tbox">
@@ -142,7 +142,7 @@
 					<dd class="tbox">
 						<div><label style="width:105px;">上次保养时间：</label></div>
 						<div>
-							{php echo tpl_form_field_date('car_care_lastDate', $car['car_care_lastDate'])}
+							<input type="date" value="{php echo date('Y-m-d',$car['car_care_lastDate'])}" name="car_care_lastDate" />
 						</div>
 					</dd>
 					<dd class="tbox">
