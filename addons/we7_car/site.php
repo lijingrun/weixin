@@ -2869,7 +2869,7 @@ class We7_carModuleSite extends WeModuleSite {
             $status = $_GPC['status'];
             $car_ids = $_GPC['car_ids'];
             if(empty($car_ids)){
-                $my_cars = pdo_fetchall("SELECT * FROM ".tablename('we7car_care')." WHERE weid =".$weid." AND from_user=".$_W['openid']);
+                $my_cars = pdo_fetchall("SELECT * FROM ".tablename('we7car_care')." WHERE weid =".$weid." AND from_user='".$_W['openid']."'");
                 if(!empty($my_cars)) {
                     $car_ids = array();
                     foreach ($my_cars as $car) {
@@ -2980,7 +2980,7 @@ class We7_carModuleSite extends WeModuleSite {
         }
 
         if ($op == 'index') {
-            $my_cars = pdo_fetchall("SELECT * FROM ".tablename('we7car_care')." WHERE weid =".$_W['uniacid']." AND from_user =".$_W['openid']);
+            $my_cars = pdo_fetchall("SELECT * FROM ".tablename('we7car_care')." WHERE weid =".$_W['uniacid']." AND from_user ='".$_W['openid']."'");
 
             foreach($my_cars as $key => $car){
                 if(!empty($car['car_insurance_lastDate'])) {
