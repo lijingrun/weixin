@@ -1,0 +1,55 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+    <li ><a href="{php echo $this->createWebUrl('bank',array('op'=>'index'));}">银行列表</a></li>
+    <li class="active"><a href="{php echo $this->createWebUrl('bank', array('op'=>'add'))}">添加银行信息</a></li>
+</ul>
+<div class="main panel panel-default">
+    <div class="category panel-body table-responsive">
+        <form method="post" class="form-horizontal form">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    银行设置
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">银行名称</label>
+                        <div class="col-sm-9 col-xs-12">
+                            <input type="text" name="bank_name" class="form-control" value="{$bank['bank_name']}" />
+                            <input type="hidden" value="{$bank['id']}" name="bank_id" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">银行代码</label>
+                        <div class="col-sm-9 col-xs-12">
+                            <input type="text" name="bank_code" class="form-control" value="{$bank['bank_code']}" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group col-sm-12">
+                <input type='hidden' name='id' value="{$theone['id']}" />
+                <input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" />
+                <input type="hidden" name="token" value="{$_W['token']}" />
+            </div>
+        </form>
+    </div>
+</div>
+<script type="text/javascript">
+    function message(msg) {
+        require(['util'], function(util) {
+            util.message(msg);
+        });
+    }
+    $('form').submit(function() {
+        if ($.trim($(':text[name="bank_name"]').val()) == '') {
+            message('必须填写银行名称.', '', 'error');
+            return false;
+        }
+        if ($.trim($(':text[name="bank_code"]').val()) == '') {
+            message('必须填写银行编码.', '', 'error');
+            return false;
+        }
+        return true;
+    });
+</script>
+{template 'common/footer'}

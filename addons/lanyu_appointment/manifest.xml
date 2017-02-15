@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns="http://www.haoid.cn" versionCode="0.6">
+	<application setting="false">
+		<name><![CDATA[微信预约]]></name>
+		<identifie><![CDATA[lanyu_appointment]]></identifie>
+		<version><![CDATA[1.0]]></version>
+		<type><![CDATA[customer]]></type>
+		<ability><![CDATA[微信在线预约功能]]></ability>
+		<description><![CDATA[影楼微信在线预约]]></description>
+		<author><![CDATA[lijingrun]]></author>
+		<url><![CDATA[]]></url>
+	</application>
+	<platform>
+		<subscribes>
+		</subscribes>
+		<handles>
+		</handles>
+		<rule embed="false" />
+		<card embed="false" />
+	</platform>
+	<bindings>
+		<menu>
+			<entry title="预约订单" do="order" direct="false" />
+			<entry title="预约说明" do="welcome" direct="false" />
+			<entry title="店铺设置" do="store" direct="false" />
+			<entry title="档期设置" do="times" direct="false" />
+			<entry title="预约类型" do="type" direct="false" />
+		</menu>
+	</bindings>
+	<permissions>
+	</permissions>
+	<install><![CDATA[
+		#预约简介
+		CREATE TABLE IF NOT EXISTS `ims_lanyu_appointment_welcome` (
+		  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+		  `weid` int(11) DEFAULT NULL,
+		  `content` text NOT NULL,
+		  `title` varchar(255) NOT NULL,
+		  PRIMARY KEY (`id`)
+		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+		#预约类型表
+		CREATE TABLE IF NOT EXISTS `ims_lanyu_appointment_type` (
+		  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+		  `weid` int(11) DEFAULT NULL,
+		  `store_id` int(11) DEFAULT NULL,
+		  `name` varchar(255) NOT NULL,
+		  `image` varchar(255) NOT NULL,
+		  `order_list` int(10) NOT NULL DEFAULT 255,
+		  `price` float(10,2) NOT NULL,
+		  `content` text NOT NULL,
+		  `status` int(1) NOT NULL,
+		  PRIMARY KEY (`id`)
+		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+		#门店
+		CREATE TABLE IF NOT EXISTS `ims_lanyu_appointment_store` (
+		  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+		  `weid` int(11) DEFAULT NULL,
+		  `name` varchar(255) NOT NULL,
+		  `address` varchar(255) NOT NULL,
+		  `traffic` varchar(255) NOT NULL ,
+		  `status` int(1),
+		  `listorder` int(10),
+		  `region_id` int(10),
+		  PRIMARY KEY (`id`)
+		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+		#预约时间段设置
+		CREATE TABLE IF NOT EXISTS `ims_lanyu_appointment_times` (
+		  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+		  `weid` int(11) DEFAULT NULL,
+		  `store_id` int(11) NOT NULL,
+		  `time` varchar(255) NOT NULL,
+		  `effective_times` int(10) NOT NULL ,
+		  `listorder` int(10),
+		  PRIMARY KEY (`id`)
+		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+		#预约订单
+		CREATE TABLE IF NOT EXISTS `ims_lanyu_appointment_data` (
+		  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+		  `weid` int(11) DEFAULT NULL,
+		  `openid` varchar(255) NOT NULL,
+		  `phone` varchar(255) NOT NULL,
+		  `name` varchar(255) NOT NULL ,
+		  `status` int(1) NOT NULL ,
+		  `email` varchar(255) NOT NULL ,
+		  `create_time` varchar(255) NOT NULL ,
+		  `appointment_day` varchar(255) NOT NULL ,
+		  `times_id` int(11) NOT NULL ,
+		  PRIMARY KEY (`id`)
+		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+		#预约订单对应内容
+		CREATE TABLE IF NOT EXISTS `ims_lanyu_appointment_to_type` (
+		  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+		  `weid` int(11) DEFAULT NULL,
+		  `app_id` int(11) NOT NULL,
+		  `type_id` int(11) NOT NULL,
+		  `price` float(10,2) NOT NULL ,
+		  PRIMARY KEY (`id`)
+		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+		#省份城市表
+		CREATE TABLE IF NOT EXISTS `ims_lanyu_region` (
+		  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+		  `weid` int(11) DEFAULT NULL,
+		  `name` varchar(50) NOT NULL,
+		  `parent_id` int(10) NOT NULL,
+		  `status` int(1) NOT NULL,
+		  PRIMARY KEY (`id`)
+		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+		#套餐设置
+		CREATE TABLE IF NOT EXISTS `ims_lanyu_appointment_package` (
+		  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+		  `weid` int(11) DEFAULT NULL,
+		  `type_id` int(11) NOT NULL,
+		  `down_type` int(11) NOT NULL,
+		  `price` float(10,2) NOT NULL ,
+		  PRIMARY KEY (`id`)
+		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+
+		#不能预约的时间段设置
+		CREATE TABLE IF NOT EXISTS `ims_lanyu_appointment_out_time` (
+		  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+		  `weid` int(11) DEFAULT NULL,
+		  `store_id` int(11) NOT NULL,
+		  `time_id` int(11) NOT NULL,
+		  `create_time` varchar(255) NOT NULL,
+		  `app_day` float(10,2) NOT NULL ,
+		  PRIMARY KEY (`id`)
+		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+	]]></install>
+	<uninstall><![CDATA[]]></uninstall>
+	<upgrade><![CDATA[]]></upgrade>
+</manifest>

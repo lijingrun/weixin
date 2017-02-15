@@ -11,6 +11,12 @@ addons/*
 !addons/we7_car/template/
 !addons/we7_car/template/mobile/
 !addons/we7_car/template/web/
+!addons/lanyu_sign/
+!addons/lanyu_sign/template/
+!addons/lanyu_sign/template/web/
+!addons/lanyu_appointment/
+!addons/lanyu_appointment/template/
+!addons/lanyu_appointment/template/web/
 framework/
 attachment/
 data/

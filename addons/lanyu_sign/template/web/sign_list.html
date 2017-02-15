@@ -1,0 +1,103 @@
+{template 'common/header'}
+<script>
+    function find(){
+        var status = $("#status").val();
+        var bank_id = $("#bank_id").val();
+        var day = $("#day").val();
+        location.href="{php echo $this->createWebUrl('sign',array('op'=>'index'));}&status="+status+"&bank_id="+bank_id+"&day="+day;
+    }
+    function export_data(){
+        var status = $("#status").val();
+        var bank_id = $("#bank_id").val();
+        var day = $("#day").val();
+        location.href="{php echo $this->createWebUrl('sign',array('op'=>'export'));}&status="+status+"&bank_id="+bank_id+"&day="+day;
+    }
+</script>
+<ul class="nav nav-tabs">
+    <li class="active"><a href="{php echo $this->createWebUrl('sign',array('op'=>'index'));}">收款列表</a></li>
+    <li ><a href="{php echo $this->createWebUrl('sign', array('op'=>'add'))}">添加收款信息</a></li>
+    <li ><a href="{php echo $this->createWebUrl('sign', array('op'=>'import'))}">导入收款信息</a></li>
+</ul>
+<div class="main">
+    <div class="panel panel-info">
+        <div class="panel-heading">查询</div>
+        <div class="panel-body">
+            <div class="form-horizontal" role="form">
+                <div class="form-group">
+                    <div class="col-sm-3 col-lg-3">
+                        <select class="form-control" id="bank_id">
+                            <option value="0" >银行</option>
+                            {loop $banks $bank}
+                            <option value="{$bank['id']}" {if $bank['id']==$bank_id }selected='selected'{/if}>
+                            {$bank['bank_name']}({$bank['bank_code']})
+                            </option>
+                            {/loop}
+                        </select>
+                    </div>
+                    <div class="col-sm-3 col-lg-3">
+                        <select class="form-control" id="status">
+                            <option value="0" >状态</option>
+                            <option value="1" {if $status == 1}selected ='selected'{/if}>未审</option>
+                            <option value="2" {if $status == 2}selected ='selected'{/if}>已审</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-3 col-lg-3">
+                        <input type="date" class="form-control" id="day" />
+                    </div>
+                    <div class=" col-xs-12 col-sm-2 col-lg-2">
+                        <button class="btn btn-default" onclick="find();"><i class="fa fa-search"></i> 搜索</button>
+                        <button class="btn btn-default" onclick="export_data();"><span class="glyphicon glyphicon-new-window"></span> 导出</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th >银行名称</th>
+            <th >银行编码</th>
+            <th >收款金额</th>
+            <th >收款时间</th>
+            <th >汇款账号</th>
+            <th >客户名称</th>
+            <th >客户编码</th>
+            <th >填写人</th>
+            <th >状态</th>
+            <th >操作</th>
+        </tr>
+        </thead>
+        <tbody>
+            {loop $signs $sign}
+            <tr>
+                <td>{$sign['bank_name']}</td>
+                <td>{$sign['bank_code']}</td>
+                <td>￥{$sign['amount']}元</td>
+                <td>{php echo date('Y-m-d',$sign['create_time'])}</td>
+                <td>{$sign['bank_user']}</td>
+                <td>{$sign['member_name']}</td>
+                <td>{$sign['member_code']}</td>
+                <td>{$sign['username']}</td>
+                <td>
+                    {if $sign['status'] == 1}
+                    未审核
+                    {else}
+                    已审核
+                    {/if}
+                </td>
+                <td>
+                    {if $sign['status'] == 1}
+                    <a href="{php echo $this->createWebUrl('sign',array('id' => $sign['id'],'op'=>'examine'))}" title="审核" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-ok"></span></a>
+                    <a href="{php echo $this->createWebUrl('sign',array('id' => $sign['id'],'op'=>'del'))}" onclick="return confirm('如果已审，请先将ERP生成的收款单删除！！');return false;" title="删除" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-remove"></span></a>
+                    {else if $sign['status'] == 2}
+                    <a href="{php echo $this->createWebUrl('sign',array('id' => $sign['id'],'op'=>'return'))}" onclick="return confirm('请先将ERP生成的收款单删除！！');return false;" title="返审" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-floppy-remove"></span></a>
+                    {/if}
+                </td>
+            </tr>
+            {/loop}
+        </tbody>
+    </table>
+    {$pager}
+</div>
+
+{template 'common/footer'}

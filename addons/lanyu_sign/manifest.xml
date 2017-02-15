@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns="http://www.haoid.cn" versionCode="0.6">
+	<application setting="false">
+		<name><![CDATA[蓝羽线上签款系统]]></name>
+		<identifie><![CDATA[lanyu_sign]]></identifie>
+		<version><![CDATA[1.0]]></version>
+		<type><![CDATA[biz]]></type>
+		<ability><![CDATA[蓝羽公司内部签款用]]></ability>
+		<description><![CDATA[针对线下汇款的客户款项，财务根据银行录入，营销签对应客户，财务审核后直接入ERP收款单]]></description>
+		<author><![CDATA[lijingrun]]></author>
+		<url><![CDATA[http://www.lanyu.com]]></url>
+	</application>
+	<platform>
+		<subscribes>
+		</subscribes>
+		<handles>
+		</handles>
+		<rule embed="false" />
+		<card embed="false" />
+	</platform>
+	<bindings>
+		<menu>
+			<entry title="银行设置" do="bank" direct="false" />
+			<entry title="录入款项" do="sign" direct="false" />
+			<entry title="签款" do="business" direct="false" />
+		</menu>
+	</bindings>
+	<permissions>
+			<!--<entry title="录入款项" do="lanyu_sign_add" />-->
+			<!--<entry title="签款" do="lanyu_sign_business" />-->
+			<!--<entry title="设置银行" do="lanyu_sign_bank" />-->
+	</permissions>
+	<install><![CDATA[
+	#银行
+		CREATE TABLE IF NOT EXISTS `ims_lanyu_bank` (
+		  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+		  `weid` int(11) DEFAULT NULL,
+		  `bank_name` varchar(255) NOT NULL,
+		  `bank_code` varchar(255) NOT NULL,
+		  PRIMARY KEY (`id`)
+		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+	#款项表
+		CREATE TABLE IF NOT EXISTS `ims_lanyu_sign` (
+		  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+		  `weid` int(11) DEFAULT NULL,
+		  `bank_id` int(10) NOT NULL,
+		  `amount` float(10,2) NOT NULL COMMENT '金额',
+		  `input_id` int(10) NOT NULL,
+		  `sign_id` int(10) NOT NULL COMMENT '签款业务员id',
+		  `status` int(10) NOT NULL DEFAULT '1' COMMENT '状态，1为未审核，2为已审核',
+		  `member_name` varchar(255) COMMENT '客户名称',
+		  `create_time` varchar(255) COMMENT '入账时间',
+		  `member_code` varchar(255) COMMENT '客户编码',
+		  `bank_user` varchar(255),
+		  PRIMARY KEY (`id`)
+		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+	]]></install>
+	<uninstall><![CDATA[
+	DROP TABLE IF EXISTS `ims_lanyu_bank`;
+	DROP TABLE IF EXISTS `ims_lanyu_sign`;
+	]]></uninstall>
+	<upgrade><![CDATA[]]></upgrade>
+</manifest>

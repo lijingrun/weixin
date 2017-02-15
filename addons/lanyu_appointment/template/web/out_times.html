@@ -1,0 +1,66 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+    <li><a href="{php echo $this->createWebUrl('times',array('op'=>'post'));}">添加时间段</a></li>
+    <li><a href="{php echo $this->createWebUrl('times', array('op'=>'index'))}">预约时间段</a></li>
+    <li class="active"><a href="{php echo $this->createWebUrl('times', array('op'=>'out_time'))}">设置不能预约时间段</a></li>
+    <!--<li ><a href="{php echo $this->createWebUrl('store', array('op'=>'type'))}">店铺类型管理</a></li>-->
+</ul>
+
+<div class="main panel panel-default">
+    <div class="category panel-body table-responsive">
+        <div class="panel panel-info">
+            <div class="panel-body">
+                <div class="form-horizontal" role="form">
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">时间</label>
+                        <div class="col-sm-8 col-lg-9">
+                            <input type="date" class="form-control" id="day" onchange="to_day();" value="{$day}" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            {loop $times $time}
+            <div class="col-md-1">
+                    <button id="time{$time['id']}" {if $time['status']}class="btn btn-danger"{else}class="btn btn-default"{/if} onclick="out_time({$time['id']});">
+                        <span class="glyphicon glyphicon-time" ></span>
+                        {$time['time']}
+                    </button>
+            </div>
+            {/loop}
+        </div>
+    </div>
+</div>
+
+<script>
+    function to_day(){
+        var day = $("#day").val();
+        location.href="{php echo $this->createWebUrl('times', array('op'=>'out_time'))}&day="+day;
+    }
+    function out_time(id){
+        var the_class = $("#time"+id).attr('class');
+        var url = "{php echo $this->createWebUrl('times', array('op'=>'to_out_time'))}";
+        var day = $("#day").val();
+        if(the_class == 'btn btn-default'){
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : {'day' : day, 'time_id' : id, 'type' : 1 },
+                success : function(data){
+                    $("#time"+id).attr('class' , 'btn btn-danger');
+                }
+            });
+        }else{
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : {'day' : day, 'time_id' : id, 'type' : 2 },
+                success : function(data){
+                    $("#time"+id).attr('class' , 'btn btn-default');
+                }
+            });
+        }
+    }
+</script>
+{template 'common/footer'}

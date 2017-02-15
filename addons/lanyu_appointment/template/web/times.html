@@ -1,0 +1,27 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+    <li><a href="{php echo $this->createWebUrl('times',array('op'=>'post'));}">添加时间段</a></li>
+    <li  class="active"><a href="{php echo $this->createWebUrl('times', array('op'=>'index'))}">预约时间段</a></li>
+    <li ><a href="{php echo $this->createWebUrl('times', array('op'=>'out_time'))}">设置不能预约时间段</a></li>
+    <!--<li ><a href="{php echo $this->createWebUrl('store', array('op'=>'type'))}">店铺类型管理</a></li>-->
+</ul>
+
+<div class="main panel panel-default">
+    <div class="category panel-body table-responsive">
+        <div class="row">
+            {loop $times $time}
+            <div class="col-md-1">
+                <a href="{php echo $this->createWebUrl('times',array('op'=>'post','id' => $time['id']));}">
+                    <button class="btn btn-default">
+                        <span class="glyphicon glyphicon-time"></span>
+                        {$time['time']}
+                    </button>
+                </a>
+            </div>
+            {/loop}
+        </div>
+    </div>
+</div>
+
+
+{template 'common/footer'}

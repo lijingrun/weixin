@@ -1,0 +1,56 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+    <li><a href="{php echo $this->createWebUrl('type',array('op'=>'post'));}">添加类型</a></li>
+    <li  class="active"><a href="{php echo $this->createWebUrl('type', array('op'=>'index'))}">类型管理</a></li>
+    <!--<li ><a href="{php echo $this->createWebUrl('store', array('op'=>'type'))}">店铺类型管理</a></li>-->
+</ul>
+
+<div class="main panel panel-default">
+    <div class="category panel-body table-responsive">
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th >类型</th>
+                <th >图片</th>
+                <th >排序</th>
+                <th >价钱</th>
+                <th >状态</th>
+                <th >操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            {loop $list $v}
+            <tr>
+                <td>
+                    {$v['name']}
+                </td>
+                <td>
+                    <img src="../attachment/{$v['image']}" style="width:80%;" />
+                </td>
+                <td>
+                    {$v['order_list']}
+                </td>
+                <td>
+                    {$v['price']}
+                </td>
+                <td>{if $v['status']=='1'}<span class="label label-success">正常</span>{else}<span class="label label-danger">失效</span>{/if}</td>
+                <td>
+                    <a href="{php echo $this->createWebUrl('type',array('id' => $v['id'],'op'=>'post'))}" title="编辑" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><i class="fa fa-edit"></i></a>
+
+                </td>
+            </tr>
+            {/loop}
+
+            </tbody>
+        </table>
+        </form>
+        {$pager}
+    </div>
+</div>
+<script>
+    require(['bootstrap'],function($){
+        $('.btn').tooltip();
+    });
+</script>
+
+{template 'common/footer'}
