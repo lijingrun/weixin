@@ -13,8 +13,19 @@
                 <div class="form-horizontal" role="form">
                     <div class="form-group">
                         <label class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">时间</label>
-                        <div class="col-sm-8 col-lg-9">
-                            <input type="date" class="form-control" id="day" onchange="to_day();" value="{$day}" />
+                        <div class="col-sm-8 col-lg-2">
+                            <input type="date" class="form-control" id="day" value="{$day}" />
+                        </div>
+                        <label class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">店铺</label>
+                        <div class="col-sm-8 col-lg-2">
+                            <select onchange="to_store();" class="form-control" id="store_id">
+                                {loop $stores $store}
+                                <option value="{$store['id']}" {if $store['id'] == $store_id}selected="selected"{/if}>{$store['name']}</option>
+                                {/loop}
+                            </select>
+                        </div>
+                        <div class="col-sm-8 col-lg-2">
+                            <button class="btn btn-default" onclick="find();">确定</button>
                         </div>
                     </div>
                 </div>
@@ -34,19 +45,16 @@
 </div>
 
 <script>
-    function to_day(){
-        var day = $("#day").val();
-        location.href="{php echo $this->createWebUrl('times', array('op'=>'out_time'))}&day="+day;
-    }
     function out_time(id){
         var the_class = $("#time"+id).attr('class');
         var url = "{php echo $this->createWebUrl('times', array('op'=>'to_out_time'))}";
         var day = $("#day").val();
+        var store_id ={$store_id};
         if(the_class == 'btn btn-default'){
             $.ajax({
                 type : 'post',
                 url : url,
-                data : {'day' : day, 'time_id' : id, 'type' : 1 },
+                data : {'day' : day, 'time_id' : id, 'type' : 1 ,'store_id' : store_id},
                 success : function(data){
                     $("#time"+id).attr('class' , 'btn btn-danger');
                 }
@@ -55,12 +63,17 @@
             $.ajax({
                 type : 'post',
                 url : url,
-                data : {'day' : day, 'time_id' : id, 'type' : 2 },
+                data : {'day' : day, 'time_id' : id, 'type' : 2 , 'store_id' : store_id},
                 success : function(data){
                     $("#time"+id).attr('class' , 'btn btn-default');
                 }
             });
         }
+    }
+    function find(){
+        var day = $("#day").val();
+        var store_id = $("#store_id").val();
+        location.href="{php echo $this->createWebUrl('times', array('op'=>'out_time'))}&day="+day+"&store_id="+store_id;
     }
 </script>
 {template 'common/footer'}

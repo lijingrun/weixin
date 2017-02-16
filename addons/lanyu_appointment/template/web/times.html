@@ -8,6 +8,13 @@
 
 <div class="main panel panel-default">
     <div class="category panel-body table-responsive">
+        <div class="form-group">
+                <select onchange="to_store();" class="form-control" id="store_id">
+                    {loop $stores $store}
+                    <option value="{$store['id']}" {if $store['id'] == $store_id}selected="selected"{/if}>{$store['name']}</option>
+                    {/loop}
+                </select>
+        </div>
         <div class="row">
             {loop $times $time}
             <div class="col-md-1">
@@ -23,5 +30,10 @@
     </div>
 </div>
 
-
+<script>
+    function to_store(){
+        var store_id = $("#store_id").val();
+        location.href="{php echo $this->createWebUrl('times',array('op'=>'index'));}&store_id="+store_id;
+    }
+</script>
 {template 'common/footer'}

@@ -1,0 +1,44 @@
+{template 'header'}
+<nav class="navbar navbar-inverse navbar-static-top">
+    <div class="container" align="center">
+        <h4 style="color:white;">选择日期</h4>
+    </div>
+</nav>
+<div style="padding: 20px 10px 0px 10px">
+    <div class="form-group">
+        <select class="form-control" id="month" onchange="change_day();">
+            {loop $month_array $m}
+            <option value="{$m}" {if $month == $m}selected="selected"{/if}>{$m}月</option>
+            {/loop}
+        </select>
+    </div>
+    <div class="row">
+        {loop $days $day}
+        <a href="{php echo $this->createMobileUrl('orders',array('op' => 'choose_time', 'type_id' => $type_id, 'store_id' => $store_id, 'month' => $month,'day' => $day))}">
+            <div class="col-xs-2" align="center">
+                <span class="glyphicon glyphicon-calendar">
+                </span>
+                <p>{$day}</p>
+            </div>
+        </a>
+        {/loop}
+    </div>
+</div>
+
+<nav class="navbar navbar-default navbar-fixed-bottom">
+    <div class="container" style="padding-top: 5px;" align="center">
+        <a href="{php echo $this->createMobileUrl('types')}" >
+            <button class="btn btn-danger" style="width:40%;">重新选择类型</button>
+        </a>
+        &nbsp;&nbsp;
+        <button class="btn btn-success" style="width:40%;" onclick="to_choose_time();">下一步</button>
+    </div>
+</nav>
+<script>
+    function change_day(){
+        var month = $("#month").val();
+        location.href="{php echo $this->createMobileUrl('orders',array('op' => 'choose_day', 'type_id' => $type_id,'store_id' => $store_id))}&month="+month;
+    }
+</script>
+
+{template 'footer'}

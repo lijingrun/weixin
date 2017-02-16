@@ -1,0 +1,30 @@
+{template 'header'}
+<nav class="navbar navbar-inverse navbar-static-top">
+    <div class="container" align="center">
+        <h4 style="color:white;">{$type['name']}</h4>
+    </div>
+</nav>
+<div style="padding: 0px 10px 0px 10px">
+    <div align="center">
+        <image src="../attachment/{$type['image']}" style="width:33%;" />
+        <p>
+            <strong style="color:#FF7F24;font-size: 20px;">￥{$type['price']}</strong>
+        </p>
+    </div>
+    <div style="padding-top: 20px;">
+        {$content}
+    </div>
+</div>
+
+<nav class="navbar navbar-default navbar-fixed-bottom">
+    <div class="container" style="padding-top: 5px;" align="center">
+        <a href="{php echo $this->createMobileUrl('types')}" >
+            <button class="btn btn-danger" style="width:40%;">重新选择类型</button>
+        </a>
+        &nbsp;&nbsp;
+        <a href="{php echo $this->createMobileUrl('orders',array('op' => 'choose_store','type_id' => $type['id']))}" >
+            <button class="btn btn-success" style="width:40%;">下一步</button>
+        </a>
+    </div>
+</nav>
+{template 'footer'}

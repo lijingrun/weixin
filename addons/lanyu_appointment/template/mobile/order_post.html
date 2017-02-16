@@ -1,0 +1,72 @@
+{template 'header'}
+<nav class="navbar navbar-inverse navbar-static-top">
+    <div class="container" align="center">
+        <h4 style="color:white;">确认订单</h4>
+    </div>
+</nav>
+<div style="padding: 20px 10px 0px 10px">
+    <div class="alert alert-info" role="alert">
+        预约时间：{$day}&nbsp;<span class="glyphicon glyphicon-time"></span>{$time['time']}
+    </div>
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            <h3 class="panel-title"><span class="glyphicon glyphicon-pushpin"></span>预约店铺：{$store['name']}</h3>
+        </div>
+        <div class="panel-body">
+            <p>
+                <span class="glyphicon glyphicon-map-marker">&nbsp;{$store['region_name']}{$store['address']}</span>
+            </p>
+            <p>
+                <span class="glyphicon glyphicon-tags">&nbsp;{$store['traffic']}</span>
+            </p>
+        </div>
+    </div>
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            <h3 class="panel-title"><span class="glyphicon glyphicon-pushpin"></span>预约类型</h3>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                {loop $types $t}
+                <div class="col-xs-4" align="center" >
+                    <img src="../attachment/{$t['image']}" style="width: 80%;" />
+                    <p align="center">{$t['name']}</p>
+                    <p align="center" style="color:#FF8C00;font-size: 16px;">{$t['price']}</p>
+                </div>
+                {/loop}
+            </div>
+        </div>
+    </div>
+    <div class="alert alert-success" role="alert" align="right">订单总价：￥{$total_price}</div>
+</div>
+
+
+
+<nav class="navbar navbar-default navbar-fixed-bottom">
+    <div class="container" style="padding-top: 5px;" align="center">
+        <a href="{php echo $this->createMobileUrl('orders',array('op' => 'choose_day','type_id' => $type_id, 'store_id' => $store_id,'month' => $month))}" >
+            <button class="btn btn-danger" style="width:40%;">重新选择日期</button>
+        </a>
+        &nbsp;&nbsp;
+        <button class="btn btn-success" style="width:40%;" onclick="to_order();">确认预约</button>
+    </div>
+</nav>
+<input type="hidden" id="time_id" value="0" />
+<script>
+    function choose_time(id){
+        $(".choose").attr('class','btn btn-default');
+        $("#time_id").val(id);
+        $("#btn"+id).attr('class','btn btn-success choose');
+    }
+    function to_order(){
+        var time_id = $("#time_id").val();
+        if(time_id == 0){
+            alert("请先选择预约时间");
+        }else{
+            var day = "{$choose_day}";
+            var store_id = "{$store_id}";
+            location.href="{php echo $this->createMobileUrl('orders',array('op' => 'to_order'))}&day="+day+"&store_id="+store_id+"&time_id="+time_id;
+        }
+    }
+</script>
+{template 'footer'}

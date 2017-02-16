@@ -1,0 +1,60 @@
+{template 'header'}
+<script>
+    function choose_store(store_id){
+        $("#store_id").val(store_id);
+        $(".panel-success").attr('class',"panel panel-default");
+        $("#store"+store_id).attr("class","panel panel-success");
+    }
+    function to_choose_day(){
+        var store_id = $("#store_id").val();
+        var type_id = $("#type_id").val();
+        if(store_id == 0 || type_id == 0){
+            alert("请先选择店铺！");
+        }else{
+            location.href="{php echo $this->createMobileUrl('orders', array('op' => 'choose_day'))}&store_id="+store_id+"&type_id="+type_id;
+        }
+    }
+</script>
+<nav class="navbar navbar-inverse navbar-static-top">
+    <div class="container" align="center">
+        <h4 style="color:white;">选择门店</h4>
+    </div>
+</nav>
+<div style="padding: 20px 10px 0px 10px" >
+
+        {loop $stores $store}
+                <div class="panel panel-default" id="store{$store['id']}" onclick="choose_store({$store['id']});">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">{$store['name']}</h3>
+                    </div>
+                    <div class="panel-body">
+                        <p>
+                            <span class="glyphicon glyphicon-map-marker">&nbsp;{$store['region_name']}{$store['address']}</span>
+                        </p>
+                        <p>
+                            <span class="glyphicon glyphicon-tags">&nbsp;{$store['traffic']}</span>
+                        </p>
+                    </div>
+                </div>
+        {/loop}
+    <input type="hidden" id="type_id" value="{$type_id}" />
+    <input type="hidden" id="store_id" value="0" />
+
+</div>
+
+<nav class="navbar navbar-default navbar-fixed-bottom">
+    <div class="container" style="padding-top: 5px;" align="center">
+        <a href="{php echo $this->createMobileUrl('types')}" >
+            <button class="btn btn-danger" style="width:40%;">重新选择类型</button>
+        </a>
+        &nbsp;&nbsp;
+            <button class="btn btn-success" style="width:40%;" onclick="to_choose_day();">下一步</button>
+    </div>
+</nav>
+<script>
+    $(document).ready(
+        function(){
+            $(".panel-default:first").click();
+    });
+</script>
+{template 'footer'}

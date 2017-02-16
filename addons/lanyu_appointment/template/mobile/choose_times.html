@@ -1,0 +1,52 @@
+{template 'header'}
+<nav class="navbar navbar-inverse navbar-static-top">
+    <div class="container" align="center">
+        <h4 style="color:white;">{$choose_day}</h4>
+    </div>
+</nav>
+<div style="padding: 20px 10px 0px 10px">
+    <div class="row">
+        {loop $times $time}
+            <div class="col-xs-3"  style="padding-bottom:15px;">
+                <button id="btn{$time['id']}" {if $time['status'] == 1}class="btn btn-default" onclick="choose_time({$time['id']});"{else}class="btn btn-danger"{/if}>
+                    <span class="glyphicon glyphicon-time"></span>{$time['time']}
+                </button>
+            </div>
+        {/loop}
+    </div>
+    <div class="alert alert-danger" role="alert">
+        红色为不能选择或者已经预约满的时间
+    </div>
+</div>
+
+
+
+<nav class="navbar navbar-default navbar-fixed-bottom">
+    <div class="container" style="padding-top: 5px;" align="center">
+        <a href="{php echo $this->createMobileUrl('orders',array('op' => 'choose_day','type_id' => $type_id, 'store_id' => $store_id,'month' => $month))}" >
+            <button class="btn btn-danger" style="width:40%;">重新选择日期</button>
+        </a>
+        &nbsp;&nbsp;
+        <button class="btn btn-success" style="width:40%;" onclick="to_order();">下一步</button>
+    </div>
+</nav>
+<input type="hidden" id="time_id" value="0" />
+<script>
+    function choose_time(id){
+        $(".choose").attr('class','btn btn-default');
+        $("#time_id").val(id);
+        $("#btn"+id).attr('class','btn btn-success choose');
+    }
+    function to_order(){
+        var time_id = $("#time_id").val();
+        if(time_id == 0){
+            alert("请先选择预约时间");
+        }else{
+            var day = "{$choose_day}";
+            var store_id = "{$store_id}";
+            var type_id = "{$type_id}";
+            location.href="{php echo $this->createMobileUrl('orders',array('op' => 'to_package'))}&day="+day+"&store_id="+store_id+"&time_id="+time_id+"&type_id="+type_id;
+        }
+    }
+</script>
+{template 'footer'}

@@ -19,6 +19,10 @@
 		<card embed="false" />
 	</platform>
 	<bindings>
+		<cover>
+			<entry title="预约入口设置" do="welcome" />
+			<entry title="订单入口" do="order" />
+		</cover>
 		<menu>
 			<entry title="预约订单" do="order" direct="false" />
 			<entry title="预约说明" do="welcome" direct="false" />
