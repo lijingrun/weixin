@@ -284,6 +284,45 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 
 			include $this->template('web/type_post');
 		}
+
+		//设置套餐
+		if($op == 'package'){
+			$id = $_GPC['type_id'];
+			$type = pdo_fetch("SELECT * FROM ".tablename('lanyu_appointment_type')." WHERE id =".$id." AND weid = ".$_W['uniacid']);
+
+			$under = pdo_fetchall("SELECT t.*,p.price as p_price,p.down_type FROM ".tablename('lanyu_appointment_type')." AS t,".tablename('lanyu_appointment_package')." AS p WHERE p.type_id =".$id." AND p.weid=".$_W['uniacid']." AND p.down_type = t.id");
+			if(!empty($under)){
+				$has_choose = array();
+				foreach($under as $u){
+					$has_choose[] = $u['down_type'];
+				}
+				$has_choose = implode(',',$has_choose);
+				$other_types = pdo_fetchall("SELECT * FROM " . tablename('lanyu_appointment_type') . " WHERE weid =" . $_W['uniacid']." AND id not in (".$has_choose.")");
+			}else {
+				$other_types = pdo_fetchall("SELECT * FROM " . tablename('lanyu_appointment_type') . " WHERE weid =" . $_W['uniacid']);
+			}
+
+			include $this->template('web/package');
+		}
+
+		//添加套餐
+		if($op == 'add_package'){
+			$type_id = $_GPC['type_id'];
+			$under_type = $_GPC['under_type'];
+			$under_price = $_GPC['under_price'];
+			$insert = array(
+				'weid' => $_W['uniacid'],
+				'type_id' => $type_id,
+				'down_type' => $under_type,
+				'price' => $under_price,
+			);
+			if(pdo_insert('lanyu_appointment_package',$insert)){
+				echo 111;
+			}else{
+				echo 222;
+			}
+			exit;
+		}
 	}
 
 	//根据id递归出区域
@@ -423,7 +462,7 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 			$time_id = $_GPC['time_id'];
 			//先查类型是否有套餐
 //			$type = pdo_fetch("SELECT * FROM ".tablename('lanyu_appointment_type')." WHERE id =".$type_id." AND weid=".$_W['uniacid']);
-			$under_type = pdo_fetchall("SELECT * FROM ".tablename('lanyu_appointment_package')." WHERE type_id =".$type_id." AND weid =".$_W['uniacid']);
+			$under_type = pdo_fetchall("SELECT t.*,p.price as p_price FROM ".tablename('lanyu_appointment_package')." AS p,".tablename('lanyu_appointment_type')." AS t WHERE p.type_id =".$type_id." AND p.weid =".$_W['uniacid']." AND p.down_type = t.id");
 			if(empty($under_type)){
 				message('正在帮您确认信息',$this->createMobileUrl('orders',array('op' => 'to_order','day' => $day, 'type_id' => $type_id, 'store_id' => $store_id, 'time_id' => $time_id)),'success');
 			}else{
@@ -434,7 +473,8 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 		//确认订单
 		if($op == 'to_order'){
 			$day = $_GPC['day'];
-			$type_id = $_GPC['type_id'];
+			$type_id = $_GPC['type_id']; //主id
+			$o_type_ids = $_GPC['ot'];
 			$store_id = $_GPC['store_id'];
 			$time_id = $_GPC['time_id'];
 			//查店铺
@@ -444,10 +484,127 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 			$store['region_name'] = $region_name;
 			//查时间
 			$time = pdo_fetch("SELECT * FROM ".tablename('lanyu_appointment_times')." WHERE id =".$time_id." AND weid=".$_W['uniacid']);
-			//查选择类型
-			$types = pdo_fetchall("SELECT * FROM ".tablename('lanyu_appointment_type')." WHERE id in(".$type_id.") AND weid =".$_W['uniacid']);
+			//查选择主类型
+			$type = pdo_fetch("SELECT * FROM ".tablename('lanyu_appointment_type')." WHERE id =".$type_id." AND weid =".$_W['uniacid']);
+			$total_price = $type['price'];
+			//套餐类型
+			if(!empty($o_type_ids)){
+				$o_type_ids = implode(',',$o_type_ids);
+				$other_types = pdo_fetchall("SELECT t.*,p.price as p_price FROM ".tablename('lanyu_appointment_type')." AS t,".tablename('lanyu_appointment_package')." AS p WHERE t.id in(".$o_type_ids.") AND t.weid =".$_W['uniacid']." AND p.down_type = t.id");
+				foreach($other_types as $ots){
+					$total_price += $ots['p_price'];
+				}
+			}
+
 			include $this->template('order_post');
 		}
+
+		//生成订单
+		if($op == 'order'){
+			$type_id = $_GPC['type_id'];
+			$time_id = $_GPC['time_id'];
+			$store_id = $_GPC['store_id'];
+			$day = $_GPC['day'];
+			$name = $_GPC['name'];
+			$phone = $_GPC['phone'];
+			$email = $_GPC['email'];
+			$o_type_ids = $_GPC['o_type_ids'];
+			$now = TIMESTAMP;
+			$insert = array(
+				'weid' => $_W['uniacid'],
+				'openid' => $_W['openid'],
+				'phone' => $phone,
+				'name' => $name,
+				'email' => $email,
+				'status' => 1,
+				'create_time' => $now,
+				'appointment_day' => strtotime($day),
+				'times_id' => $time_id,
+				'store_id' => $store_id,
+			);
+			if(pdo_insert('lanyu_appointment_data',$insert)){
+				$uid = pdo_insertid();
+				$app_id = $uid;
+				$type = pdo_fetch("SELECT * FROM ".tablename('lanyu_appointment_type')." WHERE id =".$type_id." AND weid =".$_W['uniacid']);
+				$order_type = array();
+				$type_array = array(
+						'weid' => $_W['uniacid'],
+						'app_id' => $app_id,
+						'type_id' => $type['id'],
+						'price' => $type['price'],
+				);
+				$order_type[] = $type_array;
+				if(!empty($o_type_ids)){
+					$o_types = pdo_fetchall("SELECT * FROM ".tablename('lanyu_appointment_package')." WHERE down_type in (".$o_type_ids.") AND weid =".$_W['uniacid']);
+					foreach($o_types as $ot){
+						$ot_arr = array(
+							'weid' => $_W['uniacid'],
+							'app_id' => $app_id,
+							'type_id' => $ot['down_type'],
+							'price' => $ot['price'],
+						);
+						$order_type[] = $ot_arr;
+					}
+				}
+				foreach($order_type as $ort){
+					pdo_insert('lanyu_appointment_to_type',$ort);
+				}
+			}
+			$return = array(
+				'error' => 0,
+				'app_id' => $app_id,
+			);
+			$return = json_encode($return);
+			echo $return;
+			exit;
+		}
+	}
+
+	//我的订单
+	public function doMobileMy_orders(){
+		global $_GPC, $_W;
+		$op = !empty($_GPC['op']) ? trim($_GPC['op']) : 'list';
+
+		if($op == 'list'){
+			if(empty($_W['open_id'])){
+				$_W['openid'] = 1;
+			}
+			$list = pdo_fetchall("SELECT d.*,t.time FROM ".tablename('lanyu_appointment_data')." as d,".tablename('lanyu_appointment_times')." as t WHERE d.openid =".$_W['openid']." AND d.weid =".$_W['uniacid']." AND d.times_id = t.id AND d.store_id = t.store_id");
+			$total_price = 0;
+			foreach($list as $key=>$l){
+				$types = pdo_fetchall("SELECT tt.price as p_price,t.* FROM ".tablename('lanyu_appointment_to_type')." AS tt,".tablename('lanyu_appointment_type')." AS t"." WHERE tt.app_id =".$l['id']." AND tt.weid =".$_W['uniacid']." AND tt.type_id = t.id");
+				$list[$key]['types'] = $types;
+				foreach($types as $type){
+					$total_price += $type['p_price'];
+				}
+			}
+
+			include $this->template('my_orders');
+		}
+
+		//订单详细
+		if($op == 'detail'){
+			$id = $_GPC['id'];
+			$order = pdo_fetch("SELECT * FROM ".tablename('lanyu_appointment_data')." WHERE id =".$id." AND weid =".$_W['uniacid']);
+			$store = pdo_fetch("SELECT * FROM ".tablename('lanyu_appointment_store')." WHERE id =".$order['store_id']." AND weid =".$_W['uniacid']);
+			$time = pdo_fetch("SELECT * FROM ".tablename('lanyu_appointment_times')." WHERE id =".$order['times_id']." AND weid =".$_W['uniacid']." AND store_id =".$order['store_id']);
+			$types = pdo_fetchall("SELECT tt.price as p_price,t.* FROM ".tablename('lanyu_appointment_to_type')." AS tt,".tablename('lanyu_appointment_type')." AS t"." WHERE tt.app_id =".$order['id']." AND tt.weid =".$_W['uniacid']." AND tt.type_id = t.id");
+			$total_price = 0;
+			foreach($types as $type){
+				$total_price += $type['price'];
+			}
+			include $this->template('order_detail');
+		}
+
+		//取消订单
+		if($op == 'del'){
+			$id = $_GPC['id'];
+			if(pdo_update('lanyu_appointment_data',array('status' => 0),array('id' => $id))){
+				echo 111;
+			}
+			exit;
+		}
+
 	}
 
 	//根据月份计算天数

@@ -1,0 +1,65 @@
+{template 'header'}
+<nav class="navbar navbar-inverse navbar-static-top">
+    <div class="container" align="center">
+        <h4 style="color:white;">套餐选择</h4>
+    </div>
+</nav>
+<div style="padding: 20px 10px 0px 10px">
+    <div class="alert alert-success" role="alert">
+        您所选择的类型有下列套餐可选！
+        <p>如果不选择套餐，请直接点击下一步</p>
+    </div>
+    <div class="row">
+        {loop $under_type $type}
+        <div class="col-xs-4">
+            <div align="center">
+                <img src="../attachment/{$type['image']}" style="width:80%;" />
+                <p>{$type['name']}</p>
+                <s>￥{$type['price']}</s>
+                <p style="color:#FF8C00;">￥{$type['p_price']}</p>
+                <button class="btn btn-default" id="btn{$type['id']}" onclick="choose_package({$type['id']});">选&nbsp;择</button>
+            </div>
+        </div>
+        {/loop}
+    </div>
+</div>
+
+<nav class="navbar navbar-default navbar-fixed-bottom">
+    <div class="container" style="padding-top: 5px;" align="center">
+        <form id='form' method="post" action="{php echo $this->createMobileUrl('orders',array('op' => 'to_order'))}">
+        <input type="hidden" name="day" value="{$day}" />
+        <input type="hidden" name="type_id" value="{$type_id}" />
+        <input type="hidden" name="store_id" value="{$store_id}" />
+        <input type="hidden" name="time_id" value="{$time_id}" />
+        </form>
+        <a href="{php echo $this->createMobileUrl('types')}" >
+            <button class="btn btn-danger" style="width:40%;">重新选择类型</button>
+        </a>
+        &nbsp;&nbsp;
+        <button class="btn btn-success" style="width:40%;" onclick="to_order();">下一步</button>
+    </div>
+</nav>
+<script>
+    function change_day(){
+        var month = $("#month").val();
+        location.href="{php echo $this->createMobileUrl('orders',array('op' => 'choose_day', 'type_id' => $type_id,'store_id' => $store_id))}&month="+month;
+    }
+    function choose_package(type_id){
+        var c = $("#btn"+type_id).attr('class');
+        if( c == 'btn btn-default'){
+            var inp = "<input type='hidden' value='"+type_id+"' id='o_t"+type_id+"' name='ot[]' />";
+            $("#form").append(inp);
+            $("#btn"+type_id).attr('class','btn btn-success');
+            $("#btn"+type_id).html('取消选择');
+        }else{
+            $("#o_t"+type_id).remove();
+            $("#btn"+type_id).attr('class','btn btn-default');
+            $("#btn"+type_id).html('选&nbsp;择');
+        }
+    }
+    function to_order(){
+        $("#form").submit();
+    }
+</script>
+
+{template 'footer'}

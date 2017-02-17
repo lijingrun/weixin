@@ -1,0 +1,84 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+    <!--<li><a href="{php echo $this->createWebUrl('store',array('op'=>'post'));}">添加店铺</a></li>-->
+    <li  class="active"><a href="">套餐管理</a></li>
+    <!--<li ><a href="{php echo $this->createWebUrl('store', array('op'=>'type'))}">店铺类型管理</a></li>-->
+</ul>
+
+<div class="main panel panel-default">
+    <div class="category panel-body table-responsive">
+        <div class="panel panel-info">
+                <div class="panel-heading"><strong style="color:red;">{$type['name']}</strong>关联套餐管理</div>
+                    <div class="panel-body">
+                        <div class="form-horizontal" role="form">
+                            <div class="form-group">
+                                <label class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">类型名称</label>
+                                <div class="col-sm-8 col-lg-9">
+                                    <select class="form-control" id="under_type">
+                                        {loop $other_types $ot}
+                                        <option value="{$ot['id']}">{$ot['name']}（原价：￥{$ot['price']}）</option>
+                                        {/loop}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">套餐价</label>
+                                <div class="col-sm-8 col-lg-9">
+                                    <input type="text" id="under_price" class="form-control" />
+                                </div>
+                            </div>
+                        <div class="form-group">
+                            <div class=" col-xs-12 col-sm-2 col-lg-2">
+                                <button class="btn btn-default" onclick="add();"><i class="fa fa-search"></i> 设置</button>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+        <div>
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h3 class="panel-title">已绑定套餐</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        {loop $under $u}
+                        <div class="col-xs-4">
+                            <div align="center">
+                                <img src="../attachment/{$u['image']}" style="width:80px" />
+                                <p>{$u['name']}</p>
+                                <p>原价：￥{$u['price']}</p>
+                                <p>套餐价：￥{$u['p_price']}</p>
+                            </div>
+                        </div>
+                        {/loop}
+                    </div>
+                </div>
+            </div>
+        </div>
+        </form>
+    </div>
+</div>
+<script>
+    function add(){
+        var under_type = $("#under_type").val();
+        var under_price = $("#under_price").val();
+        var type_id = "{$id}";
+        var url = "{php echo $this->createWebUrl('type', array('op'=>'add_package'))}";
+        if(under_price > 0){
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : {'under_type' : under_type, 'under_price' : under_price, 'type_id' : type_id},
+                success: function(data){
+                    if(data == 111){
+                        alert("操作成功！");
+                        location.reload();
+                    }
+                }
+            });
+        }
+    }
+</script>
+
+{template 'common/footer'}

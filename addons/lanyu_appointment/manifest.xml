@@ -93,6 +93,7 @@
 		  `create_time` varchar(255) NOT NULL ,
 		  `appointment_day` varchar(255) NOT NULL ,
 		  `times_id` int(11) NOT NULL ,
+		  `store_id` int(11) NOT NULL ,
 		  PRIMARY KEY (`id`)
 		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 

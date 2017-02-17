@@ -1,0 +1,97 @@
+{template 'header'}
+<nav class="navbar navbar-inverse navbar-static-top">
+    <div class="container" align="center">
+        <h4 style="color:white;">订单详细</h4>
+    </div>
+</nav>
+<div style="padding: 20px 10px 0px 10px">
+    <div class="panel panel-success">
+        <div class="panel-heading">
+            <h3 class="panel-title"><span class="glyphicon glyphicon-success"></span>预留信息</h3>
+        </div>
+        <div class="panel-body">
+            <div class="input-group">
+                <span class="input-group-addon" >称呼：</span>
+                <input type="text" class="form-control" id="name" placeholder="{$order['name']}" readonly="readonly" aria-describedby="basic-addon1">
+            </div>
+            <br />
+            <div class="input-group">
+                <span class="input-group-addon" >电话：</span>
+                <input type="text" class="form-control" id="phone" placeholder="{$order['phone']}" readonly="readonly" aria-describedby="basic-addon1">
+            </div>
+            <br />
+            <div class="input-group">
+                <span class="input-group-addon" >Email：</span>
+                <input type="text" class="form-control" id="email" placeholder="{$order['email']}" readonly="readonly" aria-describedby="basic-addon1">
+            </div>
+        </div>
+    </div>
+    <div class="alert alert-info" role="alert">
+        预约时间：{$day}&nbsp;<span class="glyphicon glyphicon-time"></span>{php echo date('Y-m-d',$order['appointment_day'])}&nbsp;{$time['time']}
+    </div>
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            <h3 class="panel-title"><span class="glyphicon glyphicon-pushpin"></span>预约店铺：{$store['name']}</h3>
+        </div>
+        <div class="panel-body">
+            <p>
+                <span class="glyphicon glyphicon-map-marker">&nbsp;{$store['region_name']}{$store['address']}</span>
+            </p>
+            <p>
+                <span class="glyphicon glyphicon-tags">&nbsp;{$store['traffic']}</span>
+            </p>
+        </div>
+    </div>
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            <h3 class="panel-title"><span class="glyphicon glyphicon-pushpin"></span>预约类型</h3>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                {loop $types $t}
+                <div class="col-xs-4" align="center" >
+                    <img src="../attachment/{$t['image']}" style="width: 80%;" />
+                    <p align="center">{$t['name']}</p>
+                    <s>￥{$t['price']}</s>
+                    <p align="center" style="color:#FF8C00;font-size: 16px;">￥{$t['p_price']}</p>
+                </div>
+                {/loop}
+            </div>
+        </div>
+    </div>
+    <div class="alert alert-success" role="alert" align="right">订单总价：￥{$total_price}</div>
+    <div style="height: 20px;"></div>
+</div>
+
+
+<nav class="navbar navbar-default navbar-fixed-bottom">
+    <div class="container" style="padding-top: 5px;" align="center">
+        &nbsp;&nbsp;
+        {if $order['status'] == 1}
+        <button class="btn btn-success" style="width:40%;" onclick="to_pay();">支付定金</button>
+        <button class="btn btn-danger" style="width:40%;" onclick="to_del({$order['id']});">取消订单</button>
+        {/if}
+        {if $order['status'] == 0}
+            <h4 style="color:red;">已取消</h4>
+        {/if}
+    </div>
+</nav>
+<script>
+    function to_del(id){
+        if(confirm("是否确定取消订单？")){
+            var url = "{php echo $this->createMobileUrl('my_orders',array('op' => 'del'))}";
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : {'id' : id},
+                success : function(data){
+                    if(data == 111){
+                        alert("操作成功！");
+                        location.reload();
+                    }
+                }
+            });
+        }
+    }
+</script>
+{template 'footer'}

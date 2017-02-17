@@ -36,7 +36,7 @@
                 <td>{if $v['status']=='1'}<span class="label label-success">正常</span>{else}<span class="label label-danger">失效</span>{/if}</td>
                 <td>
                     <a href="{php echo $this->createWebUrl('type',array('id' => $v['id'],'op'=>'post'))}" title="编辑" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><i class="fa fa-edit"></i></a>
-
+                    <a href="{php echo $this->createWebUrl('type',array('type_id' => $v['id'],'op'=>'package'))}" title="设置套餐" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-briefcase"></span></a>
                 </td>
             </tr>
             {/loop}

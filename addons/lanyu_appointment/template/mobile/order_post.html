@@ -5,6 +5,28 @@
     </div>
 </nav>
 <div style="padding: 20px 10px 0px 10px">
+    <div class="alert alert-warning" role="alert" >请填写预留信息并且核对预约信息是否正确！</div>
+    <div class="panel panel-success">
+        <div class="panel-heading">
+            <h3 class="panel-title"><span class="glyphicon glyphicon-success"></span>预留信息</h3>
+        </div>
+        <div class="panel-body">
+            <div class="input-group">
+                <span class="input-group-addon" >称呼：</span>
+                <input type="text" class="form-control" id="name" placeholder="您的称呼" aria-describedby="basic-addon1">
+            </div>
+            <br />
+            <div class="input-group">
+                <span class="input-group-addon" >电话：</span>
+                <input type="text" class="form-control" id="phone" placeholder="手机号码" aria-describedby="basic-addon1">
+            </div>
+            <br />
+            <div class="input-group">
+                <span class="input-group-addon" >Email：</span>
+                <input type="text" class="form-control" id="email" placeholder="常用邮箱" aria-describedby="basic-addon1">
+            </div>
+        </div>
+    </div>
     <div class="alert alert-info" role="alert">
         预约时间：{$day}&nbsp;<span class="glyphicon glyphicon-time"></span>{$time['time']}
     </div>
@@ -27,11 +49,17 @@
         </div>
         <div class="panel-body">
             <div class="row">
-                {loop $types $t}
+                <div class="col-xs-4" align="center" >
+                    <img src="../attachment/{$type['image']}" style="width: 80%;" />
+                    <p align="center">{$type['name']}</p>
+                    <p align="center" style="color:#FF8C00;font-size: 16px;">￥{$type['price']}</p>
+                </div>
+                {loop $other_types $t}
                 <div class="col-xs-4" align="center" >
                     <img src="../attachment/{$t['image']}" style="width: 80%;" />
                     <p align="center">{$t['name']}</p>
-                    <p align="center" style="color:#FF8C00;font-size: 16px;">{$t['price']}</p>
+                    <s>￥{$t['price']}</s>
+                    <p align="center" style="color:#FF8C00;font-size: 16px;">￥{$t['p_price']}</p>
                 </div>
                 {/loop}
             </div>
@@ -40,6 +68,11 @@
     <div class="alert alert-success" role="alert" align="right">订单总价：￥{$total_price}</div>
 </div>
 
+    <input type="hidden" id="type_id" value="{$type_id}" />
+    <input type="hidden" id="store_id" value="{$store_id}" />
+    <input type="hidden" id="time_id" value="{$time_id}" />
+    <input type="hidden" id="day" value="{$day}" />
+    <input type="hidden" id="o_type_ids" value="{$o_type_ids}" />
 
 
 <nav class="navbar navbar-default navbar-fixed-bottom">
@@ -51,21 +84,40 @@
         <button class="btn btn-success" style="width:40%;" onclick="to_order();">确认预约</button>
     </div>
 </nav>
-<input type="hidden" id="time_id" value="0" />
 <script>
-    function choose_time(id){
-        $(".choose").attr('class','btn btn-default');
-        $("#time_id").val(id);
-        $("#btn"+id).attr('class','btn btn-success choose');
-    }
     function to_order(){
-        var time_id = $("#time_id").val();
-        if(time_id == 0){
-            alert("请先选择预约时间");
-        }else{
-            var day = "{$choose_day}";
-            var store_id = "{$store_id}";
-            location.href="{php echo $this->createMobileUrl('orders',array('op' => 'to_order'))}&day="+day+"&store_id="+store_id+"&time_id="+time_id;
+       var type_id = $("#type_id").val();
+       var store_id = $("#store_id").val();
+       var time_id = $("#time_id").val();
+       var day = $("#day").val();
+       var o_type_ids = $("#o_type_ids").val();
+        var url = "{php echo $this->createMobileUrl('orders',array('op' => 'order'))}";
+        var name = $("#name").val();
+        var phone = $("#phone").val();
+        var email = $("#email").val();
+        if(name == '' || phone == '' || email == ''){
+            alert('请输入预留信息！');
+        }else {
+            $.ajax({
+                type: 'post',
+                url: url,
+                data: {
+                    'type_id': type_id,
+                    'store_id': store_id,
+                    'time_id': time_id,
+                    'day': day,
+                    "o_type_ids": o_type_ids,
+                    'name' : name,
+                    'phone' : phone,
+                    'email' : email,
+                },
+                success: function (data) {
+                    var obj = JSON.parse(data);
+                    if(obj.error == 0){
+                        location.href="{php echo $this->createMobileUrl('my_orders',array('op' => 'detail'))}&id="+obj.app_id;
+                    }
+                }
+            });
         }
     }
 </script>

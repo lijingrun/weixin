@@ -1,0 +1,32 @@
+{template 'header'}
+<nav class="navbar navbar-inverse navbar-static-top">
+    <div class="container" align="center">
+        <h4 style="color:white;">我的订单</h4>
+    </div>
+</nav>
+<div style="padding: 10px">
+    {loop $list $l}
+    <a href="{php echo $this->createMobileUrl('my_orders',array('op' => 'detail', 'id' => $l['id']))}">
+        <div class="panel panel-warning">
+            <div class="panel-heading">
+                <h3 class="panel-title">{php echo date('Y-m-d',$l['appointment_day'])}&nbsp;&nbsp;[{$l['time']}</h3>
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    {loop $l['types'] $t}
+                        <div class="col-xs-4" align="center">
+                            <img src="../attachment/{$t['image']}" style="width: 80%;" />
+                            <p>{$t['name']}</p>
+                            <p>{$t['p_price']}</p>
+                        </div>
+                    {/loop}
+                </div>
+                <p align="right" style="color:#FF8C00">总价：￥{$total_price}</p>
+            </div>
+        </div>
+    </a>
+    {/loop}
+</div>
+
+
+{template 'footer'}
