@@ -1,0 +1,93 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+    <li ><a href="{php echo $this->createWebUrl('order',array('op'=>'index'));}">订单列表</a></li>
+    <li class="active"><a href="#">订单详细</a></li>
+    <!--<li ><a href="{php echo $this->createWebUrl('store', array('op'=>'type'))}">店铺类型管理</a></li>-->
+</ul>
+<nav class="navbar navbar-inverse navbar-static-top">
+    <div class="container" align="center">
+        <h4 style="color:white;">订单详细</h4>
+    </div>
+</nav>
+<div style="padding: 20px 10px 0px 10px">
+    <div class="panel panel-success">
+        <div class="panel-heading">
+            <h3 class="panel-title"><span class="glyphicon glyphicon-success"></span>预约信息</h3>
+        </div>
+        <div class="panel-body">
+            <div class="alert alert-info" role="alert">
+                <span class="glyphicon glyphicon-user"></span>订单状态：
+                {if $order['status'] == 0}
+                <span style="color:red">已取消</span>
+                {else if $order['status'] == 1 }
+                <span style="color:#919191">未支付定金</span>
+                {else if $order['status'] == 2 }
+                <span style="color:green">已支付定金</span>
+                {/if}
+            </div>
+            <div class="alert alert-info" role="alert">
+                <span class="glyphicon glyphicon-user"></span>称呼：{$order['name']}
+            </div>
+            <div class="alert alert-info" role="alert">
+                <span class="glyphicon glyphicon-phone"></span>电话：{$order['phone']}
+            </div>
+            <div class="alert alert-info" role="alert">
+                <span class="glyphicon glyphicon-envelope"></span>Email：{$order['email']}
+            </div>
+            <div class="alert alert-info" role="alert">
+                <span class="glyphicon glyphicon-home"></span>店铺：{$order['store_name']}
+            </div>
+            <div class="alert alert-info" role="alert">
+                <span class="glyphicon glyphicon-time"></span>预约时间：{php echo date('Y-m-d',$order['appointment_day'])}&nbsp;{$order['time']}
+            </div>
+        </div>
+    </div>
+
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            <h3 class="panel-title"><span class="glyphicon glyphicon-pushpin"></span>预约类型</h3>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                {loop $types $t}
+                <div class="col-xs-2" align="center" >
+                    <img src="../attachment/{$t['image']}" style="width: 80%;" />
+                    <p align="center">{$t['name']}</p>
+                    <s>￥{$t['price']}</s>
+                    <p align="center" style="color:#FF8C00;font-size: 16px;">￥{$t['p_price']}</p>
+                </div>
+                {/loop}
+            </div>
+        </div>
+    </div>
+    <div class="alert alert-success" role="alert" align="right">
+        <p>订单总价：￥{$total_price}</p>
+        <p>已付定金：￥{$order['deposit']}</p>
+    </div>
+    <div style="height: 20px;"></div>
+</div>
+
+
+
+<script>
+    function to_del(id){
+        if(confirm("是否确定取消订单？")){
+            var url = "{php echo $this->createMobileUrl('my_orders',array('op' => 'del'))}";
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : {'id' : id},
+                success : function(data){
+                    if(data == 111){
+                        alert("操作成功！");
+                        location.reload();
+                    }
+                }
+            });
+        }
+    }
+    function to_pay(){
+
+    }
+</script>
+{template 'common/footer'}

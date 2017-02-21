@@ -1,0 +1,116 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+    <li class="active"><a href="{php echo $this->createWebUrl('order',array('op'=>'index'));}">订单列表</a></li>
+    <!--<li ><a href="{php echo $this->createWebUrl('store', array('op'=>'type'))}">店铺类型管理</a></li>-->
+</ul>
+<script>
+    function find(){
+        var store_id = $("#store_id").val();
+        var phone = $("#phone").val();
+        var day = $("#day").val();
+        var status = $("#status").val();
+        location.href="{php echo $this->createWebUrl('order',array('op'=>'index'));}&store_id="+store_id+"&phone="+phone+"&day="+day+"&status="+status;
+    }
+</script>
+<div class="main panel panel-default">
+    <div class="category panel-body table-responsive">
+        <div class="panel panel-info">
+            <div class="panel-heading">查询</div>
+                <div class="panel-body">
+                <div class="form-horizontal" role="form">
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">店铺</label>
+                        <div class="col-sm-3 col-lg-2">
+                            <select class="form-control" id="store_id">
+                                <option value="0">全部</option>
+                                {loop $stores $store}
+                                <option value="{$store['id']}" {if $store_id == $store['id']}selected='selected'{/if}>{$store['name']}</option>
+                                {/loop}
+                            </select>
+                        </div>
+                        <label class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">电话</label>
+                        <div class="col-sm-3 col-lg-2">
+                            <input type="text" class="form-control" id="phone" value="{$phone}" />
+                        </div>
+                        <label class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">预约日期</label>
+                        <div class="col-sm-4 col-lg-2">
+                            <input type="date" class="form-control" id="day" value="{$day}" />
+                        </div>
+                        <label class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">预约状态</label>
+                        <div class="col-sm-4 col-lg-2">
+                            <select class="form-control" id="status">
+                                <option value="1" {if $status == '1'}selected='selected'{/if}>全部</option>
+                                <option value="2" {if $status == '2'}selected='selected'{/if}>取消</option>
+                                <option value="3" {if $status == '3'}selected='selected'{/if}>未支付</option>
+                                <option value="4" {if $status == '4'}selected='selected'{/if}>已支付</option>
+                                <option value="5" {if $status == '5'}selected='selected'{/if}>已完成</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class=" col-xs-12 col-sm-2 col-lg-2">
+                            <button class="btn btn-default" onclick="find();"><i class="fa fa-search"></i> 搜索</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th >店铺</th>
+                <th >客户称呼</th>
+                <th >电话号码</th>
+                <th >email</th>
+                <th >预约日期</th>
+                <th >预约档期</th>
+                <th>状态</th>
+                <th >操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            {loop $list $l}
+            <tr>
+                <td>
+                    {$l['store_name']}
+                </td>
+                <td>
+                    {$l['name']}
+                </td>
+                <td>
+                    {$l['phone']}
+                </td>
+                <td>
+                    {$l['email']}
+                </td>
+                <td>
+                    {php echo date('Y-m-d',$l['appointment_day'])}
+                </td>
+                <td>
+                    {$l['time']}
+                </td>
+                <td>{if $l['status']=='1'}<span class="label label-default">未支付</span>{else if $l['status'] == 2}<span class="label label-success">已支付</span>{else if $l['status'] == 0}<span class="label label-success">已取消</span>{/if}</td>
+                <td>
+                    <a href="{php echo $this->createWebUrl('order',array('id' => $l['id'],'op'=>'detail'))}" title="查看" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-search"></span></a>
+
+                </td>
+            </tr>
+            {/loop}
+            <tr>
+                <td colspan="8">
+                    <a class='btn btn-default' href="{php echo $this->createWebUrl('store', array('op'=>'post','id'=>0));}"><i class="fa fa-arrows"></i> 添加店铺</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        </form>
+        {$pager}
+    </div>
+</div>
+<script>
+    require(['bootstrap'],function($){
+        $('.btn').tooltip();
+    });
+</script>
+
+{template 'common/footer'}

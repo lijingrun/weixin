@@ -89,6 +89,7 @@
                     {if $sign['status'] == 1}
                     <a href="{php echo $this->createWebUrl('sign',array('id' => $sign['id'],'op'=>'examine'))}" title="审核" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-ok"></span></a>
                     <a href="{php echo $this->createWebUrl('sign',array('id' => $sign['id'],'op'=>'del'))}" onclick="return confirm('如果已审，请先将ERP生成的收款单删除！！');return false;" title="删除" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-remove"></span></a>
+                    <a href="{php echo $this->createWebUrl('sign',array('id' => $sign['id'],'op'=>'edit'))}" title="修改" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-edit"></span></a>
                     {else if $sign['status'] == 2}
                     <a href="{php echo $this->createWebUrl('sign',array('id' => $sign['id'],'op'=>'return'))}" onclick="return confirm('请先将ERP生成的收款单删除！！');return false;" title="返审" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-floppy-remove"></span></a>
                     {/if}

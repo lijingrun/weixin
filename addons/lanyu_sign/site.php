@@ -122,6 +122,34 @@ class Lanyu_signModuleSite extends WeModuleSite {
 			include $this->template('web/sign_add');
 		}
 
+		//修改
+		if($op == 'edit'){
+			$id = $_GPC['id'];
+			$banks = pdo_fetchall("SELECT * FROM ".tablename('lanyu_bank')." WHERE weid =".$_W['uniacid']);
+			$sign = pdo_fetch("SELECT s.*,b.bank_name,b.bank_code FROM ".tablename('lanyu_sign')." AS s,".tablename('lanyu_bank')." AS b WHERE s.id =".$id." AND s.weid =".$_W['uniacid']);
+			if(checksubmit('submit')) {
+				$id = $_GPC['id'];
+				$bank_user = $_GPC['bank_user'];
+				$amount = $_GPC['amount'];
+				$day = $_GPC['day'];
+				$bank_id = $_GPC['bank_id'];
+				$insert = array(
+						'bank_id' => $bank_id,
+						'weid' => $_W['uniacid'],
+						'amount' => $amount,
+						'input_id' => $_W['user']['uid'],
+						'bank_user' => $bank_user,
+						'create_time' => strtotime($day)
+				);
+				if (pdo_update('lanyu_sign', $insert, array('id' => $id))) {
+					message('操作成功！', $this->createWebUrl('sign'), 'success');
+				} else {
+					message('服务器繁忙，请稍后重试！', $this->createWebUrl('sign'), 'error');
+				}
+			}
+			include $this->template('web/sign_add');
+		}
+
 		//删除
 		if($op == 'del'){
 			$id = $_GPC['id'];
@@ -187,12 +215,16 @@ class Lanyu_signModuleSite extends WeModuleSite {
 					for ($row = 2;$row <= $highestRow;$row++){
 						$bank_name = trim($objWorksheet->getCellByColumnAndRow(0, $row)->getValue());
 						$bank_code = trim($objWorksheet->getCellByColumnAndRow(1, $row)->getValue());
-						$user_name = trim($objWorksheet->getCellByColumnAndRow(2, $row)->getValue());
-						$amount = floatval($objWorksheet->getCellByColumnAndRow(3, $row)->getValue());
-						$day = trim($objWorksheet->getCellByColumnAndRow(4, $row)->getValue());
+						$user_name = trim($objWorksheet->getCellByColumnAndRow(3, $row)->getValue());
+						$amount = floatval($objWorksheet->getCellByColumnAndRow(4, $row)->getValue());
+						$day = trim($objWorksheet->getCellByColumnAndRow(2, $row)->getValue());
 						if(empty($bank_name) || empty($bank_code) || empty($user_name) || empty($amount) || empty($day)){
 							$names[] = array(
 								'name' => $bank_name,
+								'bank_code' => $bank_code,
+								'user_name' => $user_name,
+								'amount' => $amount,
+								'day' => $day,
 								'status' => 0,
 								'data' => '资料不齐全'
 							);
@@ -202,6 +234,10 @@ class Lanyu_signModuleSite extends WeModuleSite {
 						if(empty($bank)){
 							$names[] = array(
 									'name' => $bank_name,
+									'bank_code' => $bank_code,
+									'user_name' => $user_name,
+									'amount' => $amount,
+									'day' => $day,
 									'status' => 0,
 									'data' => '银行资料不正确'
 							);
@@ -223,7 +259,21 @@ class Lanyu_signModuleSite extends WeModuleSite {
 							);
 						}
 					}
-					message('数据导入完毕',  $this->createWebUrl('sign',array('op' => 'import','data' => $names)),'success');
+					$str = "收款银行,银行代码,汇款日期,汇款账号,汇款金额,错误原因\n";
+					$str = iconv('utf-8','gb2312',$str);
+					foreach( $names as $v ) {
+						$bank_name = iconv('utf-8','gb2312',$v['name']);
+						$user_name = iconv('utf-8','gb2312',$v['user_name']);
+						$bank_code = iconv('utf-8','gb2312',$v['bank_code']);
+						$data = iconv('utf-8','gb2312',$v['data']);
+						if($v['status'] != 1) {
+							$str .= $bank_name . ',' . $bank_code . ',' .$v['day'].','.$user_name.','.$v['amount'].','.$data. "\n";
+						}
+					}
+					$filename = '导入问题列表.csv';
+					$this->export_csv($filename,$str);
+					exit;
+//					message('数据导入完毕',  $this->createWebUrl('sign',array('op' => 'import','data' => $names)),'success');
 				}
 				message('文件上传失败！',  '', 'error');
 			}

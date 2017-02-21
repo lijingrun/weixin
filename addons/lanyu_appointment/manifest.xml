@@ -21,7 +21,7 @@
 	<bindings>
 		<cover>
 			<entry title="预约入口设置" do="welcome" />
-			<entry title="订单入口" do="order" />
+			<entry title="订单入口" do="my_orders" />
 		</cover>
 		<menu>
 			<entry title="预约订单" do="order" direct="false" />
@@ -40,6 +40,8 @@
 		  `weid` int(11) DEFAULT NULL,
 		  `content` text NOT NULL,
 		  `title` varchar(255) NOT NULL,
+		  `coe` float(10,2) NOT NULL,
+		  `c_type` int(1) NOT NULL,
 		  PRIMARY KEY (`id`)
 		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 
@@ -140,6 +142,15 @@
 		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 
 	]]></install>
-	<uninstall><![CDATA[]]></uninstall>
+	<uninstall><![CDATA[
+		DROP TABLE IF EXISTS `ims_lanyu_appointment_welcome`;
+		DROP TABLE IF EXISTS `ims_lanyu_appointment_type`;
+		DROP TABLE IF EXISTS `ims_lanyu_appointment_to_type`;
+		DROP TABLE IF EXISTS `ims_lanyu_appointment_store`;
+		DROP TABLE IF EXISTS `ims_lanyu_appointment_times`;
+		DROP TABLE IF EXISTS `ims_lanyu_appointment_data`;
+		DROP TABLE IF EXISTS `ims_lanyu_appointment_package`;
+		DROP TABLE IF EXISTS `ims_lanyu_appointment_out_time`;
+	]]></uninstall>
 	<upgrade><![CDATA[]]></upgrade>
 </manifest>

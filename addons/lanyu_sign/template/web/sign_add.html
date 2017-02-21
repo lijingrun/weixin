@@ -17,7 +17,9 @@
                         <div class="col-sm-9 col-xs-12">
                             <select class="form-control" name="bank_id">
                                 {loop $banks $bank}
-                                <option value="{$bank['id']}">{$bank['bank_name']}({$bank['bank_code']})</option>
+                                <option value="{$bank['id']}" {if $bank['id'] == $sign['bank_id']}selected = 'selected'{/if}>
+                                    {$bank['bank_name']}({$bank['bank_code']})
+                                </option>
                                 {/loop}
                             </select>
                         </div>
@@ -25,25 +27,25 @@
                     <div class="form-group">
                         <label class="col-xs-12 col-sm-3 col-md-2 control-label">汇款账号</label>
                         <div class="col-sm-9 col-xs-12">
-                            <input type="text" name="bank_user" class="form-control" />
+                            <input type="text" name="bank_user" value="{$sign['bank_user']}" class="form-control" />
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-xs-12 col-sm-3 col-md-2 control-label">汇款日期</label>
                         <div class="col-sm-9 col-xs-12">
-                            <input type="date" name="day" class="form-control"  />
+                            <input type="date" value="{php echo date('Y-m-d',$sign['create_time'])}" name="day" class="form-control"  />
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-xs-12 col-sm-3 col-md-2 control-label">汇款金额</label>
                         <div class="col-sm-9 col-xs-12">
-                            <input type="text" name="amount" class="form-control"  />
+                            <input type="text" name="amount" value="{$sign['amount']}" class="form-control"  />
                         </div>
                     </div>
                 </div>
             </div>
             <div class="form-group col-sm-12">
-                <input type='hidden' name='id' value="{$theone['id']}" />
+                <input type='hidden' name='id' value="{$sign['id']}" />
                 <input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" />
                 <input type="hidden" name="token" value="{$_W['token']}" />
             </div>

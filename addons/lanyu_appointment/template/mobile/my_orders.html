@@ -9,7 +9,19 @@
     <a href="{php echo $this->createMobileUrl('my_orders',array('op' => 'detail', 'id' => $l['id']))}">
         <div class="panel panel-warning">
             <div class="panel-heading">
-                <h3 class="panel-title">{php echo date('Y-m-d',$l['appointment_day'])}&nbsp;&nbsp;[{$l['time']}</h3>
+                <h3 class="panel-title">{php echo date('Y-m-d',$l['appointment_day'])}&nbsp;&nbsp;{$l['time']}
+                    <span style="float:right">
+                        {if $l['status'] == 1}
+                        待支付
+                        {else if $l['status'] == 0}
+                        <span style="color:red;">已取消</span>
+                        {else if $l['status'] == 2}
+
+                        {else if $l['status'] == 3}
+
+                        {/if}
+                    </span>
+                </h3>
             </div>
             <div class="panel-body">
                 <div class="row">
@@ -21,7 +33,7 @@
                         </div>
                     {/loop}
                 </div>
-                <p align="right" style="color:#FF8C00">总价：￥{$total_price}</p>
+                <p align="right" style="color:#FF8C00">总价：￥{$l['total_price']}</p>
             </div>
         </div>
     </a>

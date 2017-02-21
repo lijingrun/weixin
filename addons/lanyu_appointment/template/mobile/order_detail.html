@@ -59,7 +59,10 @@
             </div>
         </div>
     </div>
-    <div class="alert alert-success" role="alert" align="right">订单总价：￥{$total_price}</div>
+    <div class="alert alert-success" role="alert" align="right">
+        <p>订单总价：￥{$total_price}</p>
+        <p>预付定金：￥{$deposit}</p>
+    </div>
     <div style="height: 20px;"></div>
 </div>
 
@@ -68,7 +71,7 @@
     <div class="container" style="padding-top: 5px;" align="center">
         &nbsp;&nbsp;
         {if $order['status'] == 1}
-        <button class="btn btn-success" style="width:40%;" onclick="to_pay();">支付定金</button>
+        <button class="btn btn-success" style="width:40%;" onclick="to_pay({$order['id']});">支付定金</button>
         <button class="btn btn-danger" style="width:40%;" onclick="to_del({$order['id']});">取消订单</button>
         {/if}
         {if $order['status'] == 0}
@@ -92,6 +95,9 @@
                 }
             });
         }
+    }
+    function to_pay(id){
+        location.href="{php echo $this->createMobileUrl('my_orders',array('op' => 'pay'))}&id="+id;
     }
 </script>
 {template 'footer'}
