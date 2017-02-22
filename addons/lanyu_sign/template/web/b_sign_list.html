@@ -47,31 +47,57 @@
         <thead>
         <tr>
             <th >银行名称</th>
-            <th >银行编码</th>
             <th >收款金额</th>
             <th >收款时间</th>
             <th >汇款账号</th>
             <th >客户名称</th>
-            <th >客户编码</th>
+            <th >汇款金额</th>
             <th >填写人</th>
+            <th>状态</th>
+            <th>备注</th>
             <th >签款</th>
         </tr>
         </thead>
         <tbody>
         {loop $signs $sign}
-        <tr>
-            <td>{$sign['bank_name']}</td>
-            <td>{$sign['bank_code']}</td>
-            <td>￥{$sign['amount']}元</td>
-            <td>{php echo date('Y-m-d',$sign['create_time'])}</td>
-            <td>{$sign['bank_user']}</td>
-            <td>{$sign['member_name']}</td>
-            <td>{$sign['member_code']}</td>
-            <td>{$sign['username']}</td>
-            <td>
+        <tr {if $sign['remark']}style="color:red;" {/if}>
+            <td rowspan="{$sign['count']}">{$sign['bank_name']}</td>
+            <td rowspan="{$sign['count']}">￥{$sign['amount']}元</td>
+            <td rowspan="{$sign['count']}">{php echo date('Y-m-d',$sign['create_time'])}</td>
+            <td rowspan="{$sign['count']}">{$sign['bank_user']}</td>
+            <td>{$sign['first_u']['member_name']}</td>
+            <td>{$sign['first_u']['member_amount']}</td>
+            <td rowspan="{$sign['count']}">{$sign['username']}</td>
+            <td rowspan="{$sign['count']}">
+                {if $sign['status'] == 1}
+                未审核
+                {else}
+                已审核
+                {/if}
+                <br />
+                {if $sign['invoice'] == 1}
+                已开票
+                {else}
+                未开票
+                {/if}
+            </td>
+            <td rowspan="{$sign['count']}" title="{$sign['remark']}">
+                {$sign['remark']}
+            </td>
+            <td rowspan="{$sign['count']}"  >
+                {if $sign['status'] == 1}
                 <a href="{php echo $this->createWebUrl('business',array('id' => $sign['id'],'op'=>'sign'))}" title="签款" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><i class="fa fa-edit"></i></a>
+                {/if}
             </td>
         </tr>
+        {if $sign['other']}
+            {loop $sign['other'] $s_user}
+            <tr>
+                <td>{$s_user['member_name']}</td>
+                <td>{$s_user['member_amount']}</td>
+            </tr>
+            {/loop}
+        {/if}
         {/loop}
         </tbody>
     </table>

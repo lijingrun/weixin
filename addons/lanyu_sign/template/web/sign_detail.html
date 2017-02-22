@@ -1,0 +1,128 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+    <li ><a href="{php echo $this->createWebUrl('sign',array('op'=>'index'));}">收款列表</a></li>
+    <li class="active"><a href="{php echo $this->createWebUrl('sign', array('op'=>'add'))}">添加收款信息</a></li>
+    <li ><a href="{php echo $this->createWebUrl('sign', array('op'=>'import'))}">导入收款信息</a></li>
+</ul>
+<div class="main panel panel-default">
+    <div class="category panel-body table-responsive">
+        <form method="post" class="form-horizontal form">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    收款信息
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">收款银行</label>
+                        <div class="col-sm-9 col-xs-12">
+                            <input type="text" name="bank_user" value="{$bank['bank_name']}({$bank['bank_code']})" readonly="readonly" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">汇款账号</label>
+                        <div class="col-sm-9 col-xs-12">
+                            <input type="text" name="bank_user" value="{$sign['bank_user']}" class="form-control" readonly="readonly" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">汇款日期</label>
+                        <div class="col-sm-9 col-xs-12">
+                            <input type="date" value="{php echo date('Y-m-d',$sign['create_time'])}" name="day" class="form-control" readonly="readonly"  />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">汇款金额</label>
+                        <div class="col-sm-9 col-xs-12">
+                            <input type="text" name="amount" value="￥{$sign['amount']}" class="form-control" readonly="readonly" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">状态</label>
+                        <div class="col-sm-9 col-xs-12">
+                            {if $sign['status']=='2'}<span class="label label-success">已审核</span>{else}<span class="label label-danger">未审核</span>{/if}
+                            {if $sign['invoice']=='1'}<span class="label label-success">已开票</span>{else}<span class="label label-danger">未审核</span>{/if}
+                            {if $sign['remark']}<span class="label label-danger">{$sign['remark']}</span>{/if}
+                        </div>
+                    </div>
+                    {loop $s_user $u}
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label"></label>
+                        <div class="col-sm-3 col-xs-12">
+                            <input type="text" name="bank_user" value="{$u['member_name']}" class="form-control" readonly="readonly" />
+                        </div>
+                        <div class="col-sm-3 col-xs-12">
+                            <input type="text" name="bank_user" value="￥{$u['member_amount']}" class="form-control" readonly="readonly" />
+                        </div>
+                        <div class="col-sm-3 col-xs-12">
+                            <input type="text" name="bank_user" value="{$u['member_code']}" class="form-control" readonly="readonly" />
+                        </div>
+
+                    </div>
+                    {/loop}
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">备注</label>
+                    <div class="col-sm-9 col-xs-12">
+                        <input type="text" id="remark" value="{$sign['remark']}" class="form-control" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-3 col-md-2 control-label">审核时间</label>
+                    <div class="col-sm-9 col-xs-12">
+                        <input type="date" id="examine_time" value="{$sign['examine_time']}" class="form-control" />
+                    </div>
+                </div>
+            </div>
+            <div class="form-group col-sm-12">
+                <input type='hidden' name='id' value="{$sign['id']}" />
+                {if $sign['status'] == 1}
+                    <input type="button" name="examine" onclick="examine();" value="审核" class="btn btn-primary " />
+                &nbsp;                &nbsp;
+                {/if}
+                {if $sign['invoice'] == 0}
+                <a href="{php echo $this->createWebUrl('sign',array('op'=>'invoice','id'=>$sign['id']));}">
+                    <input type="button" name="examine" value="开票" class="btn btn-primary " />
+                </a>
+                {/if}
+                &nbsp; &nbsp;
+                <input type="button" name="examine" value="备注" class="btn btn-primary " onclick="add_remark();" />
+                <input type="hidden" name="token" value="{$_W['token']}" />
+            </div>
+        </form>
+    </div>
+</div>
+<script type="text/javascript">
+    function add_remark(){
+        var remark = $("#remark").val();
+        var url = "{php echo $this->createWebUrl('sign',array('op'=>'remark'));}";
+        var id = "{$sign['id']}";
+        $.ajax({
+            type : 'post',
+            url : url,
+            data : {'remark' : remark, 'id' : id},
+            success : function(data){
+                if(data == 111){
+                    alert("操作成功！");
+                    location.reload();
+                }
+            }
+        });
+    }
+    function examine(){
+        var examine_time = $("#examine_time").val();
+        var id = "{$sign['id']}";
+        var url = "{php echo $this->createWebUrl('sign',array('op'=>'examine_ajax'));}";
+        $.ajax({
+            type : 'post',
+            url : url,
+            data : {'examine_time' : examine_time, 'id' : id},
+            success : function(data){
+                if(data == 111){
+                    alert("操作成功！");
+                    location.reload();
+                }
+            }
+        });
+    }
+</script>
+{template 'common/footer'}

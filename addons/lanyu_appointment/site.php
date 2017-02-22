@@ -116,7 +116,7 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 				$theone = array('status' => 1, 'listorder' => 0);
 			}
 			//店铺类型
-			$region = pdo_fetchall("SELECT * FROM ".tablename('lanyu_region')." WHERE weid =".$_W['uniacid']." AND parent_id = 1");
+			$region = pdo_fetchall("SELECT * FROM ".tablename('lanyu_region')." WHERE parent_id = 1");
 			if(checksubmit('submit')){
 				$listorder = $_GPC['listorder'];
 				$store_name = trim($_GPC['store_name']) ? trim($_GPC['store_name']) : message('请填写店铺名称！');

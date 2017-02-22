@@ -35,17 +35,30 @@
                             <input type="text" name="amount" class="form-control" value="￥{$sign['amount']}" readonly="readonly" />
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">客户名称</label>
-                        <div class="col-sm-9 col-xs-12">
-                            <input type="text" name="member_name" class="form-control" value="{$sign['member_name']}" />
+                    <!-- 填写开始 -->
+                    <div id="data">
+                        <div class="form-group">
+                            <label class="col-xs-12 col-sm-3 col-md-2 control-label">客户名称</label>
+                            <div class="col-sm-9 col-xs-12">
+                                <input type="text" name="member_name[]" class="form-control" value="{$sign['member_name']}" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-xs-12 col-sm-3 col-md-2 control-label">客户编码</label>
+                            <div class="col-sm-9 col-xs-12">
+                                <input type="text" name="member_code[]" class="form-control" value="{$sign['member_code']}"  />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-xs-12 col-sm-3 col-md-2 control-label">汇款金额</label>
+                            <div class="col-sm-9 col-xs-12">
+                                <input type="text" name="member_amount[]" class="form-control" value="{$sign['price']}"  />
+                            </div>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">客户编码</label>
-                        <div class="col-sm-9 col-xs-12">
-                            <input type="text" name="member_code" class="form-control" value="{$sign['member_code']}"  />
-                        </div>
+                    <!-- 填写结束 -->
+                    <div align="right">
+                        <input type="button" value="增加收款人" onclick="add_member();" class="btn btn-primary " />
                     </div>
                 </div>
             </div>
@@ -63,11 +76,47 @@
         });
     }
     $('form').submit(function() {
-        if ($.trim($(':text[name="member_name"]').val()) == '') {
+        if ($.trim($(':text[name="member_name[]"]').val()) == '') {
             message('请填写客户名称.', '', 'error');
             return false;
         }
-        return true;
+        if ($.trim($(':text[name="member_amount[]"]').val()) == '') {
+            message('请填写汇款金额.', '', 'error');
+            return false;
+        }
+        var sum = 0;
+        // 循环遍历读取每个input标签的值，并计算总数,必须要等于总数
+        $('input[name="member_amount[]"]').each(function(){
+            sum = parseFloat(sum)+ parseFloat($(this).val());
+        });
+        var total =  parseFloat("{$sign['amount']}");
+        if(sum == total){
+            return true;
+        }else{
+            message('金额总数对不上，请确认！.', '', 'error');
+            return false;
+        }
     });
+    function add_member(){
+        var add_html ="<div class='form-group'>"+
+                "<label class='col-xs-12 col-sm-3 col-md-2 control-label'>客户名称</label>"+
+                "<div class='col-sm-9 col-xs-12'>"+
+                " <input type='text' name='member_name[]' class='form-control'  />"+
+                "</div>"+
+                "</div>"+
+                " <div class='form-group'>"+
+                "<label class='col-xs-12 col-sm-3 col-md-2 control-label'>客户编码</label>"+
+                "<div class='col-sm-9 col-xs-12'>"+
+                "<input type='text' name='member_code[]' class='form-control'  />"+
+                "</div>"+
+                "</div>"+
+                "<div class='form-group'>"+
+                "<label class='col-xs-12 col-sm-3 col-md-2 control-label'>汇款金额</label>"+
+                "<div class='col-sm-9 col-xs-12'>"+
+                "<input type='text' name='member_amount[]' class='form-control'  />"+
+                "</div>"+
+                "</div>";
+        $("#data").append(add_html);
+    }
 </script>
 {template 'common/footer'}

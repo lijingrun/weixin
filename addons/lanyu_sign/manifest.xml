@@ -26,9 +26,7 @@
 		</menu>
 	</bindings>
 	<permissions>
-			<!--<entry title="录入款项" do="lanyu_sign_add" />-->
-			<!--<entry title="签款" do="lanyu_sign_business" />-->
-			<!--<entry title="设置银行" do="lanyu_sign_bank" />-->
+
 	</permissions>
 	<install><![CDATA[
 	#银行
@@ -40,7 +38,7 @@
 		  PRIMARY KEY (`id`)
 		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 
-	#款项表
+	#款项等记表
 		CREATE TABLE IF NOT EXISTS `ims_lanyu_sign` (
 		  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
 		  `weid` int(11) DEFAULT NULL,
@@ -49,10 +47,22 @@
 		  `input_id` int(10) NOT NULL,
 		  `sign_id` int(10) NOT NULL COMMENT '签款业务员id',
 		  `status` int(10) NOT NULL DEFAULT '1' COMMENT '状态，1为未审核，2为已审核',
-		  `member_name` varchar(255) COMMENT '客户名称',
 		  `create_time` varchar(255) COMMENT '入账时间',
-		  `member_code` varchar(255) COMMENT '客户编码',
 		  `bank_user` varchar(255),
+		  `remark` varchar(255),
+		  `invoice` int(1) NOT NULL DEFAULT '0' COMMENT '发票状态，1为开了，0 为未开',
+		  `examine_time` varchar(255),
+		  PRIMARY KEY (`id`)
+		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+		#签款表
+		CREATE TABLE IF NOT EXISTS `ims_lanyu_sign_user` (
+		  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+		  `weid` int(11) DEFAULT NULL,
+		  `sign_id` int(10) NOT NULL,
+		  `member_amount` float(10,2) NOT NULL COMMENT '金额',
+		  `member_name` varchar(255) NOT NULL,
+		  `member_code` varchar(255) NOT NULL,
 		  PRIMARY KEY (`id`)
 		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 

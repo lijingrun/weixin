@@ -69,6 +69,8 @@ class Lanyu_signModuleSite extends WeModuleSite {
 			$status = $_GPC['status'];
 			$day = $_GPC['day'];
 			$bank_id = $_GPC['bank_id'];
+			$begin_time = $_GPC['begin_time'];
+			$end_time = $_GPC['end_time'];
 			$sql = " WHERE s.weid =".$_W['uniacid'];
 			if(!empty($status)){
 				$sql .= " AND s.status =".$status;
@@ -79,6 +81,14 @@ class Lanyu_signModuleSite extends WeModuleSite {
 			}
 			if(!empty($bank_id)){
 				$sql .= " AND s.bank_id =".$bank_id;
+			}
+			if(!empty($begin_time)){
+				$begin = strtotime($begin_time);
+				$sql .= " AND s.examine_time >=".$begin;
+			}
+			if(!empty($end_time)){
+				$end = strtotime($end_time);
+				$sql .= " AND s.examine_time <=".$end;
 			}
 			$total = pdo_fetchcolumn("SELECT COUNT(*) FROM ".tablename('lanyu_sign')." AS s".$sql);
 			$pager = pagination($total,$pindex,$psize);
@@ -91,13 +101,49 @@ class Lanyu_signModuleSite extends WeModuleSite {
 					$user = pdo_fetch("SELECT username FROM ".tablename('users')." WHERE uid =".$sign['sign_id']);
 					$signs[$key]['username'] = $user['username'];
 				}
+				$sign_users = pdo_fetchall("SELECT * FROM ".tablename('lanyu_sign_user')." WHERE sign_id =".$sign['id']);
+				$count = count($sign_users);
+				$first_u = current($sign_users);
+				unset($sign_users[0]);
+				$signs[$key]['first_u'] = $first_u;
+				$signs[$key]['other'] = $sign_users;
+				$signs[$key]['count'] = $count;
 			}
 			include $this->template('web/sign_list');
+		}
+
+		//详细
+		if($op == 'detail'){
+			$id = $_GPC['id'];
+			$sign = pdo_fetch("SELECT * FROM ".tablename('lanyu_sign')." WHERE id =".$id." AND weid =".$_W['uniacid']);
+			$bank = pdo_fetch("SELECT * FROM ".tablename('lanyu_bank')." WHERE id =".$sign['bank_id']." AND weid =".$_W['uniacid']);
+			$s_user = pdo_fetchall("SELECT * FROM ".tablename('lanyu_sign_user')." WHERE sign_id =".$id);
+			if(empty($sign['examine_time'])){
+				$sign['examine_time'] = date('Y-m-d',time());
+			}
+			include $this->template('web/sign_detail');
+		}
+
+		//ajax审核
+		if($op == 'examine_ajax'){
+			$id = $_GPC['id'];
+			$examine_time = empty($_GPC['examine']) ? time() : strtotime($_GPC['examine']);
+			$sign = pdo_fetch("SELECT * FROM ".tablename('lanyu_sign')." WHERE id = ".$id);
+			$sign_user = pdo_fetchall("SELECT * FROM ".tablename('lanyu_sign_user')." WHERE sign_id =".$id." weid =".$_W['uniacid']);
+			if(empty($sign_user)){
+				message('未填写客户名称，不能审核',$this->createWebUrl('sign'),'error');
+			}
+			if(pdo_update('lanyu_sign',array('status' => 2, 'examine_time' => $examine_time),array('id' => $id)) == 1){
+				echo 111;
+			}else{
+				echo 222;
+			}
 		}
 
 		//录入
 		if($op == 'add'){
 			$banks = pdo_fetchall("SELECT * FROM ".tablename('lanyu_bank')." WHERE weid =".$_W['uniacid']);
+			$sign['create_time'] = time();
 			if(checksubmit('submit')){
 				$bank_user = $_GPC['bank_user'];
 				$amount = $_GPC['amount'];
@@ -163,7 +209,8 @@ class Lanyu_signModuleSite extends WeModuleSite {
 		//返审
 		if($op == 'return'){
 			$id = $_GPC['id'];
-			if(pdo_update('lanyu_sign',array('status' => 1,'sign_id' => 0,'member_name' => '','member_code' => ''),array('id' => $id))){
+			if(pdo_update('lanyu_sign',array('status' => 1,'sign_id' => 0),array('id' => $id))){
+				pdo_delete('lanyu_sign_user',array('sign_id' => $id));
 				message('操作成功！',$this->createWebUrl('sign'),'success');
 			}else{
 				message('操作失败！',$this->createWebUrl('sign'),'error');
@@ -173,14 +220,81 @@ class Lanyu_signModuleSite extends WeModuleSite {
 		//审核
 		if($op == 'examine'){
 			$id = $_GPC['id'];
+			$examine_time = empty($_GPC['examine']) ? time() : strtotime($_GPC['examine']);
 			$sign = pdo_fetch("SELECT * FROM ".tablename('lanyu_sign')." WHERE id = ".$id);
-			if(empty($sign['member_name'])){
+			$sign_user = pdo_fetchall("SELECT * FROM ".tablename('lanyu_sign_user')." WHERE sign_id =".$id." AND weid =".$_W['uniacid']);
+			if(empty($sign_user)){
 				message('未填写客户名称，不能审核',$this->createWebUrl('sign'),'error');
 			}
-			if(pdo_update('lanyu_sign',array('status' => 2),array('id' => $id)) == 1){
+			if(pdo_update('lanyu_sign',array('status' => 2, 'examine_time' => $examine_time),array('id' => $id)) == 1){
 				message('审核成功！',$this->createWebUrl('sign'),'success');
 			}else{
 				message('操作失败，请重新操作！',$this->createWebUrl('sign'),'error');
+			}
+		}
+
+		//全部删除
+		if($op == 'del_all'){
+			$ids = $_GPC['ids'];
+			if(!empty($ids)){
+				foreach($ids as $id){
+					pdo_delete('lanyu_sign_user',array('sign_id' => $id));
+					pdo_delete('lanyu_sign',array('id' => $id));
+				}
+				echo 111;
+				exit;
+			}
+		}
+
+		//全部审核
+		if($op == 'examine_all'){
+			$ids = $_GPC['ids'];
+			$examine = strtotime(date('Y-m-d',time()));
+			if(!empty($ids)){
+				foreach($ids as $id){
+					$sign_user = pdo_fetchall("SELECT * FROM ".tablename('lanyu_sign_user')." WHERE sign_id =".$id." AND weid =".$_W['uniacid']);
+					if(!empty($sign_user)) {
+						pdo_update('lanyu_sign', array('status' => 2, 'examine_time' => $examine), array('id' => $id));
+					}
+				}
+				echo 111;
+				exit;
+			}
+		}
+
+		//全部开票
+		if($op == 'v_all'){
+			$ids = $_GPC['ids'];
+			if(!empty($ids)){
+				foreach($ids as $id){
+					pdo_update('lanyu_sign',array('invoice' => 1),array('id' => $id));
+				}
+				echo 111;
+				exit;
+			}
+		}
+
+		//开票
+		if($op == 'invoice'){
+			$id = $_GPC['id'];
+			$sign = pdo_fetch("SELECT * FROM ".tablename('lanyu_sign')." WHERE id = ".$id);
+			if($sign['status'] == 1){
+				message('还未审核，不能开票',$this->createWebUrl('sign'),'error');
+			}
+			if(pdo_update('lanyu_sign',array('invoice' => 1),array('id' => $id)) == 1){
+				message('开票成功！',$this->createWebUrl('sign'),'success');
+			}else{
+				message('操作失败，请重新操作！',$this->createWebUrl('sign'),'error');
+			}
+		}
+
+		//添加备注
+		if($op == 'remark'){
+			$id = $_GPC['id'];
+			$remark = $_GPC['remark'];
+			if(pdo_update('lanyu_sign',array('remark' => $remark),array('id' => $id))){
+				echo 111;
+				exit;
 			}
 		}
 
@@ -299,10 +413,10 @@ class Lanyu_signModuleSite extends WeModuleSite {
 			}
 			$total = pdo_fetchcolumn("SELECT COUNT(*) FROM ".tablename('lanyu_sign')." AS s".$sql);
 			$pager = pagination($total,$pindex,$psize);
-			$page_sql = " ORDER BY s.create_time desc LIMIT " . ($pindex - 1) * $psize . ',' . $psize;
-			$sql .= " AND s.bank_id = b.id";
-			$sql .= $page_sql;
-			$signs = pdo_fetchall("SELECT s.*,b.bank_name,b.bank_code FROM ".tablename('lanyu_sign')." AS s,".tablename('lanyu_bank')." AS b".$sql);
+//			$page_sql = " ORDER BY s.create_time desc LIMIT " . ($pindex - 1) * $psize . ',' . $psize;
+			$sql .= " AND s.bank_id = b.id AND u.sign_id = s.id";
+//			$sql .= $page_sql;
+			$signs = pdo_fetchall("SELECT s.*,b.bank_name,b.bank_code,u.* FROM ".tablename('lanyu_sign')." AS s,".tablename('lanyu_bank')." AS b,".tablename('lanyu_sign_user')." AS u".$sql);
 			foreach($signs as $key=>$sign){
 				if($sign['sign_id'] > 0){
 					$user = pdo_fetch("SELECT username FROM ".tablename('users')." WHERE uid =".$sign['sign_id']);
@@ -313,8 +427,10 @@ class Lanyu_signModuleSite extends WeModuleSite {
 			$str = iconv('utf-8','gb2312',$str);
 			foreach( $signs as $sign ) {
 				$data_day = date("Y-m-d",$sign['create_time']);
+				$examine_day = date('Y-m-d',$sign['examine_time']);
+				$member_name = iconv('utf-8','gb2312',$sign['member_name']);
 				$bank_name = iconv('utf-8','gb2312',$sign['bank_name']);
-				$str .= $data_day.', ,'.$sign['amount'].', , ,'.$sign['member_name'].','.$sign['bank_code'].','.$bank_name.', ,RMB,1.00000'."\n";
+				$str .= $data_day.','.$examine_day.' ,'.$sign['member_amount'].', , ,'.$member_name.','.$sign['bank_code'].','.$bank_name.', ,RMB,1.00000'."\n";
 			}
 			$filename = '线下签款明细.'.date('Ymd').'.csv';
 			$this->export_csv($filename,$str);
@@ -340,7 +456,6 @@ class Lanyu_signModuleSite extends WeModuleSite {
 		if($op == 'index'){
 			$banks = pdo_fetchall("SELECT * FROM ".tablename('lanyu_bank')." WHERE weid =".$_W['uniacid']);
 			$status = empty($_GPC['status']) ? 1 : $_GPC['status'];
-			echo $status;
 			$day = $_GPC['day'];
 			$bank_id = $_GPC['bank_id'];
 			$sql = " WHERE s.weid =".$_W['uniacid'];
@@ -365,6 +480,13 @@ class Lanyu_signModuleSite extends WeModuleSite {
 					$user = pdo_fetch("SELECT username FROM ".tablename('users')." WHERE uid =".$sign['sign_id']);
 					$signs[$key]['username'] = $user['username'];
 				}
+				$sign_users = pdo_fetchall("SELECT * FROM ".tablename('lanyu_sign_user')." WHERE sign_id =".$sign['id']);
+				$count = count($sign_users);
+				$first_u = current($sign_users);
+				unset($sign_users[0]);
+				$signs[$key]['first_u'] = $first_u;
+				$signs[$key]['other'] = $sign_users;
+				$signs[$key]['count'] = $count;
 			}
 			include $this->template('web/b_sign_list');
 		}
@@ -374,19 +496,24 @@ class Lanyu_signModuleSite extends WeModuleSite {
 			$id = $_GPC['id'];
 			$sign = pdo_fetch("SELECT s.*,b.bank_name,b.bank_code FROM ".tablename('lanyu_sign')." AS s,".tablename('lanyu_bank')." AS b WHERE s.id =".$id." AND s.bank_id = b.id");
 			if(checksubmit('submit')){
-				$member_name = $_GPC['member_name'];
-				$member_code = $_GPC['member_code'];
-				$insert = array(
-					'member_name' => $member_name,
-					'member_code' => $member_code,
-					'sign_id' => $_W['user']['uid'],
-				);
-				if($sign['sign_id'] == 0 || $sign['sign_id'] == $_W['uniacid']) {
-					if(pdo_update('lanyu_sign', $insert, array('id' => $id)) == 1){
-						message('签款成功！',$this->createWebUrl('business'),'success');
-					}else{
-						message('签款失败，请重试！',$this->createWebUrl('business'),'error');
+				$member_name_arr = $_GPC['member_name'];
+				$member_code_arr = $_GPC['member_code'];
+				$member_amount_arr = $_GPC['member_amount'];
+				if($sign['sign_id'] == 0 || $sign['sign_id'] == $_W['user']['uid']) {
+					//无论之前有无，都先删除这个sign下面的所有签款记录，重新记录过
+					pdo_delete('lanyu_sign_user',array('sign_id' => $sign['id']));
+					foreach($member_amount_arr as $key=>$m){
+						$insert = array(
+							'sign_id' => $sign['id'],
+							'weid' => $_W['uniacid'],
+							'member_amount' => $m,
+							'member_name' => $member_name_arr[$key],
+							'member_code' => $member_code_arr[$key],
+						);
+						pdo_insert('lanyu_sign_user',$insert);
 					}
+					pdo_update('lanyu_sign',array('sign_id' => $_W['user']['uid']),array('id' => $sign['id']));
+					message('签款/修改成功！',$this->createWebUrl('business'),'success');
 				}else{
 					message('签款失败，已经被其他人签了！',$this->createWebUrl('business'),'error');
 				}
