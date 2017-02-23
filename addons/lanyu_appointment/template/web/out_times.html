@@ -49,7 +49,7 @@
         var the_class = $("#time"+id).attr('class');
         var url = "{php echo $this->createWebUrl('times', array('op'=>'to_out_time'))}";
         var day = $("#day").val();
-        var store_id ={$store_id};
+        var store_id ="{$store_id}";
         if(the_class == 'btn btn-default'){
             $.ajax({
                 type : 'post',

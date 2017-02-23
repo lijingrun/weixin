@@ -110,7 +110,7 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 			if ($id > 0) {
 				$theone = pdo_fetch('SELECT * FROM ' . tablename('lanyu_appointment_store') . " WHERE  weid = :weid  AND id = :id", array(':weid' => $_W['uniacid'], ':id' => $id));
 
-				$one_region = pdo_fetch("SELECT * FROM ".tablename('lanyu_region')." WHERE weid=".$_W['uniacid']." AND id=".$theone['region_id']);
+				$one_region = pdo_fetch("SELECT * FROM ".tablename('lanyu_region')." WHERE id=".$theone['region_id']);
 				$region_name = $this->find_region($one_region['parent_id'],$one_region['name'],$one_region['weid']);
 			} else {
 				$theone = array('status' => 1, 'listorder' => 0);
@@ -151,7 +151,7 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 			$parent_id = $_GPC['parent_id'];
 			$type_id = $_GPC['type_id'];
 			$type_id++;
-			$under = pdo_fetchall("SELECT * FROM ".tablename('we7car_region')." WHERE weid =".$_W['uniacid']." AND parent_id =".$parent_id);
+			$under = pdo_fetchall("SELECT * FROM ".tablename('lanyu_region')." WHERE parent_id =".$parent_id);
 			if(!empty($under)){
 				echo "<div class='col-sm-2 col-xs-12' >";
 				echo "<select class='form-control' id='region_id".$type_id."' onchange='get_under_region(".$type_id.");'>";
@@ -374,7 +374,7 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 	//根据id递归出区域
 	function find_region($parent_id,$region_name,$weid){
 		if($parent_id>1){
-			$region = pdo_fetch("SELECT * FROM ".tablename('we7car_region')." WHERE id =".$parent_id." AND weid =".$weid);
+			$region = pdo_fetch("SELECT * FROM ".tablename('lanyu_region')." WHERE id =".$parent_id);
 			$region_name = $region['name'].'-'.$region_name;
 			return $this->find_region($region['parent_id'],$region_name,$weid);
 		}else{
@@ -433,7 +433,7 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 			$type_id = $_GPC['type_id'];
 			$stores = pdo_fetchall("SELECT * FROM ".tablename('lanyu_appointment_store')." WHERE weid=".$_W['uniacid']." AND status = 1 ORDER BY listorder");
 			foreach($stores as $key=>$store){
-				$one_region = pdo_fetch("SELECT * FROM ".tablename('lanyu_region')." WHERE weid=".$_W['uniacid']." AND id=".$store['region_id']);
+				$one_region = pdo_fetch("SELECT * FROM ".tablename('lanyu_region')." WHERE id=".$store['region_id']);
 				$region_name = $this->find_region($one_region['parent_id'],$one_region['name'],$one_region['weid']);
 				$stores[$key]['region_name'] = $region_name;
 			}
@@ -533,7 +533,7 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 			$time_id = $_GPC['time_id'];
 			//查店铺
 			$store = pdo_fetch("SELECT * FROM ".tablename('lanyu_appointment_store')." WHERE id =".$store_id." AND weid =".$_W['uniacid']);
-			$one_region = pdo_fetch("SELECT * FROM ".tablename('lanyu_region')." WHERE weid=".$_W['uniacid']." AND id=".$store['region_id']);
+			$one_region = pdo_fetch("SELECT * FROM ".tablename('lanyu_region')." WHERE id=".$store['region_id']);
 			$region_name = $this->find_region($one_region['parent_id'],$one_region['name'],$one_region['weid']);
 			$store['region_name'] = $region_name;
 			//查时间
