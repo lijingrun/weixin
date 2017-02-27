@@ -486,7 +486,7 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 				$out_ids[] = $t['time_id'];
 			}
 			//查所选日期里面已经满了预约的时间
-			$had_app = pdo_fetchall("SELECT count(*) as count,times_id FROM ".tablename('lanyu_appointment_data')." WHERE appointment_day =".$time." AND store_id =".$store_id." AND weid =".$_W['uniacid']." GROUP BY times_id");
+			$had_app = pdo_fetchall("SELECT count(*) as count,times_id FROM ".tablename('lanyu_appointment_data')." WHERE appointment_day =".$time." AND status=2 AND store_id =".$store_id." AND weid =".$_W['uniacid']." GROUP BY times_id");
 			//将不能预约的标注出来
 			foreach($times as $key=>$tt){
 				if(in_array($tt['id'],$out_ids)){
@@ -620,10 +620,10 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 		$op = !empty($_GPC['op']) ? trim($_GPC['op']) : 'list';
 
 		if($op == 'list'){
-			if(empty($_W['open_id'])){
+			if(empty($_W['openid'])){
 				$_W['openid'] = 1;
 			}
-			$list = pdo_fetchall("SELECT d.*,t.time FROM ".tablename('lanyu_appointment_data')." as d,".tablename('lanyu_appointment_times')." as t WHERE d.openid =".$_W['openid']." AND d.weid =".$_W['uniacid']." AND d.times_id = t.id AND d.store_id = t.store_id");
+			$list = pdo_fetchall("SELECT d.*,t.time FROM ".tablename('lanyu_appointment_data')." as d,".tablename('lanyu_appointment_times')." as t WHERE d.openid ='".$_W['openid']."' AND d.weid =".$_W['uniacid']." AND d.times_id = t.id AND d.store_id = t.store_id");
 			foreach($list as $key=>$l){
 				$total_price = 0;
 				$types = pdo_fetchall("SELECT tt.price as p_price,t.* FROM ".tablename('lanyu_appointment_to_type')." AS tt,".tablename('lanyu_appointment_type')." AS t"." WHERE tt.app_id =".$l['id']." AND tt.weid =".$_W['uniacid']." AND tt.type_id = t.id");
@@ -687,10 +687,10 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 			}
 			if($price > 0) {
 				$params = array(
-						'tid' => 123123,
-						'ordersn' => 2332321,
-						'title' => '123',
-						'fee' => 100,
+						'tid' => $id,
+						'ordersn' => '000000'.$id,
+						'title' => '预约费用',
+						'fee' => $price,
 						'user' => $_W['member']['uid'],
 				);
 				$this->pay($params);
@@ -700,6 +700,16 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 			}
 		}
 
+	}
+
+	//支付回调
+	public function payResult($params){
+		global $_GPC, $_W;
+		$id = $params['tid'];
+		//修改订单状态
+		if(pdo_update('lanyu_appointment_data',array('status' => 2),array('id' => $id,'openid' => $_W['openid'], 'weid' => $_W['uniacid']))){
+			message('支付成功！',$this->createMobileUrl('my_orders'));
+		}
 	}
 
 	//根据月份计算天数

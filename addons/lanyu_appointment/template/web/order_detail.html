@@ -64,7 +64,11 @@
         <p>订单总价：￥{$total_price}</p>
         <p>已付定金：￥{$order['deposit']}</p>
     </div>
-    <div style="height: 20px;"></div>
+    <button class="btn-success" onclick="had_pay();">确认收款</button>
+    <button class="btn-danger" onclick="cancel();">取消订单</button>
+    <div style="height: 20px;">
+
+    </div>
 </div>
 
 
@@ -87,6 +91,12 @@
         }
     }
     function to_pay(){
+
+    }
+    function had_pay(){
+
+    }
+    function cancel(){
 
     }
 </script>

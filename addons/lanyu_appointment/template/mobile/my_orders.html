@@ -7,18 +7,18 @@
 <div style="padding: 10px">
     {loop $list $l}
     <a href="{php echo $this->createMobileUrl('my_orders',array('op' => 'detail', 'id' => $l['id']))}">
-        <div class="panel panel-warning">
+        <div {if $l['status'] == 1}class="panel panel-warning"{else if $l['status'] == 2}class="panel panel-success"{else if $l['status'] == 0}class="panel panel-danger"{/if}>
             <div class="panel-heading">
                 <h3 class="panel-title">{php echo date('Y-m-d',$l['appointment_day'])}&nbsp;&nbsp;{$l['time']}
                     <span style="float:right">
                         {if $l['status'] == 1}
-                        待支付
+                        待支付订金
                         {else if $l['status'] == 0}
                         <span style="color:red;">已取消</span>
                         {else if $l['status'] == 2}
-
+                        已支付订金
                         {else if $l['status'] == 3}
-
+                        已完成服务
                         {/if}
                     </span>
                 </h3>
