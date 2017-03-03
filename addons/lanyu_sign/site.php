@@ -71,9 +71,13 @@ class Lanyu_signModuleSite extends WeModuleSite {
 			$bank_id = $_GPC['bank_id'];
 			$begin_time = $_GPC['begin_time'];
 			$end_time = $_GPC['end_time'];
+			$v_status = $_GPC['v_status'];
 			$sql = " WHERE s.weid =".$_W['uniacid'];
 			if(!empty($status)){
 				$sql .= " AND s.status =".$status;
+			}
+			if(!empty($v_status)){
+				$sql .= " AND s.invoice =".($v_status-1);
 			}
 			if(!empty($day)){
 				$time = strtotime($day);
@@ -400,9 +404,15 @@ class Lanyu_signModuleSite extends WeModuleSite {
 			$status = $_GPC['status'];
 			$day = $_GPC['day'];
 			$bank_id = $_GPC['bank_id'];
+			$begin_time = $_GPC['begin_time'];
+			$end_time = $_GPC['end_time'];
+			$v_status = $_GPC['v_status'];
 			$sql = " WHERE s.weid =".$_W['uniacid'];
 			if(!empty($status)){
 				$sql .= " AND s.status =".$status;
+			}
+			if(!empty($v_status)){
+				$sql .= " AND s.invoice =".($v_status-1);
 			}
 			if(!empty($day)){
 				$time = strtotime($day);
@@ -411,10 +421,18 @@ class Lanyu_signModuleSite extends WeModuleSite {
 			if(!empty($bank_id)){
 				$sql .= " AND s.bank_id =".$bank_id;
 			}
-			$total = pdo_fetchcolumn("SELECT COUNT(*) FROM ".tablename('lanyu_sign')." AS s".$sql);
-			$pager = pagination($total,$pindex,$psize);
+			if(!empty($begin_time)){
+				$begin = strtotime($begin_time);
+				$sql .= " AND s.examine_time >=".$begin;
+			}
+			if(!empty($end_time)){
+				$end = strtotime($end_time);
+				$sql .= " AND s.examine_time <=".$end;
+			}
+//			$total = pdo_fetchcolumn("SELECT COUNT(*) FROM ".tablename('lanyu_sign')." AS s".$sql);
+//			$pager = pagination($total,$pindex,$psize);
 //			$page_sql = " ORDER BY s.create_time desc LIMIT " . ($pindex - 1) * $psize . ',' . $psize;
-			$sql .= " AND s.bank_id = b.id AND u.sign_id = s.id";
+			$sql .= " AND s.bank_id = b.id AND u.sign_id = s.id ";
 //			$sql .= $page_sql;
 			$signs = pdo_fetchall("SELECT s.*,b.bank_name,b.bank_code,u.* FROM ".tablename('lanyu_sign')." AS s,".tablename('lanyu_bank')." AS b,".tablename('lanyu_sign_user')." AS u".$sql);
 			foreach($signs as $key=>$sign){

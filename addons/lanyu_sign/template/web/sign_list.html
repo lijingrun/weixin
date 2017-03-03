@@ -6,7 +6,8 @@
         var day = $("#day").val();
         var begin_time = $("#begin_time").val();
         var end_time = $("#end_time").val();
-        location.href="{php echo $this->createWebUrl('sign',array('op'=>'index'));}&status="+status+"&bank_id="+bank_id+"&day="+day+"&begin_time="+begin_time+"&end_time="+end_time;
+        var v_status = $("#v_status").val();
+        location.href="{php echo $this->createWebUrl('sign',array('op'=>'index'));}&status="+status+"&bank_id="+bank_id+"&day="+day+"&begin_time="+begin_time+"&end_time="+end_time+"&v_status="+v_status;
     }
     function export_data(){
         var status = $("#status").val();
@@ -134,7 +135,13 @@
                     <div class=" col-xs-12 col-sm-2 col-lg-2">
                         <input type="date" class="form-control" id="day" />
                     </div>
-
+                    <div class=" col-xs-12 col-sm-2 col-lg-2">
+                        <select id="v_status" class="form-control">
+                            <option value="0">全部</option>
+                            <option value="2" {if $v_status == 2}selected="selected"{/if}>已开票</option>
+                            <option value="1" {if $v_status == 1}selected="selected"{/if}>未开票</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="row">
                     <div class="col-xs-1">审核时间</div>
