@@ -66,6 +66,15 @@
 		  PRIMARY KEY (`id`)
 		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 
+		#账号可看银行表
+		CREATE TABLE IF NOT EXISTS `ims_lanyu_bank_user` (
+		  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+		  `weid` int(11) DEFAULT NULL,
+		  `uid` int(10) NOT NULL,
+		  `bank_id` float(10,2) NOT NULL COMMENT '金额',
+		  PRIMARY KEY (`id`)
+		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
 	]]></install>
 	<uninstall><![CDATA[
 	DROP TABLE IF EXISTS `ims_lanyu_bank`;

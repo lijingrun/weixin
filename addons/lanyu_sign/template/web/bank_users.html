@@ -1,0 +1,34 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+    <li class="active"><a href="{php echo $this->createWebUrl('bank', array('op'=>'add'))}">可看账号</a></li>
+    <li><a href="{php echo $this->createWebUrl('bank',array('op'=>'index'));}">银行列表</a></li>
+
+</ul>
+<div class="main">
+    <form method="post" class="form-horizontal form">
+    <div class="checkbox">
+    {loop $users $user}
+        <label style="width: 200px;">
+            <input type="checkbox" name="user[]" value="{$user['uid']}" {if in_array($user['uid'],$uids)}checked{/if} /> {$user['username']}
+        </label>
+    {/loop}
+    </div>
+    <div class="form-group col-sm-12">
+        <input type="hidden" name="bank_id" value="{$bank_id}" />
+        <input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" />
+        <input type="hidden" name="token" value="{$_W['token']}" />
+    </div>
+    </form>
+</div>
+<script type="text/javascript">
+    function message(msg) {
+        require(['util'], function(util) {
+            util.message(msg);
+        });
+    }
+    $('form').submit(function() {
+
+        return true;
+    });
+</script>
+{template 'common/footer'}

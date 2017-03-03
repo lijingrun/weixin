@@ -55,6 +55,32 @@ class Lanyu_signModuleSite extends WeModuleSite {
 				message('操作成功！',$this->createWebUrl('bank'),'success');
 			}
 		}
+
+		//可看账号
+		if($op == 'users'){
+			$bank_id = $_GPC['id'];
+			$users = pdo_fetchall("SELECT u.* FROM ".tablename('users_permission')." AS p,".tablename('users')." AS u WHERE p.uniacid = ".$_W['uniacid']." AND p.type = 'lanyu_sign' AND p.uid=u.uid");
+			$bank_user = pdo_fetchall("SELECT * FROM ".tablename('lanyu_bank_user')." WHERE weid =".$_W['uniacid']." AND bank_id = ".$bank_id);
+			$uids = array();
+			foreach($bank_user as $u){
+				$uids[] = $u['uid'];
+			}
+			if(checksubmit('submit')){
+				$bank_id = $_GPC['bank_id'];
+				pdo_delete('lanyu_bank_user',array('bank_id' => $bank_id));
+				$user_ids = $_GPC['user'];
+				foreach($user_ids as $user_id){
+					$insert = array(
+						'weid' => $_W['uniacid'],
+						'bank_id' => $bank_id,
+						'uid' => $user_id,
+					);
+					pdo_insert('lanyu_bank_user',$insert);
+				}
+				message('操作成功！',$this->createWebUrl('bank',array('op' => 'users','id' => $bank_id)),'success');
+			}
+			include $this->template('web/bank_users');
+		}
 	}
 
 	//财务录入
@@ -472,7 +498,17 @@ class Lanyu_signModuleSite extends WeModuleSite {
 		$psize = 20;
 
 		if($op == 'index'){
-			$banks = pdo_fetchall("SELECT * FROM ".tablename('lanyu_bank')." WHERE weid =".$_W['uniacid']);
+			//先查可以查看的银行
+			$bank_user = pdo_fetchall("SELECT * FROM ".tablename('lanyu_bank_user')." WHERE uid =".$_W['user']['uid']." AND weid =".$_W['uniacid']);
+			$bank_ids = array();
+			foreach($bank_user as $bu){
+				$bank_ids[] = $bu['bank_id'];
+			}
+			$bank_ids = implode(',',$bank_ids);
+			if(empty($bank_ids)){
+				$bank_ids = '0';
+			}
+			$banks = pdo_fetchall("SELECT * FROM ".tablename('lanyu_bank')." WHERE weid =".$_W['uniacid']." AND id in (".$bank_ids.")");
 			$status = empty($_GPC['status']) ? 1 : $_GPC['status'];
 			$day = $_GPC['day'];
 			$bank_id = $_GPC['bank_id'];
@@ -487,6 +523,7 @@ class Lanyu_signModuleSite extends WeModuleSite {
 			if(!empty($bank_id)){
 				$sql .= " AND s.bank_id =".$bank_id;
 			}
+			$sql .= " AND bank_id in(".$bank_ids.")";
 			$total = pdo_fetchcolumn("SELECT COUNT(*) FROM ".tablename('lanyu_sign')." AS s".$sql);
 			$pager = pagination($total,$pindex,$psize);
 			$page_sql = " ORDER BY s.create_time desc LIMIT " . ($pindex - 1) * $psize . ',' . $psize;

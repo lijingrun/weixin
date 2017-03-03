@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns="http://www.haoid.cn" versionCode="0.6">
+	<application setting="false">
+		<name><![CDATA[信贷系统]]></name>
+		<identifie><![CDATA[ljr_credit]]></identifie>
+		<version><![CDATA[1.0]]></version>
+		<type><![CDATA[biz]]></type>
+		<ability><![CDATA[信贷系统在线展示&分级会员]]></ability>
+		<description><![CDATA[在线展示信贷业务、管理业务员、管理客户等]]></description>
+		<author><![CDATA[ljr]]></author>
+		<url><![CDATA[http://www.ljr.com]]></url>
+	</application>
+	<platform>
+		<subscribes>
+		</subscribes>
+		<handles>
+		</handles>
+		<rule embed="false" />
+		<card embed="false" />
+	</platform>
+	<bindings>
+	</bindings>
+	<permissions>
+	</permissions>
+	<install><![CDATA[
+	#业务员
+		CREATE TABLE IF NOT EXISTS `ims_ljr_credit_salesman` (
+		  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+		  `weid` int(11) DEFAULT NULL,
+		  `name` varchar(255) NOT NULL,
+		  `create_time` varchar(255) NOT NULL,
+		  `remark` varchar(255),
+		  PRIMARY KEY (`id`)
+		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+	#业务员to客户
+		CREATE TABLE IF NOT EXISTS `ims_ljr_credit_salesman_member` (
+		  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+		  `weid` int(11) DEFAULT NULL,
+		  `salesman_id` int(11) NOT NULL,
+		  `member_id` int(11) NOT NULL,
+		  PRIMARY KEY (`id`)
+		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+
+	]]></install>
+	<uninstall><![CDATA[]]></uninstall>
+	<upgrade><![CDATA[]]></upgrade>
+</manifest>

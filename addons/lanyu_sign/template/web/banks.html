@@ -19,9 +19,10 @@
                 <td>{$bank['bank_code']}</td>
                 <td>
                     <a href="{php echo $this->createWebUrl('bank',array('id' => $bank['id'],'op'=>'add'))}" title="编辑" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><i class="fa fa-edit"></i></a>
-                    <a href="{php echo $this->createWebUrl('bank',array('id' => $bank['id'],'op'=>'del'))}" onclick="return confirm('确认取消此订单？');return false;" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm" title="取消">
-                        <i class="fa fa-times"></i>
-                    </a>
+                    <a href="{php echo $this->createWebUrl('bank',array('id' => $bank['id'],'op'=>'del'))}" onclick="return confirm('确认取消此订单？');return false;" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm" title="取消"><i class="fa fa-times"></i></a>
+                    <a href="{php echo $this->createWebUrl('bank',array('id' => $bank['id'],'op'=>'users'))}"  data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm" title="查看账号"><span class="glyphicon glyphicon-eye-open"></span></a>
+
+
                 </td>
             </tr>
             {/loop}

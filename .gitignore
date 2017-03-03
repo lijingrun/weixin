@@ -17,6 +17,9 @@ addons/*
 !addons/lanyu_appointment/
 !addons/lanyu_appointment/template/
 !addons/lanyu_appointment/template/web/
+!addons/ljr_credit/
+!addons/ljr_credit/template/
+!addons/ljr_credit/template/web/
 framework/
 attachment/
 data/
