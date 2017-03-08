@@ -216,6 +216,15 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 			include $this->template('web/times_post');
 		}
 
+		//删除时间段
+		if($op == 'del'){
+			$id = $_GET['id'];
+			if(pdo_delete('lanyu_appointment_times',array('id' => $id))){
+				message("操作成功！",$this->createWebUrl('times', array('op' => 'index')),'success');
+			}
+
+		}
+
 		//不能预约的时间段
 		if($op == 'out_time'){
 			$day = empty($_GPC['day'])?date("Y-m-d",time()):$_GPC['day'];

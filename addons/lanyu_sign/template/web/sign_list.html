@@ -3,17 +3,34 @@
     function find(){
         var status = $("#status").val();
         var bank_id = $("#bank_id").val();
-        var day = $("#day").val();
+        var begin_day = $("#begin_day").val();
+        var end_day = $("#end_day").val();
         var begin_time = $("#begin_time").val();
         var end_time = $("#end_time").val();
         var v_status = $("#v_status").val();
-        location.href="{php echo $this->createWebUrl('sign',array('op'=>'index'));}&status="+status+"&bank_id="+bank_id+"&day="+day+"&begin_time="+begin_time+"&end_time="+end_time+"&v_status="+v_status;
+        location.href="{php echo $this->createWebUrl('sign',array('op'=>'index'));}&status="+status+"&bank_id="+bank_id+"&begin_day="+begin_day+"&end_day="+end_day+"&begin_time="+begin_time+"&end_time="+end_time+"&v_status="+v_status;
     }
     function export_data(){
         var status = $("#status").val();
         var bank_id = $("#bank_id").val();
         var day = $("#day").val();
-        location.href="{php echo $this->createWebUrl('sign',array('op'=>'export'));}&status="+status+"&bank_id="+bank_id+"&day="+day;
+        var begin_day = $("#begin_day").val();
+        var end_day = $("#end_day").val();
+        var begin_time = $("#begin_time").val();
+        var end_time = $("#end_time").val();
+        var v_status = $("#v_status").val();
+        location.href="{php echo $this->createWebUrl('sign',array('op'=>'export'));}&status="+status+"&bank_id="+bank_id+"&begin_day="+begin_day+"&end_day="+end_day+"&begin_time="+begin_time+"&end_time="+end_time+"&v_status="+v_status;
+    }
+    function export_sign_data(){
+        var status = $("#status").val();
+        var bank_id = $("#bank_id").val();
+        var day = $("#day").val();
+        var begin_day = $("#begin_day").val();
+        var end_day = $("#end_day").val();
+        var begin_time = $("#begin_time").val();
+        var end_time = $("#end_time").val();
+        var v_status = $("#v_status").val();
+        location.href="{php echo $this->createWebUrl('sign',array('op'=>'export_sign'));}&status="+status+"&bank_id="+bank_id+"&begin_day="+begin_day+"&end_day="+end_day+"&begin_time="+begin_time+"&end_time="+end_time+"&v_status="+v_status;
     }
 </script>
 <script>
@@ -130,10 +147,7 @@
                         </select>
                     </div>
                     <div class=" col-xs-12 col-sm-1 col-lg-1">
-                        汇款日期
-                    </div>
-                    <div class=" col-xs-12 col-sm-2 col-lg-2">
-                        <input type="date" class="form-control" id="day" />
+                        状态
                     </div>
                     <div class=" col-xs-12 col-sm-2 col-lg-2">
                         <select id="v_status" class="form-control">
@@ -143,6 +157,16 @@
                         </select>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-xs-1">汇款时间</div>
+                    <div class="col-xs-4">
+                        <input type="date" class="form-control" id="begin_day" value="{$begin_day}" />
+                    </div>
+                    <div class="col-xs-4">
+                        <input type="date" class="form-control" id="end_day" value="{$end_day}" />
+                    </div>
+                </div>
+                <br />
                 <div class="row">
                     <div class="col-xs-1">审核时间</div>
                     <div class="col-xs-4">
@@ -156,6 +180,7 @@
                 <div class="row">
                     <button class="btn btn-default" onclick="find();"><i class="fa fa-search"></i> 搜索</button>
                     <button class="btn btn-default" onclick="export_data();"><span class="glyphicon glyphicon-new-window"></span> 导出</button>
+                    <button class="btn btn-default" onclick="export_sign_data();"><span class="glyphicon glyphicon-new-window"></span> 导出银行收款信息</button>
                 </div>
             </div>
         </div>

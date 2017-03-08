@@ -93,7 +93,8 @@ class Lanyu_signModuleSite extends WeModuleSite {
 		if($op == 'index'){
 			$banks = pdo_fetchall("SELECT * FROM ".tablename('lanyu_bank')." WHERE weid =".$_W['uniacid']);
 			$status = $_GPC['status'];
-			$day = $_GPC['day'];
+			$begin_day = $_GPC['begin_day'];
+			$end_day = $_GET['end_day'];
 			$bank_id = $_GPC['bank_id'];
 			$begin_time = $_GPC['begin_time'];
 			$end_time = $_GPC['end_time'];
@@ -105,9 +106,13 @@ class Lanyu_signModuleSite extends WeModuleSite {
 			if(!empty($v_status)){
 				$sql .= " AND s.invoice =".($v_status-1);
 			}
-			if(!empty($day)){
-				$time = strtotime($day);
-				$sql .= " AND s.create_time =".$time;
+			if(!empty($begin_day)){
+				$time = strtotime($begin_day);
+				$sql .= " AND s.create_time >=".$time;
+			}
+			if(!empty($end_day)){
+				$time = strtotime($end_day);
+				$sql .= " AND s.create_time <=".$time;
 			}
 			if(!empty($bank_id)){
 				$sql .= " AND s.bank_id =".$bank_id;
@@ -179,13 +184,15 @@ class Lanyu_signModuleSite extends WeModuleSite {
 				$amount = $_GPC['amount'];
 				$day = $_GPC['day'];
 				$bank_id = $_GPC['bank_id'];
+				$number = $this->get_sn();
 				$insert = array(
 					'bank_id' => $bank_id,
 					'weid' => $_W['uniacid'],
 					'amount' => $amount,
 					'input_id' => $_W['user']['uid'],
 					'bank_user' => $bank_user,
-					'create_time' => strtotime($day)
+					'create_time' => strtotime($day),
+					'sign_sn' => $number,
 				);
 				if(pdo_insert('lanyu_sign',$insert)){
 					message('新增成功！',$this->createWebUrl('sign'),'success');
@@ -362,7 +369,22 @@ class Lanyu_signModuleSite extends WeModuleSite {
 						$user_name = trim($objWorksheet->getCellByColumnAndRow(3, $row)->getValue());
 						$amount = floatval($objWorksheet->getCellByColumnAndRow(4, $row)->getValue());
 						$day = trim($objWorksheet->getCellByColumnAndRow(2, $row)->getValue());
-						if(empty($bank_name) || empty($bank_code) || empty($user_name) || empty($amount) || empty($day)){
+						$number = trim($objWorksheet->getCellByColumnAndRow(5, $row)->getValue());
+						//判断$number是否存在
+						$check = pdo_fetchcolumn("SELECT COUNT(*) FROM ".tablename('lanyu_sign')." WHERE sign_sn =".$number);
+						if($check >= 1){
+							$names[] = array(
+									'name' => $bank_name,
+									'bank_code' => $bank_code,
+									'user_name' => $user_name,
+									'amount' => $amount,
+									'day' => $day,
+									'status' => 0,
+									'data' => '订单号已经存在'
+							);
+							continue;
+						}
+						if(empty($bank_name) || empty($bank_code) || empty($user_name) || empty($amount) || empty($day) || empty($number)){
 							$names[] = array(
 								'name' => $bank_name,
 								'bank_code' => $bank_code,
@@ -395,6 +417,7 @@ class Lanyu_signModuleSite extends WeModuleSite {
 							'status' => 1,
 							'bank_user' => $user_name,
 							'create_time' => strtotime($day),
+							'sign_sn' => $number,
 						);
 						if(pdo_insert('lanyu_sign',$insert)){
 							$names[] = array(
@@ -428,7 +451,8 @@ class Lanyu_signModuleSite extends WeModuleSite {
 		if($op == 'export'){
 			$banks = pdo_fetchall("SELECT * FROM ".tablename('lanyu_bank')." WHERE weid =".$_W['uniacid']);
 			$status = $_GPC['status'];
-			$day = $_GPC['day'];
+			$begin_day = $_GPC['begin_day'];
+			$end_day = $_GET['end_day'];
 			$bank_id = $_GPC['bank_id'];
 			$begin_time = $_GPC['begin_time'];
 			$end_time = $_GPC['end_time'];
@@ -440,9 +464,13 @@ class Lanyu_signModuleSite extends WeModuleSite {
 			if(!empty($v_status)){
 				$sql .= " AND s.invoice =".($v_status-1);
 			}
-			if(!empty($day)){
-				$time = strtotime($day);
-				$sql .= " AND s.create_time =".$time;
+			if(!empty($begin_day)){
+				$time = strtotime($begin_day);
+				$sql .= " AND s.create_time >=".$time;
+			}
+			if(!empty($end_day)){
+				$time = strtotime($end_day);
+				$sql .= " AND s.create_time <=".$time;
 			}
 			if(!empty($bank_id)){
 				$sql .= " AND s.bank_id =".$bank_id;
@@ -478,6 +506,66 @@ class Lanyu_signModuleSite extends WeModuleSite {
 			}
 			$filename = '线下签款明细.'.date('Ymd').'.csv';
 			$this->export_csv($filename,$str);
+		}
+
+		if($op == 'export_sign'){
+			$status = $_GPC['status'];
+			$begin_day = $_GPC['begin_day'];
+			$end_day = $_GET['end_day'];
+			$bank_id = $_GPC['bank_id'];
+			$begin_time = $_GPC['begin_time'];
+			$end_time = $_GPC['end_time'];
+			$v_status = $_GPC['v_status'];
+			$sql = " WHERE s.weid =".$_W['uniacid'];
+			if(!empty($status)){
+				$sql .= " AND s.status =".$status;
+			}
+			if(!empty($v_status)){
+				$sql .= " AND s.invoice =".($v_status-1);
+			}
+			if(!empty($begin_day)){
+				$time = strtotime($begin_day);
+				$sql .= " AND s.create_time >=".$time;
+			}
+			if(!empty($end_day)){
+				$time = strtotime($end_day);
+				$sql .= " AND s.create_time <=".$time;
+			}
+			if(!empty($bank_id)){
+				$sql .= " AND s.bank_id =".$bank_id;
+			}
+			if(!empty($begin_time)){
+				$begin = strtotime($begin_time);
+				$sql .= " AND s.examine_time >=".$begin;
+			}
+			if(!empty($end_time)){
+				$end = strtotime($end_time);
+				$sql .= " AND s.examine_time <=".$end;
+			}
+			$sql .= " AND s.bank_id = b.id ";
+			$signs = pdo_fetchall("SELECT s.*,b.bank_name FROM ".tablename('lanyu_sign')." AS s,".tablename('lanyu_bank')." AS b".$sql);
+			$str = "收款银行,汇款人,汇款日期,汇款金额\n";
+			$str = iconv('utf-8','gb2312',$str);
+			foreach( $signs as $sign ) {
+				$data_day = date("Y-m-d",$sign['create_time']);
+				$bank_name = iconv('utf-8','gb2312',$sign['bank_name']);
+				$bank_user = iconv('utf-8','gb2312',$sign['bank_user']);
+				$amount = $sign['amount'];
+				$str .= $bank_name.','.$bank_user.','.$data_day.','.$amount."\n";
+			}
+			$filename = '银行汇款明细.'.date('Ymd').'.csv';
+			$this->export_csv($filename,$str);
+		}
+	}
+
+	//自动生成对应的订单编号
+	function get_sn(){
+		$number = date('Ymd',time()).rand(100,999);
+		$check = pdo_fetchcolumn("SELECT COUNT(*) FROM ".tablename('lanyu_sign')." WHERE sign_sn =".$number);
+		if($check >=1 ){
+			$this->get_sn();
+		}else{
+			return $number;
 		}
 	}
 
