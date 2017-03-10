@@ -214,6 +214,9 @@
                 <td>{$sign['first_u']['member_name']}</td>
                 <td>{$sign['first_u']['member_amount']}</td>
                 <td rowspan="{$sign['count']}">
+                    {if !empty($sign['remark'])}
+                    <p style="color:red;">{$sign['remark']}</p>
+                    {/if}
                     {if $sign['status'] == 1}
                     未审核
                     {else}

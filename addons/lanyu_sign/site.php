@@ -127,7 +127,7 @@ class Lanyu_signModuleSite extends WeModuleSite {
 			}
 			$total = pdo_fetchcolumn("SELECT COUNT(*) FROM ".tablename('lanyu_sign')." AS s".$sql);
 			$pager = pagination($total,$pindex,$psize);
-			$page_sql = " ORDER BY s.create_time desc LIMIT " . ($pindex - 1) * $psize . ',' . $psize;
+			$page_sql = " ORDER BY s.remark desc,s.create_time desc LIMIT " . ($pindex - 1) * $psize . ',' . $psize;
 			$sql .= " AND s.bank_id = b.id";
 			$sql .= $page_sql;
 			$signs = pdo_fetchall("SELECT s.*,b.bank_name,b.bank_code FROM ".tablename('lanyu_sign')." AS s,".tablename('lanyu_bank')." AS b".$sql);
@@ -614,7 +614,7 @@ class Lanyu_signModuleSite extends WeModuleSite {
 			$sql .= " AND bank_id in(".$bank_ids.")";
 			$total = pdo_fetchcolumn("SELECT COUNT(*) FROM ".tablename('lanyu_sign')." AS s".$sql);
 			$pager = pagination($total,$pindex,$psize);
-			$page_sql = " ORDER BY s.create_time desc LIMIT " . ($pindex - 1) * $psize . ',' . $psize;
+			$page_sql = " ORDER BY s.remark desc LIMIT " . ($pindex - 1) * $psize . ',' . $psize;
 			$sql .= " AND s.bank_id = b.id";
 			$sql .= $page_sql;
 			$signs = pdo_fetchall("SELECT s.*,b.bank_name,b.bank_code FROM ".tablename('lanyu_sign')." AS s,".tablename('lanyu_bank')." AS b".$sql);
