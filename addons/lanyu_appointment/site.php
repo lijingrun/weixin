@@ -729,6 +729,7 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 			$order_time = date("Y-m-d",$order['appointment_day'])." ".$time['time'];
 			$order_time = strtotime($order_time);
 			//距离预约时间大于48小时才可以修改
+
 			if(($order_time - time()) > 172800){
 //				$type_id = $order['type_id'];
 //				$store_id = $order['store_id'];
@@ -786,9 +787,7 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 			$day_time = strtotime($day_time);
 			if(pdo_update('lanyu_appointment_data',array('appointment_day' => $day_time),array('id' => $order_id,'weid' => $_W['uniacid'])) || 1 == 1) {
 				$order = pdo_fetch("SELECT * FROM ".tablename('lanyu_appointment_data')." WHERE id =".$order_id." AND weid =".$_W['uniacid']);
-//				$type_id = $order['type_id']; //类型id
 				$store_id = $order['store_id']; //店铺id
-//				$day = $_GPC['day']; //日期
 				$year = empty($_GPC['year']) ? date('Y', time()) : $_GPC['year'];
 				$choose_day = $year . "-" . $month . "-" . $day;
 				$time = strtotime($choose_day);

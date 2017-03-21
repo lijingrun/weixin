@@ -24,6 +24,13 @@
     <div class="alert alert-danger" role="alert">最多只能提前15天预约！</div>
 </div>
 
+<script>
+    function change_day(){
+        var month = $("#month").val();
+        location.href="{php echo $this->createMobileUrl('my_orders',array('op' => 'to_change_day','order_id' => $order_id, 'type_id' => $type_id,'store_id' => $store_id))}&month="+month;
+    }
+</script>
+
 
 
 {template 'footer'}
