@@ -91,6 +91,28 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 			include $this->template('web/order_detail');
 		}
 
+		//取消订单
+		if($op == 'cancel'){
+			$id = $_GPC['id'];
+			if(pdo_update('lanyu_appointment_data',array('status' => 0),array('id' => $id))){
+				echo 111;
+			}else{
+				echo 222;
+			}
+			exit;
+		}
+
+		//完成订单
+		if($op == 'finish'){
+			$id = $_GPC['id'];
+			if(pdo_update('lanyu_appointment_data',array('status' => 3,'finish_time' => time()),array('id' => $id))){
+				echo 111;
+			}else{
+				echo 222;
+			}
+			exit;
+		}
+
 	}
 
 	//店铺设置
@@ -453,27 +475,41 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 		if($op == 'choose_day'){
 			$type_id = $_GPC['type_id'];
 			$store_id = $_GPC['store_id'];
-			$month = empty($_GPC['month'])?date('m',time()):$_GPC['month'];
+			$month = intval(empty($_GPC['month'])?date('m',time()):$_GPC['month']);
 			$year = empty($_GPC['year'])?date('Y',time()):$_GPC['year'];
-			//求出今个月以及今年剩下月份
-			$this_month = date('m',time());
-			$start_month = intval($this_month);
-			$month_array = array();
-			for($i = $start_month;$i<=12;$i++){
-				$month_array[] = $i;
-			}
-			//求所在月份的剩余天数
-			$days = array();
-			if($month == $this_month){
-				$start_day = date('d',time());
-			}else{
-				$start_day = 1;
-			}
-			$end_day = $this->_get_month_by_month($month);
-			for($i = $start_day; $i<=$end_day; $i++){
-				$days[] = $i;
-			}
+			//只算出未来15天的预约
 
+			//如果选择的月份是今个月的，就查今个月
+			$this_month = intval(date('m',time()));
+			$begin_day = $year."-".$month."-01";
+			$end_day = intval(date('d', strtotime("$begin_day +1 month -1 day")));
+			if($month == $this_month) {
+				$today = intval(date('d', time()));  //本月
+				$spacing = 15;
+			}else{
+				$today = 0;
+				$p_begin_day = date('Y-m-01', strtotime(date("Y-m-d")));
+				$p_end_day = intval(date('d', strtotime("$p_begin_day +1 month -1 day")));
+				$pev_day = intval(date('d',time()));
+				$pev_days = $p_end_day-$pev_day;
+				$spacing = 15-$pev_days;
+			}
+			//如果到月尾还大于间距，就直接显示间距
+			$days = array();
+			$month_array = array();
+			$month_array[] = $month;
+			if(($end_day-$today) > ($spacing+1) ){
+				for($i=$today+1;$i<=($spacing+$today);$i++){
+					$days[] = $i;
+				}
+				$month_array[] = $month-1;
+			}else{
+				$next_month = $month+1;
+				for($i=$today+1;$i<=$end_day;$i++){
+					$days[] = $i;
+				}
+				$month_array[] = $month+1;
+			}
 			include $this->template('choose_day');
 		}
 
@@ -677,6 +713,42 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 				echo 111;
 			}
 			exit;
+		}
+
+		//评价
+		if($op == 'eva'){
+			$order_id = $_GET['order_id'];
+			//先查有无评价了，有就不可以再评价
+			$eva = pdo_fetch("SELECT * FROM ".tablename('lanyu_appointment_eva')." WHERE order_id =".$order_id);
+			$eva_types = pdo_fetchall("SELECT * FROM " . tablename('lanyu_appointment_eva_type') . " WHERE weid=" . $_W['uniacid'] . " ORDER BY list_order");
+			if(!empty($eva)) {
+				$eva_array = (ARRAY)json_decode($eva['eva']);
+				$remark = $eva_array['remark'];
+				$has_eva = true;
+				foreach ($eva_types as $key2 => $type) {
+					foreach ($eva_array as $key => $e_a) {
+						if ($type['id'] == $key) {
+							$eva_types[$key2]['value'] = $e_a;
+						}
+					}
+				}
+			}
+			include $this->template('eva');
+		}
+
+		if($op == 'input_eva'){
+			$order_id = $_GPC['id'];
+			$eva = $_GPC['eva'];
+			$eva = json_encode($eva);
+			$insert = array(
+				'order_id' => $order_id,
+				'weid' => $_W['uniacid'],
+				'eva' => $eva,
+				'create_time' => time(),
+			);
+			if(pdo_insert('lanyu_appointment_eva',$insert)){
+				message('',$this->createMobileUrl('my_orders',array('op'=>'eva','order_id' => $order_id)),'');
+			}
 		}
 
 		//支付

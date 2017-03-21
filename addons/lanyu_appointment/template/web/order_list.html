@@ -89,7 +89,7 @@
                 <td>
                     {$l['time']}
                 </td>
-                <td>{if $l['status']=='1'}<span class="label label-default">未支付</span>{else if $l['status'] == 2}<span class="label label-success">已支付</span>{else if $l['status'] == 0}<span class="label label-success">已取消</span>{/if}</td>
+                <td>{if $l['status']=='1'}<span class="label label-default">未支付</span>{else if $l['status'] == 2}<span class="label label-success">已支付</span>{else if $l['status'] == 0}<span class="label label-success">已取消</span>{else if $l['status'] == 3}<span class="label label-success">已完成</span>{/if}</td>
                 <td>
                     <a href="{php echo $this->createWebUrl('order',array('id' => $l['id'],'op'=>'detail'))}" title="查看" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-search"></span></a>
 

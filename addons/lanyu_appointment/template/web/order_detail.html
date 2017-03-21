@@ -23,6 +23,8 @@
                 <span style="color:#919191">未支付定金</span>
                 {else if $order['status'] == 2 }
                 <span style="color:green">已支付定金</span>
+                {else if $order['status'] == 3 }
+                <span style="color:green">已完成服务</span>
                 {/if}
             </div>
             <div class="alert alert-info" role="alert">
@@ -64,8 +66,10 @@
         <p>订单总价：￥{$total_price}</p>
         <p>已付定金：￥{$order['deposit']}</p>
     </div>
-    <button class="btn-success" onclick="had_pay();">确认收款</button>
-    <button class="btn-danger" onclick="cancel();">取消订单</button>
+    {if $order['status'] != 3}
+    <button class="btn-success" onclick="finish({$order['id']});">完成服务</button>
+    <button class="btn-danger" onclick="cancel({$order['id']});">取消订单</button>
+    {/if}
     <div style="height: 20px;">
 
     </div>
@@ -74,9 +78,9 @@
 
 
 <script>
-    function to_del(id){
+    function cancel(id){
         if(confirm("是否确定取消订单？")){
-            var url = "{php echo $this->createMobileUrl('my_orders',array('op' => 'del'))}";
+            var url = "{php echo $this->createWebUrl('order',array('op' => 'cancel'))}";
             $.ajax({
                 type : 'post',
                 url : url,
@@ -85,19 +89,30 @@
                     if(data == 111){
                         alert("操作成功！");
                         location.reload();
+                    }else{
+                        alert("系统繁忙，请稍后重试！");
                     }
                 }
             });
         }
     }
-    function to_pay(){
-
-    }
-    function had_pay(){
-
-    }
-    function cancel(){
-
+    function finish(id){
+        if(confirm("是否确定已经完成服务并收款？")){
+            var url = "{php echo $this->createWebUrl('order',array('op' => 'finish'))}";
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : {'id' : id},
+                success : function(data){
+                    if(data == 111){
+                        alert("操作成功！");
+                        location.reload();
+                    }else{
+                        alert("系统繁忙，请稍后重试！");
+                    }
+                }
+            });
+        }
     }
 </script>
 {template 'common/footer'}

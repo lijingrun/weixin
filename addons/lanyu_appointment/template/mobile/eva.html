@@ -1,0 +1,75 @@
+{template 'header'}
+<meta charset="utf-8"/>
+<!--<script src="resource/js/bs/jquery.min.js"></script>-->
+<link href="resource/css/star-rating.css" media="all" rel="stylesheet" type="text/css"/>
+<script src="resource/js/bs/star-rating.js" type="text/javascript"></script>
+
+
+<nav class="navbar navbar-inverse navbar-static-top">
+    <div class="container" align="center">
+        <h4 style="color:white;">我的评价</h4>
+    </div>
+</nav>
+{if $has_eva}<div class="alert alert-info" role="alert">评价时间：{php echo date('Y-m-d',$eva['create_time'])}</div>{/if}
+
+{if $eva_types}
+<div class="container">
+    <form action="{php echo $this->createMobileUrl('my_orders',array('op'=>'input_eva'));}" method="post" class="form-horizontal form">
+        <div class="row">
+        {loop $eva_types $type}
+            <div class="col-md-3">
+                <h4>{$type['eva_name']}</h4>
+            </div>
+            <div class="col-md-9">
+                <input id="input-2b" type="number" class="rating" min="0" max="5" step="1" value="{if $has_eva}{$type['value']}{else}5{/if}" name="eva[{$type['id']}]" {if $has_eva}readonly="readonly"{/if}/>
+            </div>
+        {/loop}
+            <div class="col-md-3"><h4>评价</h4></div>
+            <div class="col-md-9">
+                <textarea class="form-control" rows="3" name="eva[remark]" {if $has_eva}readonly="readonly"{/if} >{$remark}</textarea>
+            </div>
+        </div>
+        <br />
+        <br />
+        <nav class="navbar navbar-default navbar-fixed-bottom">
+            <div class="container" style="padding-top: 5px;" align="center">
+                {if !$has_eva}
+                <button type="submit" class="btn btn-primary">确认评价</button>
+                <input type="hidden" name="token" value="{$_W['token']}" />
+                <input type='hidden' name='id' value="{$order_id}" />
+                {/if}
+                &nbsp;&nbsp;
+                <button type="reset" onclick="history.go(-1)" class="btn btn-default">返回</button>
+            </div>
+        </nav>
+    </form>
+
+    <script>
+        jQuery(document).ready(function () {
+            $(".rating-kv").rating();
+        });
+    </script>
+    <script type="text/javascript">
+        $('form').submit(function() {
+//            if($.trim($(':text[name="store_name"]').val()) == '') {
+//                message('必须填写店铺名称.', '', 'error');
+//                return false;
+//            }
+//            if($.trim($(':text[name="address"]').val()) == '') {
+//                message('必须填写店铺地址.', '', 'error');
+//                return false;
+//            }
+//            if($.trim($(':text[name="traffic"]').val()) == '') {
+//                message('必须填写交通指导.', '', 'error');
+//                return false;
+//            }
+
+            return true;
+        });
+
+
+    </script>
+    {else}
+
+    {/if}
+{template 'footer'}

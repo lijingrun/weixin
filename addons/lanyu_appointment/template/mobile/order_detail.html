@@ -77,6 +77,11 @@
         {if $order['status'] == 0}
             <h4 style="color:red;">已取消</h4>
         {/if}
+        {if $order['status'] == 3}
+        <a href="{php echo $this->createMobileUrl('my_orders',array('op' => 'eva','order_id' => $order['id']))}">
+            <button class="btn btn-info" style="width:40%;" >进行评价</button>
+        </a>
+        {/if}
     </div>
 </nav>
 <script>

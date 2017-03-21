@@ -7,7 +7,7 @@
 <div style="padding: 10px">
     {loop $list $l}
     <a href="{php echo $this->createMobileUrl('my_orders',array('op' => 'detail', 'id' => $l['id']))}">
-        <div {if $l['status'] == 1}class="panel panel-warning"{else if $l['status'] == 2}class="panel panel-success"{else if $l['status'] == 0}class="panel panel-danger"{/if}>
+        <div {if $l['status'] == 1}class="panel panel-warning"{else if $l['status'] == 2}class="panel panel-success"{else if $l['status'] == 0}class="panel panel-danger"{else if $l['status'] == 3}class="panel panel-info"{/if}>
             <div class="panel-heading">
                 <h3 class="panel-title">{php echo date('Y-m-d',$l['appointment_day'])}&nbsp;&nbsp;{$l['time']}
                     <span style="float:right">

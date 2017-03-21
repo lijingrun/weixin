@@ -96,6 +96,7 @@
 		  `appointment_day` varchar(255) NOT NULL ,
 		  `times_id` int(11) NOT NULL ,
 		  `store_id` int(11) NOT NULL ,
+		  `finish_time` varchar(255),
 		  PRIMARY KEY (`id`)
 		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 
@@ -140,6 +141,25 @@
 		  `app_day` varchar(255) NOT NULL ,
 		  PRIMARY KEY (`id`)
 		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+		#评价类型（评价自定义）
+		CREATE TABLE IF NOT EXISTS `ims_lanyu_appointment_eva_type` (
+		  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+		  `weid` int(11) DEFAULT NULL,
+		  `eva_name` varchar(255) NOT NULL,
+		  `list_order` int(10) NOT NULL ,
+		  `type` int(10) NOT NULL ,
+		  PRIMARY KEY (`id`)
+		) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+		#评价内容
+		CREATE TABLE IF NOT EXISTS `ims_lanyu_appointment_eva` (
+		  `order_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+		  `weid` int(11) DEFAULT NULL,
+		  `eva` varchar(255) NOT NULL,
+		  `create_time` varchar(255) NOT NULL,
+		  PRIMARY KEY (`order_id`)
+		) ENGINE=MyISAM AUTO_INCREMENT DEFAULT CHARSET=utf8;
 
 	]]></install>
 	<uninstall><![CDATA[
