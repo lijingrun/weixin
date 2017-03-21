@@ -73,11 +73,13 @@
         {if $order['status'] == 1}
         <button class="btn btn-danger" style="width:40%;" onclick="to_del({$order['id']});">取消订单</button>
         <button class="btn btn-success" style="width:40%;" onclick="to_pay({$order['id']});">支付定金</button>
-        {/if}
-        {if $order['status'] == 0}
+        {else if $order['status'] == 0}
             <h4 style="color:red;">已取消</h4>
-        {/if}
-        {if $order['status'] == 3}
+        {else if $order['status'] == 2}
+        <a href="{php echo $this->createMobileUrl('my_orders',array('op' => 'to_change_day','order_id' => $order['id']))}">
+            <button class="btn btn-info" style="width:40%;" >修改预约时间</button>
+        </a>
+        {else if $order['status'] == 3}
         <a href="{php echo $this->createMobileUrl('my_orders',array('op' => 'eva','order_id' => $order['id']))}">
             <button class="btn btn-info" style="width:40%;" >进行评价</button>
         </a>

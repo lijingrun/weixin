@@ -1,0 +1,59 @@
+{template 'header'}
+<nav class="navbar navbar-inverse navbar-static-top">
+    <div class="container" align="center">
+        <h4 style="color:white;">请选择预约时间</h4>
+    </div>
+</nav>
+<div style="padding: 20px 10px 0px 10px">
+    <div align="center">
+        <h4>{$choose_day}</h4>
+    </div>
+    <div class="row">
+        {loop $times $time}
+        <div class="col-xs-3"  style="padding-bottom:15px;">
+            <button id="btn{$time['id']}" {if $time['status'] == 1}class="btn btn-default" onclick="choose_time({$time['id']});"{else}class="btn btn-danger"{/if}>
+            <span class="glyphicon glyphicon-time"></span>{$time['time']}
+            </button>
+        </div>
+        {/loop}
+    </div>
+    <div class="alert alert-danger" role="alert">
+        红色为不能选择或者已经预约满的时间
+    </div>
+</div>
+
+
+
+<nav class="navbar navbar-default navbar-fixed-bottom">
+    <div class="container" style="padding-top: 5px;" align="center">
+        <button class="btn btn-success" style="width:40%;" onclick="to_change({$order_id});">确定</button>
+        <button class="btn btn-danger" style="width:40%;" onclick="history.go(-1);">返回</button>
+    </div>
+</nav>
+<input type="hidden" id="time_id" value="0" />
+<script>
+    function choose_time(id){
+        $(".choose").attr('class','btn btn-default');
+        $("#time_id").val(id);
+        $("#btn"+id).attr('class','btn btn-success choose');
+    }
+    function to_change(order_id){
+        var time_id = $("#time_id").val();
+        if(time_id == 0){
+            alert("请先选择预约时间");
+        }else{
+            var url = "{php echo $this->createMobileUrl('my_orders',array('op' => 'change_times'))}";
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : {'order_id' : order_id, 'time_id' : time_id},
+                success : function(data){
+                    if(data == 111){
+                        location.href="{php echo $this->createMobileUrl('my_orders',array('op' => 'detail'))}"+"&id="+order_id;
+                    }
+                }
+            });
+        }
+    }
+</script>
+{template 'footer'}

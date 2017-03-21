@@ -684,7 +684,7 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 			if(empty($_W['openid'])){
 				$_W['openid'] = 1;
 			}
-			$list = pdo_fetchall("SELECT d.*,t.time FROM ".tablename('lanyu_appointment_data')." as d,".tablename('lanyu_appointment_times')." as t WHERE d.openid ='".$_W['openid']."' AND d.weid =".$_W['uniacid']." AND d.times_id = t.id AND d.store_id = t.store_id");
+			$list = pdo_fetchall("SELECT d.*,t.time FROM ".tablename('lanyu_appointment_data')." as d,".tablename('lanyu_appointment_times')." as t WHERE d.openid ='".$_W['openid']."' AND d.weid =".$_W['uniacid']." AND d.times_id = t.id AND d.store_id = t.store_id ORDER BY create_time desc");
 			foreach($list as $key=>$l){
 				$total_price = 0;
 				$types = pdo_fetchall("SELECT tt.price as p_price,t.* FROM ".tablename('lanyu_appointment_to_type')." AS tt,".tablename('lanyu_appointment_type')." AS t"." WHERE tt.app_id =".$l['id']." AND tt.weid =".$_W['uniacid']." AND tt.type_id = t.id");
@@ -719,6 +719,118 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 					break;
 			}
 			include $this->template('order_detail');
+		}
+
+		//去修改预约日期
+		if($op == 'to_change_day'){
+			$order_id = $_GPC['order_id'];
+			$order = pdo_fetch("SELECT * FROM ".tablename('lanyu_appointment_data')." WHERE id = ".$order_id." AND weid =".$_W['uniacid']);
+			$time = pdo_fetch('SELECT * FROM '.tablename('lanyu_appointment_times')." WHERE id =".$order['times_id']." AND store_id =".$order['store_id']." AND weid =".$_W['uniacid']);
+			$order_time = date("Y-m-d",$order['appointment_day'])." ".$time['time'];
+			$order_time = strtotime($order_time);
+			//距离预约时间大于48小时才可以修改
+			if(($order_time - time()) > 172800){
+//				$type_id = $order['type_id'];
+//				$store_id = $order['store_id'];
+				$month = intval(empty($_GPC['month'])?date('m',time()):$_GPC['month']);
+				$year = empty($_GPC['year'])?date('Y',time()):$_GPC['year'];
+				//只算出未来15天的预约
+				//如果选择的月份是今个月的，就查今个月
+				$this_month = intval(date('m',time()));
+				$begin_day = $year."-".$month."-01";
+				$end_day = intval(date('d', strtotime("$begin_day +1 month -1 day")));
+				if($month == $this_month) {
+					$today = intval(date('d', time()));  //本月
+					$spacing = 15;
+				}else{
+					$today = 0;
+					$p_begin_day = date('Y-m-01', strtotime(date("Y-m-d")));
+					$p_end_day = intval(date('d', strtotime("$p_begin_day +1 month -1 day")));
+					$pev_day = intval(date('d',time()));
+					$pev_days = $p_end_day-$pev_day;
+					$spacing = 15-$pev_days;
+				}
+				//如果到月尾还大于间距，就直接显示间距
+				$days = array();
+				$month_array = array();
+				$month_array[] = $month;
+				if(($end_day-$today) > ($spacing+1) ){
+					for($i=$today+1;$i<=($spacing+$today);$i++){
+						$days[] = $i;
+					}
+					$month_array[] = $month-1;
+				}else{
+					$next_month = $month+1;
+					for($i=$today+1;$i<=$end_day;$i++){
+						$days[] = $i;
+					}
+					if($month == 12){
+						$month_array[] = 1;
+					}else {
+						$month_array[] = $month + 1;
+					}
+				}
+				include $this->template('change_day');
+			}else{
+				message('距离预约时间大于48小时才能修改！','','error');
+			}
+		}
+
+		//修改预约日期
+		if($op == 'change_day'){
+			$order_id = $_GPC['order_id'];
+			$day = $_GPC['day'];
+			$year = $_GPC['year'];
+			$month = $_GPC['month'];
+			$day_time = $year."-".$month."-".$day;
+			$day_time = strtotime($day_time);
+			if(pdo_update('lanyu_appointment_data',array('appointment_day' => $day_time),array('id' => $order_id,'weid' => $_W['uniacid'])) || 1 == 1) {
+				$order = pdo_fetch("SELECT * FROM ".tablename('lanyu_appointment_data')." WHERE id =".$order_id." AND weid =".$_W['uniacid']);
+//				$type_id = $order['type_id']; //类型id
+				$store_id = $order['store_id']; //店铺id
+//				$day = $_GPC['day']; //日期
+				$year = empty($_GPC['year']) ? date('Y', time()) : $_GPC['year'];
+				$choose_day = $year . "-" . $month . "-" . $day;
+				$time = strtotime($choose_day);
+				//根据店铺，查找店铺对应的时间
+				$times = pdo_fetchall("SELECT * FROM " . tablename('lanyu_appointment_times') . " WHERE weid =" . $_W['uniacid'] . " AND store_id =" . $store_id . " ORDER BY listorder");
+				//查看这个日期这个店铺是否有设置不能预约的时间
+				$out_time = pdo_fetchall("SELECT * FROM " . tablename('lanyu_appointment_out_time') . " WHERE app_day =" . $time . " AND weid=" . $_W['uniacid'] . " AND store_id =" . $store_id);
+				$out_ids = array();
+				foreach ($out_time as $t) {
+					$out_ids[] = $t['time_id'];
+				}
+				//查所选日期里面已经满了预约的时间
+				$had_app = pdo_fetchall("SELECT count(*) as count,times_id FROM " . tablename('lanyu_appointment_data') . " WHERE appointment_day =" . $time . " AND status=2 AND store_id =" . $store_id . " AND weid =" . $_W['uniacid'] . " GROUP BY times_id");
+				//将不能预约的标注出来
+				foreach ($times as $key => $tt) {
+					if (in_array($tt['id'], $out_ids)) {
+						$times[$key]['status'] = 2;
+					} else {
+						$times[$key]['status'] = 1;
+						if (!empty($had_app)) {
+							foreach ($had_app as $ha) {
+								if ($tt['id'] == $ha['times_id'] && intval($tt['effective_times']) <= intval($ha['count'])) {
+									$times[$key]['status'] = 2;
+								}
+							}
+						}
+					}
+				}
+				include $this->template('change_times');
+			}
+		}
+
+		//修改预约时间点
+		if($op == 'change_times'){
+			$order_id = $_GPC['order_id'];
+			$time_id = $_GPC['time_id'];
+			if(pdo_update("lanyu_appointment_data",array('times_id' => $time_id), array('id' => $order_id,'weid' => $_W['uniacid']))){
+				echo 111;
+			}else{
+				echo 222;
+			}
+			exit;
 		}
 
 		//取消订单
