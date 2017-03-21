@@ -88,6 +88,21 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 			foreach($types as $type){
 				$total_price += $type['p_price'];
 			}
+			//先查有无评价了，有就不可以再评价
+			$eva = pdo_fetch("SELECT * FROM ".tablename('lanyu_appointment_eva')." WHERE order_id =".$id);
+			$eva_types = pdo_fetchall("SELECT * FROM " . tablename('lanyu_appointment_eva_type') . " WHERE weid=" . $_W['uniacid'] . " ORDER BY list_order");
+			if(!empty($eva)) {
+				$eva_array = (ARRAY)json_decode($eva['eva']);
+				$remark = $eva_array['remark'];
+				$has_eva = true;
+				foreach ($eva_types as $key2 => $type) {
+					foreach ($eva_array as $key => $e_a) {
+						if ($type['id'] == $key) {
+							$eva_types[$key2]['value'] = $e_a;
+						}
+					}
+				}
+			}
 			include $this->template('web/order_detail');
 		}
 

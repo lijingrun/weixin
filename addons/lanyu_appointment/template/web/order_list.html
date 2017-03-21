@@ -58,7 +58,7 @@
         <table class="table table-hover">
             <thead>
             <tr>
-                <th >店铺</th>
+                <!--<th >店铺</th>-->
                 <th >客户称呼</th>
                 <th >电话号码</th>
                 <th >email</th>
@@ -71,9 +71,8 @@
             <tbody>
             {loop $list $l}
             <tr>
-                <td>
-                    {$l['store_name']}
-                </td>
+                <!--<td>-->
+                    <!--</td>-->
                 <td>
                     {$l['name']}
                 </td>
@@ -97,7 +96,7 @@
             </tr>
             {/loop}
             <tr>
-                <td colspan="8">
+                <td colspan="7">
                     <a class='btn btn-default' href="{php echo $this->createWebUrl('store', array('op'=>'post','id'=>0));}"><i class="fa fa-arrows"></i> 添加店铺</a>
                 </td>
             </tr>

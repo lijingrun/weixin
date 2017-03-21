@@ -11,8 +11,6 @@
     </div>
 </nav>
 {if $has_eva}<div class="alert alert-info" role="alert">评价时间：{php echo date('Y-m-d',$eva['create_time'])}</div>{/if}
-
-{if $eva_types}
 <div class="container">
     <form action="{php echo $this->createMobileUrl('my_orders',array('op'=>'input_eva'));}" method="post" class="form-horizontal form">
         <div class="row">
@@ -69,7 +67,4 @@
 
 
     </script>
-    {else}
-
-    {/if}
 {template 'footer'}
