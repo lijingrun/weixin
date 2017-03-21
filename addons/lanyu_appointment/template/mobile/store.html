@@ -48,13 +48,17 @@
             <button class="btn btn-danger" style="width:40%;">重新选择类型</button>
         </a>
         &nbsp;&nbsp;
-            <button class="btn btn-success" style="width:40%;" onclick="to_choose_day();">下一步</button>
+            <button class="btn btn-success" id="next" style="width:40%;" onclick="to_choose_day();">下一步</button>
     </div>
 </nav>
 <script>
     $(document).ready(
         function(){
+            var count = "<?php echo $store_count    ?>";
             $(".panel-default:first").click();
+            if(count == 1){
+                $("#next").click();
+            }
     });
 </script>
 {template 'footer'}

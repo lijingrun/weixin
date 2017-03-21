@@ -446,6 +446,7 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 				$region_name = $this->find_region($one_region['parent_id'],$one_region['name'],$one_region['weid']);
 				$stores[$key]['region_name'] = $region_name;
 			}
+			$store_count = count($stores);
 			include $this->template('store');
 		}
 
@@ -527,7 +528,7 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 //			$type = pdo_fetch("SELECT * FROM ".tablename('lanyu_appointment_type')." WHERE id =".$type_id." AND weid=".$_W['uniacid']);
 			$under_type = pdo_fetchall("SELECT t.*,p.price as p_price FROM ".tablename('lanyu_appointment_package')." AS p,".tablename('lanyu_appointment_type')." AS t WHERE p.type_id =".$type_id." AND p.weid =".$_W['uniacid']." AND p.down_type = t.id");
 			if(empty($under_type)){
-				message('正在帮您确认信息',$this->createMobileUrl('orders',array('op' => 'to_order','day' => $day, 'type_id' => $type_id, 'store_id' => $store_id, 'time_id' => $time_id)),'success');
+				message('',$this->createMobileUrl('orders',array('op' => 'to_order','day' => $day, 'type_id' => $type_id, 'store_id' => $store_id, 'time_id' => $time_id)),'');
 			}else{
 				include $this->template('to_package');
 			}

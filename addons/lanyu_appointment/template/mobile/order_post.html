@@ -5,8 +5,8 @@
     </div>
 </nav>
 <div style="padding: 20px 10px 0px 10px">
-    <div class="alert alert-warning" role="alert" >请填写预留信息并且核对预约信息是否正确！</div>
-    <div class="panel panel-success">
+    <div class="alert alert-default" role="alert" >请填写预留信息并且核对预约信息是否正确！</div>
+    <div class="panel panel-warning">
         <div class="panel-heading">
             <h3 class="panel-title"><span class="glyphicon glyphicon-success"></span>预留信息</h3>
         </div>
@@ -81,7 +81,7 @@
             <button class="btn btn-danger" style="width:40%;">重新选择日期</button>
         </a>
         &nbsp;&nbsp;
-        <button class="btn btn-success" style="width:40%;" onclick="to_order();">确认预约</button>
+        <button class="btn btn-success" style="width:40%;" onclick="to_order();">确认并支付</button>
     </div>
 </nav>
 <script>
@@ -114,7 +114,7 @@
                 success: function (data) {
                     var obj = JSON.parse(data);
                     if(obj.error == 0){
-                        location.href="{php echo $this->createMobileUrl('my_orders',array('op' => 'detail'))}&id="+obj.app_id;
+                        location.href="{php echo $this->createMobileUrl('my_orders',array('op' => 'pay'))}&id="+obj.app_id;
                     }
                 }
             });

@@ -71,8 +71,8 @@
     <div class="container" style="padding-top: 5px;" align="center">
         &nbsp;&nbsp;
         {if $order['status'] == 1}
-        <button class="btn btn-success" style="width:40%;" onclick="to_pay({$order['id']});">支付定金</button>
         <button class="btn btn-danger" style="width:40%;" onclick="to_del({$order['id']});">取消订单</button>
+        <button class="btn btn-success" style="width:40%;" onclick="to_pay({$order['id']});">支付定金</button>
         {/if}
         {if $order['status'] == 0}
             <h4 style="color:red;">已取消</h4>

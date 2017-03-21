@@ -1,10 +1,13 @@
 {template 'header'}
 <nav class="navbar navbar-inverse navbar-static-top">
     <div class="container" align="center">
-        <h4 style="color:white;">{$choose_day}</h4>
+        <h4 style="color:white;">请选择预约时间</h4>
     </div>
 </nav>
 <div style="padding: 20px 10px 0px 10px">
+    <div align="center">
+        <h4>{$choose_day}</h4>
+    </div>
     <div class="row">
         {loop $times $time}
             <div class="col-xs-3"  style="padding-bottom:15px;">
