@@ -40,6 +40,22 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="myModal2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel2">友情提示</h4>
+            </div>
+            <div class="modal-body" id="time_detail2">
+                请选择时间
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
 <nav class="navbar navbar-default navbar-fixed-bottom">
     <div class="container" style="padding-top: 5px;" align="center">
         <a href="{php echo $this->createMobileUrl('orders',array('op' => 'choose_day','type_id' => $type_id, 'store_id' => $store_id,'month' => $month))}" >
@@ -47,6 +63,7 @@
         </a>
         &nbsp;&nbsp;
         <input type="hidden" data-toggle="modal" data-target="#myModal" id="show_time" />
+        <input type="hidden" data-toggle="modal" data-target="#myModal2" id="message" />
         <button type="button" class="btn btn-success"  onclick="to_order();">下&nbsp;一&nbsp;步</button>
     </div>
 </nav>
@@ -60,7 +77,7 @@
     function to_order(){
         var time_id = $("#time_id").val();
         if(time_id == 0){
-            alert("请先选择预约时间");
+            $("#message").click();
         }else{
             var day = "{$choose_day}";
             var store_id = "{$store_id}";

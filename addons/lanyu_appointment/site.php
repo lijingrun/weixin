@@ -142,6 +142,14 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 			include $this->template('web/store_list');
 		}
 
+		if($op == 'del_package'){
+			$id = $_GPC['id'];
+			if(pdo_delete('lanyu_appointment_package',array('id' => $id, 'weid' => $_W['uniacid']))){
+				echo 111;
+			}
+			exit;
+		}
+
 		if($op == 'post'){
 			$id = intval($_GPC['id']);
 			if ($id > 0) {
