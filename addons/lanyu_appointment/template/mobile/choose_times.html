@@ -1,36 +1,53 @@
 {template 'header'}
-<nav class="navbar navbar-inverse navbar-static-top">
+<nav class="navbar navbar-inverse navbar-static-top" style="margin-bottom: 0px;text-align: center;" >
     <div class="container" align="center">
         <h4 style="color:white;">请选择预约时间</h4>
     </div>
 </nav>
-<div style="padding: 20px 10px 0px 10px">
-    <div align="center">
-        <h4>{$choose_day}</h4>
+<div style="padding: 0px 10px 0px 10px">
+    <div class="alert alert-info" align="center" style="font-size: 20px;">
+        <span class="alert-link" style="font-size: 20px;" >{$choose_day}</span>
     </div>
-    <div class="row">
+    <div class="row" style="margin: 0px;">
         {loop $times $time}
-            <div class="col-xs-3"  style="padding-bottom:15px;">
-                <button id="btn{$time['id']}" {if $time['status'] == 1}class="btn btn-default" onclick="choose_time({$time['id']});"{else}class="btn btn-danger"{/if}>
-                    <span class="glyphicon glyphicon-time"></span>{$time['time']}
-                </button>
-            </div>
+        <div class="col-xs-3" style="padding-bottom: 15px;">
+            <button id="btn{$time['id']}" {if $time['status'] == 1}class="btn btn-default" onclick="choose_time({$time['id']});"{else}class="btn btn-danger"{/if}>
+            <span class="glyphicon glyphicon-time" id="time{$time['id']}">{$time['time']}</span>
+            </button>
+        </div>
         {/loop}
     </div>
-    <div class="alert alert-danger" role="alert">
+    <div align="center" style="color:#C7C7C7;">
         红色为不能选择或者已经预约满的时间
     </div>
 </div>
 
-
-
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">您已经选择的预约时间为</h4>
+            </div>
+            <div class="modal-body" id="time_detail">
+                2017-03-24 8:00
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">重选</button>
+                <button type="button" class="btn btn-primary" onclick="sure_to();">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
 <nav class="navbar navbar-default navbar-fixed-bottom">
     <div class="container" style="padding-top: 5px;" align="center">
         <a href="{php echo $this->createMobileUrl('orders',array('op' => 'choose_day','type_id' => $type_id, 'store_id' => $store_id,'month' => $month))}" >
             <button class="btn btn-danger" style="width:40%;">重新选择日期</button>
         </a>
         &nbsp;&nbsp;
-        <button class="btn btn-success" style="width:40%;" onclick="to_order();">下一步</button>
+        <input type="hidden" data-toggle="modal" data-target="#myModal" id="show_time" />
+        <button type="button" class="btn btn-success"  onclick="to_order();">下&nbsp;一&nbsp;步</button>
     </div>
 </nav>
 <input type="hidden" id="time_id" value="0" />
@@ -48,8 +65,21 @@
             var day = "{$choose_day}";
             var store_id = "{$store_id}";
             var type_id = "{$type_id}";
-            location.href="{php echo $this->createMobileUrl('orders',array('op' => 'to_package'))}&day="+day+"&store_id="+store_id+"&time_id="+time_id+"&type_id="+type_id;
+            var time = $("#time"+time_id).html();
+            $("#time_detail").html(day+"  "+time);
+            $("#show_time").click();
+//            if(confirm("您选择的预约时间为"+day+"  "+time)) {
+//                location.href="{php echo $this->createMobileUrl('orders',array('op' => 'to_package'))}&day="+day+"&store_id="+store_id+"&time_id="+time_id+"&type_id="+type_id;
+//            }
         }
+    }
+
+    function sure_to(){
+        var time_id = $("#time_id").val();
+        var day = "{$choose_day}";
+        var store_id = "{$store_id}";
+        var type_id = "{$type_id}";
+        location.href="{php echo $this->createMobileUrl('orders',array('op' => 'to_package'))}&day="+day+"&store_id="+store_id+"&time_id="+time_id+"&type_id="+type_id;
     }
 </script>
 {template 'footer'}

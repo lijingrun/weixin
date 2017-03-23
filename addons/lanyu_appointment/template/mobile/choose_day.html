@@ -4,7 +4,7 @@
         <h4 style="color:white;">请选择预约日期</h4>
     </div>
 </nav>
-<div style="padding: 20px 10px 0px 10px">
+<div>
     <div >
         <select class="form-control" id="month" onchange="change_day();">
             {loop $month_array $m}
@@ -12,7 +12,7 @@
             {/loop}
         </select>
     </div>
-    <div class="row">
+    <div class="row" style="margin: 0px;">
         {loop $days $day}
         <a href="{php echo $this->createMobileUrl('orders',array('op' => 'choose_time', 'type_id' => $type_id, 'store_id' => $store_id, 'month' => $month,'day' => $day))}">
             <div class="col-xs-3" style="background-image: url('resource/images/day.png');background-repeat:no-repeat;background-position:top;height: 90px;">
@@ -21,7 +21,7 @@
         </a>
         {/loop}
     </div>
-    <div class="alert alert-danger" role="alert">最多只能提前15天预约！</div>
+    <div align="center" style="color:#C7C7C7;">可预约14天内的档期，新一天档期于每天10:00开放</div>
 </div>
 
 <!--<nav class="navbar navbar-default navbar-fixed-bottom">-->

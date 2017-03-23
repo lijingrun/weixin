@@ -54,11 +54,11 @@
 <script>
     $(document).ready(
         function(){
-            var count = "<?php echo $store_count    ?>";
+            var count = "<?php echo $store_count;   ?>";
             $(".panel-default:first").click();
-            if(count == 1){
-                $("#next").click();
-            }
+//            if(count == 1){
+//                $("#next").click();
+//            }
     });
 </script>
 {template 'footer'}

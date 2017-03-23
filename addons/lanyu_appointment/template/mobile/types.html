@@ -6,14 +6,14 @@
 </nav>
 <div style="padding: 20px 10px 0px 10px">
 
-    <div class="row">
+    <div class="row" style="margin:0px;">
         {loop $types $type}
         <a href="{php echo $this->createMobileUrl('types',array('op' => 'detail', 'type_id' => $type['id']))}">
             <div class="col-xs-4" align="center">
                 <p>
-                    <img src="../attachment/{$type['image']}" style="width:80%;" />
+                    <img src="../attachment/{$type['image']}" style="width:90%;" />
                 </p>
-                <!--<p>{$type['name']}</p>-->
+                <p>{$type['name']}</p>
             </div>
         </a>
         {/loop}

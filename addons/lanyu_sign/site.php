@@ -210,6 +210,14 @@ class Lanyu_signModuleSite extends WeModuleSite {
 			$id = $_GPC['id'];
 			$banks = pdo_fetchall("SELECT * FROM ".tablename('lanyu_bank')." WHERE weid =".$_W['uniacid']);
 			$sign = pdo_fetch("SELECT s.*,b.bank_name,b.bank_code FROM ".tablename('lanyu_sign')." AS s,".tablename('lanyu_bank')." AS b WHERE s.id =".$id." AND s.weid =".$_W['uniacid']);
+			$status = $_GPC['status'];
+			$f_bank_id = $_GPC['f_bank_id'];
+			$begin_day = $_GPC['begin_day'];
+			$end_day = $_GPC['end_day'];
+			$begin_time = $_GPC['begin_time'];
+			$end_time = $_GPC['end_time'];
+			$v_status = $_GPC['v_status'];
+			$page = $_GPC['page'];
 			if(checksubmit('submit')) {
 				$id = $_GPC['id'];
 				$bank_user = $_GPC['bank_user'];
@@ -225,9 +233,9 @@ class Lanyu_signModuleSite extends WeModuleSite {
 						'create_time' => strtotime($day)
 				);
 				if (pdo_update('lanyu_sign', $insert, array('id' => $id))) {
-					message('操作成功！', $this->createWebUrl('sign'), 'success');
+					message('操作成功！', $this->createWebUrl('sign',array('status' => $status,'bank_id' => $f_bank_id,'begin_day' => $begin_day,'end_day' => $end_day, 'begin_time' => $begin_time, 'end_time' => $end_time ,'v_status' => $v_status,'page'=>$page)), 'success');
 				} else {
-					message('服务器繁忙，请稍后重试！', $this->createWebUrl('sign'), 'error');
+					message('服务器繁忙，请稍后重试！', $this->createWebUrl('sign',array('status' => $status,'bank_id' => $f_bank_id,'begin_day' => $begin_day,'end_day' => $end_day, 'begin_time' => $begin_time, 'end_time' => $end_time ,'v_status' => $v_status,'page'=>$page)), 'error');
 				}
 			}
 			include $this->template('web/sign_add');
@@ -427,12 +435,12 @@ class Lanyu_signModuleSite extends WeModuleSite {
 						}
 					}
 					$str = "收款银行,银行代码,汇款日期,汇款账号,汇款金额,错误原因\n";
-					$str = iconv('utf-8','gb2312',$str);
+					$str = iconv('utf-8','gbk',$str);
 					foreach( $names as $v ) {
-						$bank_name = iconv('utf-8','gb2312',$v['name']);
-						$user_name = iconv('utf-8','gb2312',$v['user_name']);
-						$bank_code = iconv('utf-8','gb2312',$v['bank_code']);
-						$data = iconv('utf-8','gb2312',$v['data']);
+						$bank_name = iconv('utf-8','gbk',$v['name']);
+						$user_name = iconv('utf-8','gbk',$v['user_name']);
+						$bank_code = iconv('utf-8','gbk',$v['bank_code']);
+						$data = iconv('utf-8','gbk',$v['data']);
 						if($v['status'] != 1) {
 							$str .= $bank_name . ',' . $bank_code . ',' .$v['day'].','.$user_name.','.$v['amount'].','.$data. "\n";
 						}
@@ -496,12 +504,12 @@ class Lanyu_signModuleSite extends WeModuleSite {
 				}
 			}
 			$str = "单据日期,财务日期,收款金额, , ,收款客户,现金类科目,收款银行,收款单号,币别代码,汇率,收款摘要\n";
-			$str = iconv('utf-8','gb2312',$str);
+			$str = iconv('utf-8','gbk',$str);
 			foreach( $signs as $sign ) {
 				$data_day = date("Y-m-d",$sign['create_time']);
 				$examine_day = date('Y-m-d',$sign['examine_time']);
-				$member_name = iconv('utf-8','gb2312',$sign['member_name']);
-				$bank_name = iconv('utf-8','gb2312',$sign['bank_name']);
+				$member_name = iconv('utf-8','gbk',$sign['member_name']);
+				$bank_name = iconv('utf-8','gbk',$sign['bank_name']);
 				$str .= $data_day.','.$examine_day.' ,'.$sign['member_amount'].', , ,'.$member_name.','.$sign['bank_code'].','.$bank_name.', ,RMB,1.00000'."\n";
 			}
 			$filename = '线下签款明细.'.date('Ymd').'.csv';
@@ -545,11 +553,11 @@ class Lanyu_signModuleSite extends WeModuleSite {
 			$sql .= " AND s.bank_id = b.id ";
 			$signs = pdo_fetchall("SELECT s.*,b.bank_name FROM ".tablename('lanyu_sign')." AS s,".tablename('lanyu_bank')." AS b".$sql);
 			$str = "收款银行,汇款人,汇款日期,汇款金额\n";
-			$str = iconv('utf-8','gb2312',$str);
+			$str = iconv('utf-8','gbk',$str);
 			foreach( $signs as $sign ) {
 				$data_day = date("Y-m-d",$sign['create_time']);
-				$bank_name = iconv('utf-8','gb2312',$sign['bank_name']);
-				$bank_user = iconv('utf-8','gb2312',$sign['bank_user']);
+				$bank_name = iconv('utf-8','gbk',$sign['bank_name']);
+				$bank_user = iconv('utf-8','gbk',$sign['bank_user']);
 				$amount = $sign['amount'];
 				$str .= $bank_name.','.$bank_user.','.$data_day.','.$amount."\n";
 			}
