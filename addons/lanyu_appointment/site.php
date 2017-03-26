@@ -146,6 +146,8 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 			$id = $_GPC['id'];
 			if(pdo_delete('lanyu_appointment_package',array('id' => $id, 'weid' => $_W['uniacid']))){
 				echo 111;
+			}else{
+				echo 123;
 			}
 			exit;
 		}
@@ -390,7 +392,7 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 			$id = $_GPC['type_id'];
 			$type = pdo_fetch("SELECT * FROM ".tablename('lanyu_appointment_type')." WHERE id =".$id." AND weid = ".$_W['uniacid']);
 
-			$under = pdo_fetchall("SELECT t.*,p.price as p_price,p.down_type FROM ".tablename('lanyu_appointment_type')." AS t,".tablename('lanyu_appointment_package')." AS p WHERE p.type_id =".$id." AND p.weid=".$_W['uniacid']." AND p.down_type = t.id");
+			$under = pdo_fetchall("SELECT t.*,p.price as p_price,p.down_type,p.id as p_id FROM ".tablename('lanyu_appointment_type')." AS t,".tablename('lanyu_appointment_package')." AS p WHERE p.type_id =".$id." AND p.weid=".$_W['uniacid']." AND p.down_type = t.id");
 			if(!empty($under)){
 				$has_choose = array();
 				foreach($under as $u){
@@ -401,7 +403,6 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 			}else {
 				$other_types = pdo_fetchall("SELECT * FROM " . tablename('lanyu_appointment_type') . " WHERE weid =" . $_W['uniacid']);
 			}
-
 			include $this->template('web/package');
 		}
 
@@ -500,38 +501,16 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 			$store_id = $_GPC['store_id'];
 			$month = intval(empty($_GPC['month'])?date('m',time()):$_GPC['month']);
 			$year = empty($_GPC['year'])?date('Y',time()):$_GPC['year'];
-			//只算出未来15天的预约
-
-			//如果选择的月份是今个月的，就查今个月
-			$this_month = intval(date('m',time()));
-			$begin_day = $year."-".$month."-01";
-			$end_day = intval(date('d', strtotime("$begin_day +1 month -1 day")));
-			if($month == $this_month) {
-				$today = intval(date('d', time()));  //本月
-				$spacing = 15;
-			}else{
-				$today = 0;
-				$p_begin_day = date('Y-m-01', strtotime(date("Y-m-d")));
-				$p_end_day = intval(date('d', strtotime("$p_begin_day +1 month -1 day")));
-				$pev_day = intval(date('d',time()));
-				$pev_days = $p_end_day-$pev_day;
-				$spacing = 15-$pev_days;
-			}
-			//如果到月尾还大于间距，就直接显示间距
+			//只算出未来14天的预约,外加今天
+			$today_time = strtotime(date('Y-m-d',time()));
 			$days = array();
-			$month_array = array();
-			$month_array[] = $month;
-			if(($end_day-$today) > ($spacing+1) ){
-				for($i=$today+1;$i<=($spacing+$today);$i++){
-					$days[] = $i;
-				}
-				$month_array[] = $month-1;
-			}else{
-				$next_month = $month+1;
-				for($i=$today+1;$i<=$end_day;$i++){
-					$days[] = $i;
-				}
-				$month_array[] = $month+1;
+			for($i = 0; $i <= 15; $i++){
+				$time = $today_time+(86400*$i);
+				$the_one['year'] = date('Y',$time);
+				$the_one['month'] = date('m',$time);
+				$the_one['day'] = date('d',$time);
+				$the_one['week'] = array('日','一','二','三','四','五','六')[date('w',$time)];
+				$days[] = $the_one;
 			}
 			include $this->template('choose_day');
 		}
@@ -571,9 +550,16 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 					}
 				}
 			}
-
-
-
+			//查是否选择了明天，是的话查时间，是当前时间之前的，直接不能选择
+			if(strtotime($choose_day) == strtotime(date("Y-m-d",time()))){
+				$tomorrow = time(); //明天的这个时间
+				foreach($times as $key=>$tt){
+					$time = strtotime($choose_day." ".$tt['time']);  //时间的时间戳
+					if($tomorrow >= $time){
+						$times[$key]['status'] = 2;
+					}
+				}
+			}
 			include $this->template('choose_times');
 		}
 
@@ -618,7 +604,8 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 					$total_price += $ots['p_price'];
 				}
 			}
-
+			//查历史订单
+			$order = pdo_fetch("SELECT * FROM ".tablename('lanyu_appointment_data')." WHERE weid =".$_W['uniacid']." AND openid like '".$_W['openid']."'");
 			include $this->template('order_post');
 		}
 
@@ -739,45 +726,17 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 			//距离预约时间大于48小时才可以修改
 
 			if(($order_time - time()) > 172800){
-//				$type_id = $order['type_id'];
-//				$store_id = $order['store_id'];
 				$month = intval(empty($_GPC['month'])?date('m',time()):$_GPC['month']);
 				$year = empty($_GPC['year'])?date('Y',time()):$_GPC['year'];
-				//只算出未来15天的预约
-				//如果选择的月份是今个月的，就查今个月
-				$this_month = intval(date('m',time()));
-				$begin_day = $year."-".$month."-01";
-				$end_day = intval(date('d', strtotime("$begin_day +1 month -1 day")));
-				if($month == $this_month) {
-					$today = intval(date('d', time()));  //本月
-					$spacing = 15;
-				}else{
-					$today = 0;
-					$p_begin_day = date('Y-m-01', strtotime(date("Y-m-d")));
-					$p_end_day = intval(date('d', strtotime("$p_begin_day +1 month -1 day")));
-					$pev_day = intval(date('d',time()));
-					$pev_days = $p_end_day-$pev_day;
-					$spacing = 15-$pev_days;
-				}
-				//如果到月尾还大于间距，就直接显示间距
+				$today_time = strtotime(date('Y-m-d',time()));
 				$days = array();
-				$month_array = array();
-				$month_array[] = $month;
-				if(($end_day-$today) > ($spacing+1) ){
-					for($i=$today+1;$i<=($spacing+$today);$i++){
-						$days[] = $i;
-					}
-					$month_array[] = $month-1;
-				}else{
-					$next_month = $month+1;
-					for($i=$today+1;$i<=$end_day;$i++){
-						$days[] = $i;
-					}
-					if($month == 12){
-						$month_array[] = 1;
-					}else {
-						$month_array[] = $month + 1;
-					}
+				for($i = 0; $i <= 15; $i++){
+					$time = $today_time+(86400*$i);
+					$the_one['year'] = date('Y',$time);
+					$the_one['month'] = date('m',$time);
+					$the_one['day'] = date('d',$time);
+					$the_one['week'] = array('日','一','二','三','四','五','六')[date('w',$time)];
+					$days[] = $the_one;
 				}
 				include $this->template('change_day');
 			}else{
@@ -824,6 +783,17 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 						}
 					}
 				}
+				//查是否选择了明天，是的话查时间，是当前时间之前的，直接不能选择
+				if(strtotime($choose_day) == strtotime(date("Y-m-d",time()+86400))){
+					$tomorrow = time()+86400; //明天的这个时间
+					foreach($times as $key=>$tt){
+						$time = strtotime($choose_day." ".$tt['time']);  //时间的时间戳
+						if($tomorrow >= $time){
+							$times[$key]['status'] = 2;
+						}
+					}
+				}
+
 				include $this->template('change_times');
 			}
 		}

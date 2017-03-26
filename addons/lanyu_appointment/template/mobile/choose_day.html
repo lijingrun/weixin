@@ -1,38 +1,28 @@
 {template 'header'}
+<link href="/addons/lanyu_appointment/template/mobile/css/choose_day.css" rel="stylesheet">
 <nav class="navbar navbar-inverse navbar-static-top">
     <div class="container" align="center">
         <h4 style="color:white;">请选择预约日期</h4>
     </div>
 </nav>
-<div>
-    <div >
-        <select class="form-control" id="month" onchange="change_day();">
-            {loop $month_array $m}
-            <option value="{$m}" {if $month == $m}selected="selected"{/if}>{$m}月</option>
-            {/loop}
-        </select>
-    </div>
-    <div class="row" style="margin: 0px;">
+<div >
+    <div class="wrap">
         {loop $days $day}
-        <a href="{php echo $this->createMobileUrl('orders',array('op' => 'choose_time', 'type_id' => $type_id, 'store_id' => $store_id, 'month' => $month,'day' => $day))}">
-            <div class="col-xs-3" style="background-image: url('resource/images/day.png');background-repeat:no-repeat;background-position:top;height: 90px;">
-                <h2 align="center" style="padding-top: 10px;">{$day}</h2>
-            </div>
+        <a href="{php echo $this->createMobileUrl('orders',array('op' => 'choose_time', 'type_id' => $type_id, 'store_id' => $store_id,'year' => $day['year'], 'month' => $day['month'],'day' => $day['day']))}">
+            <date-section class="available">
+                <date>
+                    <month>{$day['month']}月</month>
+                    <day>{$day['day']}</day>
+                    <week>周{$day['week']}</week>
+                </date>
+            </date-section>
         </a>
         {/loop}
     </div>
-    <div align="center" style="color:#C7C7C7;">可预约14天内的档期，新一天档期于每天10:00开放</div>
-</div>
 
-<!--<nav class="navbar navbar-default navbar-fixed-bottom">-->
-    <!--<div class="container" style="padding-top: 5px;" align="center">-->
-        <!--<a href="{php echo $this->createMobileUrl('types')}" >-->
-            <!--<button class="btn btn-danger" style="width:40%;">重新选择类型</button>-->
-        <!--</a>-->
-        <!--&nbsp;&nbsp;-->
-        <!--<button class="btn btn-success" style="width:40%;" onclick="to_choose_time();">下一步</button>-->
-    <!--</div>-->
-<!--</nav>-->
+</div>
+<div align="center" style="clear:both; color:#C7C7C7;">可预约14天内的档期，新一天档期于每天10:00开放</div>
+
 <script>
     function change_day(){
         var month = $("#month").val();

@@ -4,11 +4,11 @@
         <h4 style="color:white;">请选择预约时间</h4>
     </div>
 </nav>
-<div style="padding: 0px 10px 0px 10px">
+<div style="">
     <div class="alert alert-info" align="center" style="font-size: 20px;">
         <span class="alert-link" style="font-size: 20px;" >{$choose_day}</span>
     </div>
-    <div class="row" style="margin: 0px;">
+    <div class="row" style="margin: 0px;" >
         {loop $times $time}
         <div class="col-xs-3" style="padding-bottom: 15px;">
             <button id="btn{$time['id']}" {if $time['status'] == 1}class="btn btn-default" onclick="choose_time({$time['id']});"{else}class="btn btn-danger"{/if}>
