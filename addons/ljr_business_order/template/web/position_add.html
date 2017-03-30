@@ -1,0 +1,69 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+    <li ><a href="{php echo $this->createWebUrl('position',array('op'=>'index'));}">职位列表</a></li>
+    <li class="active"><a href="{php echo $this->createWebUrl('position',array('op'=>'add'));}">增加职位</a></li>
+</ul>
+<div class="main panel panel-default">
+    <div class="category panel-body table-responsive">
+        <form method="post" class="form-horizontal form">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    职位相关资料
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">所属部门</label>
+                        <div class="col-sm-9 col-xs-12">
+                            <select class="form-control" name="department_id">
+                                {loop $departments $depart}
+                                <option value="{$depart['id']}" {if $depart['id'] == $the_one['department_id']}selected = 'selected'{/if}>
+                                {$depart['name']}
+                                </option>
+                                {/loop}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">职位名称</label>
+                        <div class="col-sm-9 col-xs-12">
+                            <input type="text" name="name" value="{$the_one['name']}" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">排序</label>
+                        <div class="col-sm-9 col-xs-12">
+                            <input type="text" name="list_order" value="{$the_one['list_order']}" class="form-control"  />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">职位状态</label>
+                        <div class="col-sm-9 col-xs-12">
+                            <label for="isshow1" class="radio-inline"><input type="radio" name="status" value="1" id="isshow1" {if $the_one['status']=='1'}  checked="true" {/if}> 正常</label>&nbsp;&nbsp;&nbsp;
+                            <label for="isshow0" class="radio-inline"><input type="radio" name="status" value="0" id="isshow0"  {if $the_one['status'] == '0'}  checked="true" {/if}> 失效</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group col-sm-12">
+                <input type='hidden' name='id' value="{$the_one['id']}" />
+                <input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" />
+                <input type="hidden" name="token" value="{$_W['token']}" />
+            </div>
+        </form>
+    </div>
+</div>
+<script type="text/javascript">
+    function message(msg) {
+        require(['util'], function(util) {
+            util.message(msg);
+        });
+    }
+    $('form').submit(function() {
+        if ($.trim($(':text[name="name"]').val()) == '') {
+            message('请填写职位名称.', '', 'error');
+            return false;
+        }
+        return true;
+    });
+</script>
+{template 'common/footer'}

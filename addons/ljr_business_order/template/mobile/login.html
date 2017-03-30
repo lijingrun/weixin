@@ -1,0 +1,40 @@
+{template 'header'}
+<link href="/addons/lanyu_appointment/template/mobile/css/choose_day.css" rel="stylesheet">
+<nav class="navbar navbar-inverse navbar-static-top">
+    <div class="container" align="center">
+        <h4 style="color:white;">请选择订餐类型</h4>
+    </div>
+</nav>
+<div style="padding:10px;">
+    <form method="post">
+        <div class="input-group">
+            <span class="input-group-addon" >员工：</span>
+            <input type="text" class="form-control" name="name" placeholder="员工登录账号" aria-describedby="basic-addon1">
+        </div>
+        <br />
+        <div class="input-group">
+            <span class="input-group-addon" >密码：</span>
+            <input type="password" class="form-control" name="password"  placeholder="登录密码" aria-describedby="basic-addon1">
+        </div>
+        <br />
+        {loop $types $type}
+        {/loop}
+        <div>
+            <input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" />
+            <input type="hidden" name="token" value="{$_W['token']}" />
+        </div>
+    </form>
+</div>
+<script type="text/javascript">
+    function message(msg) {
+        require(['util'], function(util) {
+            util.message(msg);
+        });
+    }
+    $('form').submit(function() {
+
+        return true;
+    });
+</script>
+
+{template 'footer'}

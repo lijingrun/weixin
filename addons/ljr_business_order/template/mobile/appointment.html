@@ -1,0 +1,45 @@
+{template 'header'}
+<link href="/addons/lanyu_appointment/template/mobile/css/choose_day.css" rel="stylesheet">
+<nav class="navbar navbar-inverse navbar-static-top">
+    <div class="container" align="center">
+        <h4 style="color:white;">请选择订餐日期</h4>
+    </div>
+</nav>
+<div >
+    {loop $days $day}
+    <a href="{php echo $this->createMobileUrl('appointment',array('op' => 'choose_type','day' => $day['day_time']))}">
+        <div class="row" style="border-bottom: solid 1px #D7D7D7;margin:0px;{if $day['status'] != 1}color:#D0D0D0{/if}">
+            <div class="col-xs-4" align="center">
+                <date-section class="available">
+                    <date>
+                        <month>{$day['month']}月</month>
+                        <day>{$day['day']}</day>
+                        <week>周{$day['week']}</week>
+                    </date>
+                </date-section>
+            </div>
+            <div class="col-xs-8">
+                {loop $types $type}
+                <p class="">
+                    {$type['name']}
+                    {if $day['type'][$type['id']] == 1}
+                    <span class="glyphicon glyphicon-ok"></span>
+                    {else}
+                    <span class="glyphicon glyphicon-remove"></span>
+                    {/if}
+                </p>
+                {/loop}
+            </div>
+        </div>
+    </a>
+    {/loop}
+</div>
+
+<script>
+    function change_day(){
+        var month = $("#month").val();
+        location.href="{php echo $this->createMobileUrl('orders',array('op' => 'choose_day', 'type_id' => $type_id,'store_id' => $store_id))}&month="+month;
+    }
+</script>
+
+{template 'footer'}

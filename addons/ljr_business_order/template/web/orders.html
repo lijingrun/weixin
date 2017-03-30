@@ -1,0 +1,40 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+    <li class="active"><a href="{php echo $this->createWebUrl('position',array('op'=>'index'));}">订餐列表</a></li>
+</ul>
+<div class="main">
+    <div>
+
+    </div>
+    <div>
+        <table class="table">
+            <tr>
+                <th>就餐人</th>
+                <th>就餐人部门</th>
+                <th>就餐人职位</th>
+                <th>就餐时间</th>
+                <th>就餐类型</th>
+                <th>是否订餐</th>
+            </tr>
+            {loop $orders $order}
+            <tr>
+                <td>{$order['username']}</td>
+                <td>{$order['d_name']}</td>
+                <td>{$order['p_name']}</td>
+                <td>{php echo date('Y-m-d H:m:s',$order['create_time'])}</td>
+                <td>{$order['t_name']}</td>
+                <td>
+                    {if $order['appointment']}
+                    <button class="btn btn-success">有</button>
+                    {else}
+                    <button class="btn btn-danger">无</button>
+                    {/if}
+                </td>
+            </tr>
+            {/loop}
+        </table>
+    </div>
+</div>
+
+
+{template 'common/footer'}

@@ -1,0 +1,39 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+    <li class="active"><a href="{php echo $this->createWebUrl('staff',array('op'=>'index'));}">人员</a></li>
+</ul>
+<div class="main">
+    <div>
+        <a href="{php echo $this->createWebUrl('staff',array('op'=>'add'));}">
+            <input class="btn btn-default" type="button" value="增加人员账号" />
+        </a>
+    </div>
+    <div>
+        <table class="table">
+            <tr>
+                <th>员工</th>
+                <th>性别</th>
+                <th>部门</th>
+                <th>职位</th>
+                <th>状态</th>
+                <th>操作</th>
+            </tr>
+            {loop $staffs $staff}
+            <tr>
+                <td>{$staff['name']}</td>
+                <td>{if $staff['sex'] == 1}男{else}女{/if}</td>
+                <td>{$staff['d_name']}</td>
+                <td>{$staff['p_name']}</td>
+                <td>{if $staff['status'] == 1}有效{else}无效{/if}</td>
+                <td>
+
+                    <a href="{php echo $this->createWebUrl('staff',array('id' => $staff['id'],'op'=>'add'))}" title="修改" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-edit"></span></a>
+                </td>
+            </tr>
+            {/loop}
+        </table>
+    </div>
+</div>
+
+
+{template 'common/footer'}

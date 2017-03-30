@@ -1,0 +1,63 @@
+{template 'header'}
+<link href="/addons/lanyu_appointment/template/mobile/css/choose_day.css" rel="stylesheet">
+<nav class="navbar navbar-inverse navbar-static-top">
+    <div class="container" align="center">
+        <h4 style="color:white;">请选择订餐类型</h4>
+    </div>
+</nav>
+<div style="padding:10px;">
+    <form method="post">
+        <button type="button" class="btn btn-primary btn-lg btn-block">{php echo date('Y-m-d',$day)}</button>
+    {loop $types $type}
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <div class="checkbox">
+                    <label>
+                        {if $type['can_choose'] == 2}
+                        <s>{$type['name']}</s>
+                        {else}
+                        <input {if in_array($type['id'],$has_choose)}checked='checked'{/if} type="checkbox" name="type[]" value="{$type['id']}"  /> {$type['name']}
+                        {/if}
+                    </label>
+                </div>
+            </div>
+        </div>
+            <!--<img src="../attachment/{$type['image']}" style="width:30%;" />-->
+    {/loop}
+        <div>
+            <input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" />
+            <input type="hidden" name="token" value="{$_W['token']}" />
+            <input type="hidden" name="day" value="{$day}" />
+            <a href="{php echo $this->createMobileUrl('appointment',array('op' => 'appointment'))}">
+            <input type="button" value="返回" class="btn btn-danger" />
+            </a>
+        </div>
+    </form>
+    <div style="padding:10px;">
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <h3 class="panel-title">当天菜式</h3>
+            </div>
+            <div class="panel-body">
+                {loop $dishes $d}
+                <div class="row">
+                    {$d['t_name']}:{$d['name']}
+                </div>
+                {/loop}
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    function message(msg) {
+        require(['util'], function(util) {
+            util.message(msg);
+        });
+    }
+    $('form').submit(function() {
+
+        return true;
+    });
+</script>
+
+{template 'footer'}

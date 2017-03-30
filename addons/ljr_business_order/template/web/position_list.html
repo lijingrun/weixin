@@ -1,0 +1,19 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+    <li class="active"><a href="{php echo $this->createWebUrl('position',array('op'=>'index'));}">职位列表</a></li>
+</ul>
+<div class="main">
+    <div>
+        <a href="{php echo $this->createWebUrl('position',array('op'=>'add'));}">
+            <input class="btn btn-default" type="button" value="增加职位" />
+        </a>
+    </div>
+    <div style="padding:10px;">
+        {loop $positions $pos}
+        <span class="glyphicon glyphicon-user">{$pos['name']}</span>
+        {/loop}
+    </div>
+</div>
+
+
+{template 'common/footer'}

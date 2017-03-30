@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns="http://www.haoid.cn" versionCode="0.6">
+	<application setting="false">
+		<name><![CDATA[企事业单位内部订餐系统]]></name>
+		<identifie><![CDATA[ljr_business_order]]></identifie>
+		<version><![CDATA[1.0]]></version>
+		<type><![CDATA[biz]]></type>
+		<ability><![CDATA[供企事业单位内部员工订餐的系统]]></ability>
+		<description><![CDATA[企事业单位员工内部订餐系统]]></description>
+		<author><![CDATA[ljr]]></author>
+		<url><![CDATA[http://www.haoid.cn/]]></url>
+	</application>
+	<platform>
+		<subscribes>
+			<message type="qr" />
+		</subscribes>
+		<handles>
+			<message type="qr" />
+		</handles>
+		<rule embed="false" />
+		<card embed="false" />
+	</platform>
+	<bindings>
+		<cover>
+			<entry title="订单系统入口" do="appointment" />
+		</cover>
+		<menu>
+			<entry title="部门管理" do="department" direct="false" />
+			<entry title="职位管理" do="position" direct="false" />
+			<entry title="人员管理" do="staff" direct="false" />
+			<entry title="订餐设置" do="order_system" direct="false" />
+			<entry title="订餐情况查询" do="orders" direct="false" />
+		</menu>
+	</bindings>
+	<permissions>
+	</permissions>
+	<install><![CDATA[
+	#部门架构
+		CREATE TABLE IF NOT EXISTS `ims_ljr_business_order_department` (
+		  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+		  `weid` int(11) DEFAULT NULL,
+		  `name` varchar(255) NOT NULL,
+		  `parent_id` int(11) DEFAULT '0',
+		  `list_order` int(11) NOT NULL DEFAULT 255,
+		  `status` int(1) NOT NULL,
+		  PRIMARY KEY (`id`)
+		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+	#职位
+		CREATE TABLE IF NOT EXISTS `ims_ljr_business_order_position` (
+		  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+		  `weid` int(11) DEFAULT NULL,
+		  `name` varchar(255) NOT NULL,
+		  `list_order` int(11) NOT NULL DEFAULT 255,
+		  `status` int(1) NOT NULL,
+		  `department_id` int(11) NOT NULL,
+		  PRIMARY KEY (`id`)
+		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+	#人员表
+		CREATE TABLE IF NOT EXISTS `ims_ljr_business_order_staff` (
+		  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+		  `weid` int(11) DEFAULT NULL,
+		  `name` varchar(255) NOT NULL,
+		  `department_id` int(11) NOT NULL,
+		  `position_id` int(11) NOT NULL COMMENT '职位id',
+		  `image` varchar(255) NOT NULL,
+		  `openid` varchar(255) NOT NULL,
+		  `password` varchar(255) NOT NULL,
+		  `status` int(1) NOT NULL,
+		  `list_order` int(11) NOT NULL,
+		  `sex` int(1) NOT NULL,
+		  PRIMARY KEY (`id`)
+		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+		#类型
+		CREATE TABLE IF NOT EXISTS `ims_ljr_business_order_type` (
+		  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+		  `weid` int(11) DEFAULT NULL,
+		  `name` varchar(255) NOT NULL,
+		  `list_order` int(11) NOT NULL DEFAULT 255,
+		  `status` int(1) NOT NULL,
+		  `image` varchar(255) ,
+		  `begin_time` varchar(255) NOT NULL,
+		  `end_time` varchar(255) NOT NULL,
+		  PRIMARY KEY (`id`)
+		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+		#预约设置
+		CREATE TABLE IF NOT EXISTS `ims_ljr_business_order_week` (
+		  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+		  `weid` int(11) DEFAULT NULL,
+		  `week` varchar(255) NOT NULL,
+		  `time` int(11) NOT NULL DEFAULT 255,
+		  PRIMARY KEY (`id`)
+		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+		#预约情况
+		CREATE TABLE IF NOT EXISTS `ims_ljr_business_order_appointment` (
+		  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+		  `weid` int(11) DEFAULT NULL,
+		  `user_id` int(11) NOT NULL,
+		  `type_id` int(11) NOT NULL,
+		  `time` varchar(255) NOT NULL,
+		  `create_time` varchar(255) NOT NULL,
+		  `eat` int(1) DEFAULT '0',
+		  `eat_time` varchar(255),
+		  PRIMARY KEY (`id`)
+		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+		#就餐情况
+		CREATE TABLE IF NOT EXISTS `ims_ljr_business_order_orders` (
+		  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+		  `weid` int(11) DEFAULT NULL,
+		  `user_id` int(11) NOT NULL,
+		  `type_id` int(11) NOT NULL,
+		  `time` varchar(255) NOT NULL,
+		  `create_time` varchar(255) NOT NULL,
+		  PRIMARY KEY (`id`)
+		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+		#菜式
+		CREATE TABLE IF NOT EXISTS `ims_ljr_business_order_dishes` (
+		  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+		  `weid` int(11) DEFAULT NULL,
+		  `type_id` int(11) NOT NULL,
+		  `name` varchar(255) NOT NULL,
+		  `day` varchar(255) NOT NULL,
+		  `image` varchar(255) NOT NULL,
+		  `week` int(11),
+		  `content` varchar(255) NOT NULL,
+		  PRIMARY KEY (`id`)
+		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+	]]></install>
+	<uninstall><![CDATA[]]></uninstall>
+	<upgrade><![CDATA[]]></upgrade>
+</manifest>

@@ -1,0 +1,21 @@
+{template 'common/header'}
+<div class="main">
+
+    <div class="row">
+        <div class="col-xs-6" align="center" style="padding-top: 10px;">
+            <a href="{php echo $this->createMobileUrl('appointment',array('op'=>'appointment'));}">
+                <img src="/eat.png" style="width:80%;" />
+                <p>我要点餐</p>
+            </a>
+        </div>
+        <div class="col-xs-6" align="center" style="padding-top: 10px;">
+            <a href="{php echo $this->createMobileUrl('appointment',array('op'=>'order'));}">
+                <img src="/order.png" style="width:80%;" />
+                <p>我要就餐</p>
+            </a>
+        </div>
+    </div>
+</div>
+
+
+{template 'common/footer'}

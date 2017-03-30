@@ -1,0 +1,59 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+    <li class="active"><a href="{php echo $this->createWebUrl('order_system',array('op'=>'index'));}">订餐设置</a></li>
+</ul>
+<div class="main">
+    <div>
+        <a href="{php echo $this->createWebUrl('order_system',array('op'=>'add_type'));}">
+            <input class="btn btn-default" type="button" value="增加订餐类型" />
+        </a>
+        <a href="{php echo $this->createWebUrl('order_system',array('op'=>'week'));}">
+            <input class="btn btn-default" type="button" value="设置订餐周期" />
+        </a>
+        <a href="{php echo $this->createWebUrl('order_system',array('op'=>'dishes'));}">
+            <input class="btn btn-default" type="button" value="设置菜单" />
+        </a>
+    </div>
+    <div>
+        <table class="table">
+            <tr>
+                <th>类型</th>
+                <th>状态</th>
+                <th>排序</th>
+                <th>就餐时间</th>
+                <th>操作</th>
+            </tr>
+            {loop $types $type}
+            <tr>
+                <td>
+                    <a href="#" class="thumbnail">
+                        <img src="../attachment/{$type['image']}" class="image" />
+                    </a>
+                    <p align="center">{$type['name']}</p>
+                </td>
+                <td>
+                    {if $type['status'] == 1}
+                    正常
+                    {else}
+                    不正常
+                    {/if}
+                </td>
+
+                <td>
+                    {$type['list_order']}
+                </td>
+                <td>
+                    {$type['begin_time']}--{$type['end_time']}
+                </td>
+                <td>
+                    <a href="{php echo $this->createWebUrl('order_system',array('id' => $type['id'],'op'=>'add_type'))}" title="修改" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-edit"></span></a>
+
+                </td>
+            </tr>
+            {/loop}
+        </table>
+    </div>
+</div>
+
+
+{template 'common/footer'}

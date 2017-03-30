@@ -1,0 +1,34 @@
+{template 'common/header'}
+<ul class="nav nav-tabs">
+    <li><a href="{php echo $this->createWebUrl('order_system',array('op'=>'index'));}">订餐设置</a></li>
+    <li class="active"><a href="{php echo $this->createWebUrl('order_system',array('op'=>'dishes'));}">菜式设置</a></li>
+</ul>
+<div class="main panel panel-default">
+    <div class="main" style="padding:10px;">
+    <a href="{php echo $this->createWebUrl('order_system',array('op'=>'dishes_add'));}">
+        <button class="btn btn-default">添加菜式</button>
+    </a>
+        <table class="table">
+            <tr>
+                <th>菜式</th>
+                <th>类型</th>
+                <th>日期</th>
+                <th>每周</th>
+                <th>操作</th>
+            </tr>
+            {loop $dishes $d}
+            <tr>
+                <td>{$d['name']}</td>
+                <td>{$d['t_name']}</td>
+                <td>{php echo date('Y-m-d',$d['day'])}</td>
+                <td>{$d['week']}</td>
+                <td>
+                    <a href="{php echo $this->createWebUrl('order_system',array('id' => $d  ['id'],'op'=>'dishes_add'))}" title="修改" data-toggle="tooltip" data-placement="bottom" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-edit"></span></a>
+                </td>
+            </tr>
+            {/loop}
+        </table>
+    </div>
+</div>
+
+{template 'common/footer'}
