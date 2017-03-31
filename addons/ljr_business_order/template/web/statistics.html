@@ -1,0 +1,64 @@
+{template 'common/header'}
+<script>
+    function find(){
+        var begin_day = $("#begin_day").val();
+        var end_day = $("#end_day").val();
+        location.href="{php echo $this->createWebUrl('orders',array('op' => 'statistics'))}&begin_day="+begin_day+"&end_day="+end_day;
+    }
+</script>
+<ul class="nav nav-tabs">
+    <li ><a href="{php echo $this->createWebUrl('orders',array('op'=>'appointment'));}">订餐明细</a></li>
+    <li><a href="{php echo $this->createWebUrl('orders',array('op'=>'index'));}">消费明细</a></li>
+    <li class="active"><a href="{php echo $this->createWebUrl('orders',array('op'=>'statistics'));}">订餐统计</a></li>
+</ul>
+<div class="main">
+    <div class="panel panel-info">
+        <div class="panel-heading">查询</div>
+        <div class="panel-body">
+            <div class="form-horizontal" role="form">
+                <div class="row">
+                    <div class="col-xs-1">预约时间</div>
+                    <div class="col-xs-4">
+                        <input type="date" class="form-control" id="begin_day" value="{$begin_day}" />
+                    </div>
+                    <div class="col-xs-4">
+                        <input type="date" class="form-control" id="end_day" value="{$end_day}" />
+                    </div>
+                </div>
+                <br />
+                <div class="row">
+                    <button class="btn btn-default" onclick="find();"><i class="fa fa-search"></i> 搜索</button>
+                    <!--<button class="btn btn-default" onclick="export_data();"><span class="glyphicon glyphicon-new-window"></span> 导出</button>-->
+                </div>
+            </div>
+        </div>
+    </div>
+    <div>
+        <table class="table">
+            <tr>
+                <th>时间</th>
+                {loop $types $type}
+                <th>{$type['name']}</th>
+                {/loop}
+
+            </tr>
+            {loop $statistics $ss}
+            <tr>
+                <td>{$ss['day']}</td>
+
+                {loop $ss['count'] $key=>$count}
+                <td>
+                    <a href="{php echo $this->createWebUrl('orders',array('op' => 'appointment','begin_day' => $ss['day'],'end_day' => $ss['day'],'type_id' => $key))}">
+                        {$count}
+                    </a>
+                </td>
+                {/loop}
+            </tr>
+            {/loop}
+        </table>
+        {$pager}
+    </div>
+</div>
+
+
+{template 'common/footer'}

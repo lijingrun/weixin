@@ -199,12 +199,14 @@ class Ljr_business_orderModuleSite extends WeModuleSite {
 				$password = $_GPC['password'];
 				$list_order = $_GPC['list_order'];
 				$status = $_GPC['status'];
+				$ic_number = $_GPC['ic_number'];
 				$insert = array(
 					'department_id' => $department_id,
 					'position_id' => $position_id,
 					'name' => $name,
 					'sex' => $sex,
 					'image' => $image,
+					'ic_number' => $ic_number,
 					'list_order' => $list_order,
 					'status' => $status,
 					'weid' => $_W['uniacid'],
@@ -262,7 +264,7 @@ class Ljr_business_orderModuleSite extends WeModuleSite {
 		if($op == 'add_type'){
 			$id = $_GPC['id'];
 			if(empty($id)){
-				$the_one['status'] = 1;
+				$the_one['status'] = 0;
 				$the_one['list_order'] = 255;
 			}else{
 				$the_one = pdo_fetch("SELECT * FROM ".tablename('ljr_business_order_type')." WHERE weid = ".$_W['uniacid']." AND id =".$id);
@@ -346,7 +348,7 @@ class Ljr_business_orderModuleSite extends WeModuleSite {
 
 		//增加菜式
 		if($op == 'dishes_add'){
-			$types = pdo_fetchall("SELECT * FROM ".tablename('ljr_business_order_type')." WHERE weid=".$_W['uniacid']." AND status = 1");
+			$types = pdo_fetchall("SELECT * FROM ".tablename('ljr_business_order_type')." WHERE weid=".$_W['uniacid']);
 
 			$id = $_GPC['id'];
 			if($id > 0) {
@@ -468,6 +470,25 @@ class Ljr_business_orderModuleSite extends WeModuleSite {
 			include $this->template('web/appointment');
 		}
 
+		if($op == 'statistics'){
+			$begin_day = empty($_GPC['begin_day'])?date('Y-m-d',time()) : $_GPC['begin_day'];
+			$end_day = empty($_GPC['end_day'])?date('Y-m-d',time()):$_GPC['end_day'];
+			$begin_day = strtotime($begin_day);
+			$end_day = strtotime($end_day);
+			$statistics = array();
+			$types = pdo_fetchall("SELECT * FROM ".tablename('ljr_business_order_type')." WHERE weid =".$_W['uniacid']);
+			for($begin_day;$begin_day <= $end_day;$begin_day+=86400){
+				foreach($types as $type){
+					$count = pdo_fetchcolumn("SELECT COUNT(*) FROM ".tablename('ljr_business_order_appointment')." WHERE type_id = ".$type['id']." AND time =".$begin_day);
+					$statistics[$begin_day]['count'][$type['id']] = $count;
+					$statistics[$begin_day]['begin_day'] = $begin_day;
+					$statistics[$begin_day]['day'] = date('Y-m-d',$begin_day);
+				}
+			}
+			include $this->template('web/statistics');
+
+		}
+
 	}
 
 
@@ -493,6 +514,108 @@ class Ljr_business_orderModuleSite extends WeModuleSite {
 				}
 			}else {
 				include $this->template('index');
+			}
+		}
+
+		//ic卡
+		if($op == 'card'){
+			//查现在的时间
+			$time = strtotime(date('Y-m-d',time()));
+			//查所有的类型，通过类型查时间
+			$types = pdo_fetchall("SELECT * FROM ".tablename('ljr_business_order_type')." WHERE weid =".$_W['uniacid']);
+			foreach($types as $key=>$type){
+				$begin = strtotime($type['begin_time']);
+				$end = strtotime($type['end_time']);
+				if($begin < time() && $end > time()){
+					$the_type = $type;
+					break;
+				}
+			}
+			include $this->template('card');
+		}
+
+		if($op == 's_card'){
+			$ic_number = $_GPC['ic_number'];
+			$staff = pdo_fetch("SELECT * FROM ".tablename('ljr_business_order_staff')." WHERE ic_number ='".$ic_number."'");
+			if(empty($staff)){
+				echo "读卡异常，没有找到该卡号！";
+				exit;
+			}
+			$user_id = $staff['id'];
+			if(empty($user_id)){
+				if(!empty($_W['openid'])){
+					$staff = pdo_fetch("SELECT * FROM ".tablename('ljr_business_order_staff')." WHERE openid =".$_W['openid']." AND WHERE weid =".$_W['uniacid']);
+					if(!empty($staff)){
+						$_SESSION['user_id'] = $staff['id'];
+						message('',$this->createMobileUrl('appointment',array('op' => 'order')),'');
+					}else{
+						message('',$this->createMobileUrl('appointment',array('op' => 'login')),'');
+					}
+				}else{
+					message('',$this->createMobileUrl('appointment',array('op' => 'login')),'');
+				}
+			}else {
+				//查现在的时间
+				$time = strtotime(date('Y-m-d',time()));
+				//查所有的类型，通过类型查时间
+				$types = pdo_fetchall("SELECT * FROM ".tablename('ljr_business_order_type')." WHERE weid =".$_W['uniacid']);
+				foreach($types as $key=>$type){
+					$begin = strtotime($type['begin_time']);
+					$end = strtotime($type['end_time']);
+					if($begin < time() && $end > time()){
+						$the_type = $type;
+						break;
+					}
+				}
+				if(empty($the_type)){
+					echo '不在就餐时间内，不能进行该操作！';
+					exit;
+				}
+				//如果就餐类型设置了没有预约不能就餐，就需要先核实有无预约
+
+					$appointment = pdo_fetch("SELECT * FROM ".tablename('ljr_business_order_appointment')." WHERE user_id =".$user_id." AND type_id =".$the_type['id']." AND time =".$time);
+				if($the_type['status'] != 1){
+					if(empty($appointment)){
+						echo '您没有订餐，不能进行该操作！';
+						exit;
+					}
+				}
+
+				$check = pdo_fetch("SELECT * FROM ".tablename('ljr_business_order_orders')." WHERE user_id =".$user_id." AND weid = ".$_W['uniacid']." AND type_id =".$the_type['id']." AND time =".$time);
+				if(!empty($check)){
+					echo '您已就餐，不需要重复操作！';exit;
+				}
+				$insert = array(
+						'user_id' => $user_id,
+						'weid' => $_W['uniacid'],
+						'type_id' => $the_type['id'],
+						'time' => $time,
+						'create_time' => time(),
+				);
+				if(pdo_insert('ljr_business_order_orders',$insert)){
+					$department = pdo_fetch("SELECT * FROM ".tablename('ljr_business_order_department')." WHERE id =".$staff['department_id']);
+					$position = pdo_fetch("SELECT * FROM ".tablename('ljr_business_order_position')." WHERE id = ".$staff['position_id']);
+					//菜式
+//					$dishes = pdo_fetchall("SELECT * FROM ".tablename('ljr_business_order_dishes')." WHERE type_id =".$the_type['id']." AND (day =".strtotime(date('Y-m-d',time()))." OR week =".date('w',time()).")");
+					$type = pdo_fetch("SELECT * FROM ".tablename('ljr_business_order_type')." WHERE id =".$the_type['id']);
+					echo "<img src='../attachment/".$staff['image']."' style='width:50px;' />";
+					echo "<p>员工:".$staff['name']."</p>";
+					echo "<p>部门：".$department['name']."</p>";
+					echo "<p>职位：".$position['name']."</p>";
+					if(empty($appointment)){
+						echo "<p style='color:red;'>没有订餐！</p><p class='color:green;'>消费成功!</p>";
+					}else{
+						echo "<p style='color: green;'>已订餐</p><p class='color:green;'>消费成功!</p>";
+					}
+//					echo "<p>菜式：</p>";
+//					foreach($dishes as $d){
+//						echo "<p>".$d['name']."</p>";
+//					}
+				}else{
+					echo '操作失败，请重新操作！';
+					exit;
+
+				}
 			}
 		}
 
@@ -565,7 +688,7 @@ class Ljr_business_orderModuleSite extends WeModuleSite {
 		//选择订餐类型
 		if($op == 'choose_type'){
 			$day = $_GPC['day'];
-			$types = pdo_fetchall("SELECT * FROM ".tablename('ljr_business_order_type')." WHERE weid =".$_W['uniacid']." AND status = 1");
+			$types = pdo_fetchall("SELECT * FROM ".tablename('ljr_business_order_type')." WHERE weid =".$_W['uniacid']);
 //			if($day == strtotime(date('Y-m-d',time()))){
 				//查设置不准订餐时间
 				$week = pdo_fetch("SELECT * FROM ".tablename('ljr_business_order_week')." WHERE weid =".$_W['uniacid']);
@@ -622,7 +745,7 @@ class Ljr_business_orderModuleSite extends WeModuleSite {
 			include $this->template('choose_type');
 		}
 
-		//就餐（无论有无订餐都可以就餐，只是会显示是否有订餐）
+		//就餐
 		if($op == 'order'){
 			$user_id = $_SESSION['user_id'];
 			if(empty($user_id)){
@@ -646,7 +769,7 @@ class Ljr_business_orderModuleSite extends WeModuleSite {
 //				echo $now;
 //				exit;
 				//查所有的类型，通过类型查时间
-				$types = pdo_fetchall("SELECT * FROM ".tablename('ljr_business_order_type')." WHERE weid =".$_W['uniacid']." AND status = 1");
+				$types = pdo_fetchall("SELECT * FROM ".tablename('ljr_business_order_type')." WHERE weid =".$_W['uniacid']);
 				foreach($types as $key=>$type){
 					$begin = strtotime($type['begin_time']);
 					$end = strtotime($type['end_time']);
@@ -658,6 +781,14 @@ class Ljr_business_orderModuleSite extends WeModuleSite {
 				if(empty($the_type)){
 					message('不在就餐时间内，不能进行该操作！',$this->createMobileUrl('appointment'),'error');
 				}
+				//如果就餐类型设置了没有预约不能就餐，就需要先核实有无预约
+				if($the_type['status'] != 1){
+					$appointment = pdo_fetch("SELECT * FROM ".tablename('ljr_business_order_appointment')." WHERE user_id =".$user_id." AND type_id =".$the_type['id']." AND time =".$time);
+					if(empty($appointment)){
+						message('您没有订餐，不能进行该操作！',$this->createMobileUrl('appointment'),'error');
+					}
+				}
+
 				$check = pdo_fetch("SELECT * FROM ".tablename('ljr_business_order_orders')." WHERE user_id =".$user_id." AND weid = ".$_W['uniacid']." AND type_id =".$the_type['id']." AND time =".$time);
 				if(!empty($check)){
 					message('您已就餐，不需要重复操作！',$this->createMobileUrl('appointment'),'error');

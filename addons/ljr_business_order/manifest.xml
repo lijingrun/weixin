@@ -67,6 +67,7 @@
 		  `image` varchar(255) NOT NULL,
 		  `openid` varchar(255) NOT NULL,
 		  `password` varchar(255) NOT NULL,
+		  `ic_number` varchar(255),
 		  `status` int(1) NOT NULL,
 		  `list_order` int(11) NOT NULL,
 		  `sex` int(1) NOT NULL,

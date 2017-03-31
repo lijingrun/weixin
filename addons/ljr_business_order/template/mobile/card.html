@@ -1,0 +1,73 @@
+{template 'header'}
+<script type="text/javascript" language=JavaScript charset="UTF-8">
+    document.onkeydown=function(event){
+        var e = event || window.event || arguments.callee.caller.arguments[0];
+        if(e && e.keyCode==13){ // enter 键
+            //要做的事情
+            $("#sure").onclick();
+        }
+    };
+</script>
+<link href="/addons/lanyu_appointment/template/mobile/css/choose_day.css" rel="stylesheet">
+<nav class="navbar navbar-inverse navbar-static-top">
+    <div class="container" align="center">
+        <h4 style="color:white;">请选择订餐类型</h4>
+    </div>
+</nav>
+<div style="padding:10px;">
+    <form method="post">
+        <button type="button" class="btn btn-primary btn-lg btn-block" style="color: red;font-size: 30px;"><strong>{php echo date('Y-m-d',time())}({$the_type['name']})</strong></button>
+        <br />
+        <div class="input-group">
+            <span class="input-group-addon" >IC卡：</span>
+            <input type="text" class="form-control" id="card_id" name="ic_number" placeholder="请刷IC卡" aria-describedby="basic-addon1">
+        </div>
+        <br />
+        <div>
+            <input type="submit" name="button" id="sure" value="提交" onclick="check_data();" class="btn btn-primary col-lg-1" />
+            <input type="hidden" name="token" value="{$_W['token']}" />
+        </div>
+    </form>
+
+</div>
+<div style='margin-top: 50px;' class="panel panel-success">
+    <div class="panel-heading">
+        <h3 class="panel-title">就餐信息</h3>
+    </div>
+    <div class="panel-body" id="content">
+        未有就餐信息。。。
+    </div>
+</div>
+<script type="text/javascript">
+    function message(msg) {
+        require(['util'], function(util) {
+            util.message(msg);
+        });
+    }
+    $('form').submit(function() {
+        return false;
+    });
+    function check_data(){
+        var ic_number = $("#card_id").val();
+        if(ic_number != ''){
+            var url = "{php echo $this->createMobileUrl('appointment',array('op' => 's_card'))}";
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : {'ic_number' : ic_number},
+                success : function(data){
+                    $("#content").html(data);
+                    $("#card_id").val('');
+                    $("#card_id").focus();
+                }
+            });
+        }else{
+            $("#card_id").focus();
+        }
+    }
+    $(function(){
+        $("#card_id").focus();
+    });
+</script>
+
+{template 'footer'}
