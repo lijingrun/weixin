@@ -1,6 +1,7 @@
 <link href="./resource/css/bootstrap.min.css" rel="stylesheet">
 <link href="./resource/css/font-awesome.min.css" rel="stylesheet">
-<link href="./resource/css/common.css" rel="stylesheet">
+<link href="./resource/css/common.css" rel="stylesheet">
+<script src="./resource/js/lib/jquery-1.11.1.min.js"></script>
 
 <div class="main panel panel-default">
     <div class="category panel-body table-responsive">
@@ -13,7 +14,7 @@
                     <div class="form-group">
                         <label class="col-xs-12 col-sm-3 col-md-2 control-label">上级部门</label>
                         <div class="col-sm-9 col-xs-12">
-                            <select class="form-control" name="parent_id">
+                            <select class="form-control" name="parent_id" id="parent_id">
 								<option value="0">根路径</option>
                                 {loop $departments $depart}
                                 <option value="{$depart['id']}" {if $depart['id'] == $department['parent_id']}selected = 'selected'{/if}>
@@ -26,13 +27,13 @@
                     <div class="form-group">
                         <label class="col-xs-12 col-sm-3 col-md-2 control-label">部门名称</label>
                         <div class="col-sm-9 col-xs-12">
-                            <input type="text" name="name" value="{$department['name']}" class="form-control" />
+                            <input type="text" name="name" id="name" value="{$department['name']}" class="form-control" />
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-xs-12 col-sm-3 col-md-2 control-label">排序</label>
                         <div class="col-sm-9 col-xs-12">
-                            <input type="text" name="list_order" value="{$department['list_order']}" class="form-control"  />
+                            <input type="text" name="list_order" id="list_order" value="{$department['list_order']}" class="form-control"  />
                         </div>
                     </div>
                     <div class="form-group">
@@ -45,8 +46,9 @@
                 </div>
             </div>
             <div class="form-group col-sm-12">
-                <input type='hidden' name='id' value="{$department['id']}" />
-                <input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" />
+                <input type='hidden' name='id'id="department_id" value="{$department['id']}" />
+                <input type="submit" name="button" onclick="save_data();" value="提交" class="btn btn-primary col-lg-1" />
+                <input type="submit" name="button" onclick="del_data();" value="删除" class="btn btn-danger col-lg-1" />
                 <input type="hidden" name="token" value="{$_W['token']}" />
             </div>
         </form>
@@ -58,11 +60,50 @@
             util.message(msg);
         });
     }
+
     $('form').submit(function() {
+        return false;
         if ($.trim($(':text[name="name"]').val()) == '') {
             message('请填写部门名称.', '', 'error');
             return false;
         }
         return true;
     });
+    function del_data(){
+        if(confirm("是否确定删除该部门？")){
+            var id = $("#department_id").val();
+            var url = "{php echo $this->createWebUrl('department',array('op' => 'ajax_del'))}";
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : {'id' : id},
+                success : function(data){
+                    if(data == 111){
+                        alert('操作成功！');
+                        parent.location.reload();
+                    }
+                }
+            });
+        }
+    }
+    function save_data(){
+        var parent_id = $("#parent_id").val();
+        var name = $("#name").val();
+        var list_order = $("#list_order").val();
+        var department_id = $("#department_id").val();
+        var status = $('input:radio[name="status"]:checked').val();
+        var url = "{php echo $this->createWebUrl('department',array('op' => 'ajax_add'))}";
+        if(name != ''){
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : {'name' : name, 'parent_id' : parent_id, 'list_order' : list_order, 'id' : department_id,'status' : status},
+                success : function(data){
+                    if(data == 111){
+                        parent.location.reload();
+                    }
+                }
+            });
+        }
+    }
 </script>

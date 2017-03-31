@@ -46,13 +46,13 @@ class Ljr_business_orderModuleSite extends WeModuleSite {
 				);
 				if(empty($id)){
 					if(pdo_insert('ljr_business_order_department',$insert)){
-						message('操作成功！','success');
+						message('操作成功,请刷新页面！','success');
 					}else{
 						message('服务器繁忙，请稍后重试！',$this->createWebUrl('department',array('op' => 'add')),'error');
 					}
 				}else{
 					if(pdo_update('ljr_business_order_department',$insert,array('id' => $id))){
-						message('操作成功！',$this->createWebUrl('department'),'success');
+						message('操作成功，请刷新页面！','','success');
 					}else{
 						message('服务器繁忙，请稍后重试！',$this->createWebUrl('department',array('op' => 'add','id' => $id)),'error');
 					}
@@ -63,6 +63,47 @@ class Ljr_business_orderModuleSite extends WeModuleSite {
 
 			include $this->template('web/department_add');
 		}
+
+		if($op == 'ajax_add'){
+			$name = $_GPC['name'];
+			$parent_id = $_GPC['parent_id'] ? $_GPC['parent_id'] : 0;
+			$status = $_GPC['status'];
+			$id = $_GPC['id'];
+			$list_order = $_GPC['list_order'];
+			if(empty($name)){
+				message('请输入正确的信息！',$this->createWebUrl('department',array('op' => 'add','id' => $id)),'error');
+			}
+			$insert = array(
+					'name' => $name,
+					'parent_id' => $parent_id,
+					'status' => $status,
+					'list_order' => $list_order,
+					'weid' => $_W['uniacid'],
+			);
+			if(empty($id)){
+				if(pdo_insert('ljr_business_order_department',$insert)){
+					echo 111;exit;
+				}else{
+					message('服务器繁忙，请稍后重试！',$this->createWebUrl('department',array('op' => 'add')),'error');
+				}
+			}else{
+				if(pdo_update('ljr_business_order_department',$insert,array('id' => $id))){
+					echo 111;
+					exit;
+				}else{
+					message('服务器繁忙，请稍后重试！',$this->createWebUrl('department',array('op' => 'add','id' => $id)),'error');
+				}
+			}
+		}
+
+		if($op == 'ajax_del'){
+			$id = $_GPC['id'];
+			if(pdo_delete('ljr_business_order_department',array('id' => $id))){
+				echo 111;
+				exit;
+			}
+		}
+
 	}
 
 	//职位管理

@@ -64,6 +64,7 @@
                 <th >email</th>
                 <th >预约日期</th>
                 <th >预约档期</th>
+                <th >预约类型</th>
                 <th>状态</th>
                 <th >操作</th>
             </tr>
@@ -87,6 +88,12 @@
                 </td>
                 <td>
                     {$l['time']}
+                </td>
+                <td>
+                    {loop $l['types'] $type}
+                    {$type['name']}
+                    <br />
+                    {/loop}
                 </td>
                 <td>{if $l['status']=='1'}<span class="label label-default">未支付</span>{else if $l['status'] == 2}<span class="label label-success">已支付</span>{else if $l['status'] == 0}<span class="label label-success">已取消</span>{else if $l['status'] == 3}<span class="label label-success">已完成</span>{/if}</td>
                 <td>

@@ -76,6 +76,10 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 				$sql .= " AND d.phone like '%".$phone."%'";
 			}
 			$list = pdo_fetchall($sql);
+			foreach($list as $key=>$l){
+				$types = pdo_fetchall("SELECT t.name FROM ".tablename('lanyu_appointment_to_type')." AS toa,".tablename('lanyu_appointment_type')." AS t WHERE toa.app_id = ".$l['id']." AND toa.type_id = t.id");
+				$list[$key]['types'] = $types;
+			}
 
 			include $this->template('web/order_list');
 		}
