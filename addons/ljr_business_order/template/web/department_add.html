@@ -1,0 +1,68 @@
+<link href="./resource/css/bootstrap.min.css" rel="stylesheet">
+<link href="./resource/css/font-awesome.min.css" rel="stylesheet">
+<link href="./resource/css/common.css" rel="stylesheet">
+
+<div class="main panel panel-default">
+    <div class="category panel-body table-responsive">
+        <form method="post" class="form-horizontal form">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    部门相关信息
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">上级部门</label>
+                        <div class="col-sm-9 col-xs-12">
+                            <select class="form-control" name="parent_id">
+								<option value="0">根路径</option>
+                                {loop $departments $depart}
+                                <option value="{$depart['id']}" {if $depart['id'] == $department['parent_id']}selected = 'selected'{/if}>
+                                {$depart['name']}
+                                </option>
+                                {/loop}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">部门名称</label>
+                        <div class="col-sm-9 col-xs-12">
+                            <input type="text" name="name" value="{$department['name']}" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">排序</label>
+                        <div class="col-sm-9 col-xs-12">
+                            <input type="text" name="list_order" value="{$department['list_order']}" class="form-control"  />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-xs-12 col-sm-3 col-md-2 control-label">状态</label>
+                        <div class="col-sm-9 col-xs-12">
+                            <label for="isshow1" class="radio-inline"><input type="radio" name="status" value="1" id="isshow1" {if $department['status']=='1'}  checked="true" {/if}> 正常</label>&nbsp;&nbsp;&nbsp;
+                            <label for="isshow0" class="radio-inline"><input type="radio" name="status" value="0" id="isshow0" {if $department['status'] == '0'}  checked="true" {/if}> 失效</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group col-sm-12">
+                <input type='hidden' name='id' value="{$department['id']}" />
+                <input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" />
+                <input type="hidden" name="token" value="{$_W['token']}" />
+            </div>
+        </form>
+    </div>
+</div>
+<script type="text/javascript">
+    function message(msg) {
+        require(['util'], function(util) {
+            util.message(msg);
+        });
+    }
+    $('form').submit(function() {
+        if ($.trim($(':text[name="name"]').val()) == '') {
+            message('请填写部门名称.', '', 'error');
+            return false;
+        }
+        return true;
+    });
+</script>

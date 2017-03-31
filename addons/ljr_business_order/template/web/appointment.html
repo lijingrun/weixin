@@ -5,12 +5,12 @@
         var begin_day = $("#begin_day").val();
         var end_day = $("#end_day").val();
         var type_id = $("#type_id").val();
-        location.href="{php echo $this->createWebUrl('orders',array('op' => 'index'))}&department_id="+department_id+"&begin_day="+begin_day+"&end_day="+end_day+"&type_id="+type_id;
+        location.href="{php echo $this->createWebUrl('orders',array('op' => 'appointment'))}&department_id="+department_id+"&begin_day="+begin_day+"&end_day="+end_day+"&type_id="+type_id;
     }
 </script>
 <ul class="nav nav-tabs">
-    <li ><a href="{php echo $this->createWebUrl('orders',array('op'=>'appointment'));}">订餐列表</a></li>
-    <li class="active"><a href="{php echo $this->createWebUrl('orders',array('op'=>'index'));}">就餐列表</a></li>
+    <li class="active"><a href="{php echo $this->createWebUrl('orders',array('op'=>'appointment'));}">订餐列表</a></li>
+    <li ><a href="{php echo $this->createWebUrl('orders',array('op'=>'index'));}">就餐列表</a></li>
 </ul>
 <div class="main">
     <div class="panel panel-info">
@@ -42,7 +42,7 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-xs-1">就餐时间</div>
+                    <div class="col-xs-1">订餐时间</div>
                     <div class="col-xs-4">
                         <input type="date" class="form-control" id="begin_day" value="{$begin_day}" />
                     </div>
@@ -61,27 +61,20 @@
     <div>
         <table class="table">
             <tr>
-                <th>就餐人</th>
-                <th>就餐人部门</th>
-                <th>就餐人职位</th>
-                <th>就餐时间</th>
-                <th>就餐类型</th>
-                <th>是否订餐</th>
+                <th>订餐人</th>
+                <th>订餐人部门</th>
+                <th>订餐人职位</th>
+                <th>订餐日期</th>
+                <th>订餐类型</th>
             </tr>
             {loop $orders $order}
             <tr>
                 <td>{$order['username']}</td>
                 <td>{$order['d_name']}</td>
                 <td>{$order['p_name']}</td>
-                <td>{php echo date('Y-m-d H:m:s',$order['create_time'])}</td>
+                <td>{php echo date('Y-m-d',$order['time'])}</td>
                 <td>{$order['t_name']}</td>
-                <td>
-                    {if $order['appointment']}
-                    <button class="btn btn-success">有</button>
-                    {else}
-                    <button class="btn btn-danger">无</button>
-                    {/if}
-                </td>
+
             </tr>
             {/loop}
         </table>

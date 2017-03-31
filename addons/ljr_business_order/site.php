@@ -14,11 +14,54 @@ class Ljr_business_orderModuleSite extends WeModuleSite {
 		$op = !empty($_GPC['op']) ? trim($_GPC['op']) : 'index';
 
 		if($op == 'index'){
-
-
-
-
+			$departments = pdo_fetchall("SELECT * FROM ".tablename('ljr_business_order_department')." WHERE weid =".$_W['uniacid']);
 			include $this->template('web/department_list');
+		}
+
+		if($op == 'add') {
+
+			$id = $_GPC['id'];
+			$departments = pdo_fetchall("SELECT * FROM ".tablename('ljr_business_order_department')." WHERE weid =".$_W['uniacid']);
+			if(!empty($id)){
+				$department = pdo_fetch("SELECT * FROM ".tablename('ljr_business_order_department')." WHERE id =".$id." AND weid =".$_W['uniacid']);
+			}else{
+				$department['list_order'] = 255;
+				$department['status'] = 1;
+			}
+			if(checksubmit('submit')){
+				$name = $_GPC['name'];
+				$parent_id = $_GPC['parent_id'] ? $_GPC['parent_id'] : 0;
+				$status = $_GPC['status'];
+				$id = $_GPC['id'];
+				$list_order = $_GPC['list_order'];
+				if(empty($name)){
+					message('请输入正确的信息！',$this->createWebUrl('department',array('op' => 'add','id' => $id)),'error');
+				}
+				$insert = array(
+					'name' => $name,
+					'parent_id' => $parent_id,
+					'status' => $status,
+					'list_order' => $list_order,
+					'weid' => $_W['uniacid'],
+				);
+				if(empty($id)){
+					if(pdo_insert('ljr_business_order_department',$insert)){
+						message('操作成功！','success');
+					}else{
+						message('服务器繁忙，请稍后重试！',$this->createWebUrl('department',array('op' => 'add')),'error');
+					}
+				}else{
+					if(pdo_update('ljr_business_order_department',$insert,array('id' => $id))){
+						message('操作成功！',$this->createWebUrl('department'),'success');
+					}else{
+						message('服务器繁忙，请稍后重试！',$this->createWebUrl('department',array('op' => 'add','id' => $id)),'error');
+					}
+				}
+			}
+
+
+
+			include $this->template('web/department_add');
 		}
 	}
 
@@ -317,10 +360,34 @@ class Ljr_business_orderModuleSite extends WeModuleSite {
 	//订单查询
 	public function doWebOrders(){
 		global $_GPC, $_W;
-		$op = !empty($_GPC['op']) ? trim($_GPC['op']) : 'index';
-
+		$op = !empty($_GPC['op']) ? trim($_GPC['op']) : 'appointment';
+		$pindex = max(1, intval($_GPC['page']));
+		$psize = 20;
 		if($op == 'index'){
-			$orders = pdo_fetchall("SELECT s.name as username,d.name as d_name,t.name as t_name,p.name as p_name,o.* FROM ".tablename('ljr_business_order_orders')." AS o,".tablename('ljr_business_order_staff')." AS s,".tablename('ljr_business_order_department')." AS d,.".tablename('ljr_business_order_type')." AS t,".tablename('ljr_business_order_position')." AS p  WHERE o.weid = ".$_W['uniacid']." AND o.user_id = s.id AND s.department_id = d.id AND o.type_id = t.id AND s.position_id = p.id ORDER BY o.create_time");
+			$sql = " FROM ".tablename('ljr_business_order_orders')." AS o,".tablename('ljr_business_order_staff')." AS s,".tablename('ljr_business_order_department')." AS d,.".tablename('ljr_business_order_type')." AS t,".tablename('ljr_business_order_position')." AS p  WHERE o.weid = ".$_W['uniacid']." AND o.user_id = s.id AND s.department_id = d.id AND o.type_id = t.id AND s.position_id = p.id";
+			$departments = pdo_fetchall("SELECT * FROM ".tablename('ljr_business_order_department')." WHERE weid =".$_W['uniacid']." AND status = 1");
+			$types = pdo_fetchall("SELECT * FROM ".tablename('ljr_business_order_type')." WHERE weid =".$_W['uniacid']);
+
+			$department_id = $_GPC['department_id'];
+			$begin_day = $_GPC['begin_day'];
+			$end_day = $_GPC['end_day'];
+			$type_id = $_GPC['type_id'];
+			if(!empty($department_id)){
+				$sql .= " AND d.id =".$department_id;
+			}
+			if(!empty($begin_day)){
+				$sql .= " AND o.create_time >=".strtotime($begin_day);
+			}
+			if(!empty($end_day)){
+				$sql .= " AND o.create_time <=".strtotime($end_day);
+			}
+			if(!empty($type_id)){
+				$sql .= " AND o.type_id =".$type_id;
+			}
+
+			$total = pdo_fetchcolumn("SELECT COUNT(*)".$sql);
+			$pager = pagination($total,$pindex,$psize);
+			$orders = pdo_fetchall("SELECT s.name as username,d.name as d_name,t.name as t_name,p.name as p_name,o.* ".$sql ." ORDER BY o.create_time LIMIT " . ($pindex - 1) * $psize . ',' . $psize);
 			foreach($orders as $key=>$order){
 				$appointment = pdo_fetch("SELECT * FROM ".tablename('ljr_business_order_appointment')." WHERE weid =".$_W['uniacid']." AND time =".$order['time']." AND user_id =".$order['user_id']." AND type_id =".$order['type_id']);
 				if(!empty($appointment)){
@@ -330,6 +397,34 @@ class Ljr_business_orderModuleSite extends WeModuleSite {
 				}
 			}
 			include $this->template('web/orders');
+		}
+
+		//订餐情况
+		if($op == 'appointment'){
+			$sql = " FROM ".tablename('ljr_business_order_appointment')." AS o,".tablename('ljr_business_order_staff')." AS s,".tablename('ljr_business_order_department')." AS d,.".tablename('ljr_business_order_type')." AS t,".tablename('ljr_business_order_position')." AS p  WHERE o.weid = ".$_W['uniacid']." AND o.user_id = s.id AND s.department_id = d.id AND o.type_id = t.id AND s.position_id = p.id";
+			$departments = pdo_fetchall("SELECT * FROM ".tablename('ljr_business_order_department')." WHERE weid =".$_W['uniacid']." AND status = 1");
+			$types = pdo_fetchall("SELECT * FROM ".tablename('ljr_business_order_type')." WHERE weid =".$_W['uniacid']);
+			$department_id = $_GPC['department_id'];
+			$begin_day = $_GPC['begin_day'];
+			$end_day = $_GPC['end_day'];
+			$type_id = $_GPC['type_id'];
+			if(!empty($department_id)){
+				$sql .= " AND d.id =".$department_id;
+			}
+			if(!empty($begin_day)){
+				$sql .= " AND o.time >=".strtotime($begin_day);
+			}
+			if(!empty($end_day)){
+				$sql .= " AND o.time <=".strtotime($end_day);
+			}
+			if(!empty($type_id)){
+				$sql .= " AND o.type_id =".$type_id;
+			}
+			$total = pdo_fetchcolumn("SELECT COUNT(*)".$sql);
+			$pager = pagination($total,$pindex,$psize);
+			$orders = pdo_fetchall("SELECT s.name as username,d.name as d_name,t.name as t_name,p.name as p_name,o.* ".$sql ." ORDER BY o.time LIMIT " . ($pindex - 1) * $psize . ',' . $psize);
+
+			include $this->template('web/appointment');
 		}
 
 	}
@@ -430,13 +525,23 @@ class Ljr_business_orderModuleSite extends WeModuleSite {
 		if($op == 'choose_type'){
 			$day = $_GPC['day'];
 			$types = pdo_fetchall("SELECT * FROM ".tablename('ljr_business_order_type')." WHERE weid =".$_W['uniacid']." AND status = 1");
-			if($day == strtotime(date('Y-m-d',time()))){
+//			if($day == strtotime(date('Y-m-d',time()))){
+				//查设置不准订餐时间
+				$week = pdo_fetch("SELECT * FROM ".tablename('ljr_business_order_week')." WHERE weid =".$_W['uniacid']);
+				if(!empty($week['time'])){
+					$time = time() + $week['time']*3600;
+				}else{
+					$time = time();
+				}
 				foreach($types as $key=>$type){
-					if(strtotime($type['end_time']) < time()){
+					//计算开始时间
+					$the_begin_time = strtotime(date('Y-m-d',$day)." ".$type['begin_time']);
+
+					if($the_begin_time < $time){
 						$types[$key]['can_choose'] = 2;
 					}
 				}
-			}
+//			}
 			//查选择的时间是否可以订餐
 			$weeks = pdo_fetch("SELECT * FROM ".tablename('ljr_business_order_week')." WHERE weid =".$_W['uniacid']);
 			$weeks = explode(',',$weeks['week']);
