@@ -1,0 +1,58 @@
+{template 'header'}
+<link href="/addons/lanyu_appointment/template/mobile/css/choose_day.css" rel="stylesheet">
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-9" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">主页</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="navbar-collapse collapse" id="bs-example-navbar-collapse-9" aria-expanded="false" style="height: 1px;">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="#">我的订餐</a></li>
+                <li><a href="#">今周菜单</a></li>
+                <!--<li><a href="#">Link</a></li>-->
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+</nav>
+<div style="padding:10px;">
+    <form method="post">
+        <div class="input-group">
+            <span class="input-group-addon" >员工：</span>
+            <input type="text" class="form-control" name="name" placeholder="员工登录账号" aria-describedby="basic-addon1">
+        </div>
+        <br />
+        <div class="input-group">
+            <span class="input-group-addon" >密码：</span>
+            <input type="password" class="form-control" name="password"  placeholder="登录密码" aria-describedby="basic-addon1">
+        </div>
+        <br />
+        {loop $types $type}
+        {/loop}
+        <div>
+            <input type="submit" name="submit" value="提交" class="btn btn-primary col-lg-1" />
+            <input type="hidden" name="token" value="{$_W['token']}" />
+        </div>
+    </form>
+</div>
+<script type="text/javascript">
+    function message(msg) {
+        require(['util'], function(util) {
+            util.message(msg);
+        });
+    }
+    $('form').submit(function() {
+
+        return true;
+    });
+</script>
+
+{template 'footer'}

@@ -42,8 +42,13 @@
                 <div class="form-group">
                     <label class="col-xs-12 col-sm-3 col-md-2 control-label">周重复</label>
                     <div class="col-sm-9 col-xs-12">
-                        <label  class="radio-inline"><input type="radio" name="status" value="1" id="isshow1" {if $the_one['status']=='1'}  checked="true" {/if}> 重复</label>&nbsp;&nbsp;&nbsp;
-                        <label  class="radio-inline"><input type="radio" name="status" value="0" id="isshow0"  {if $the_one['status'] == '0'}  checked="true" {/if}> 不重复</label>
+                        <label  class="radio-inline"><input type="checkbox" name="week[]" value="1"  {if in_array(1,$weeks)}  checked="true" {/if}> 周一</label>&nbsp;&nbsp;&nbsp;
+                        <label  class="radio-inline"><input type="checkbox" name="week[]" value="2"  {if in_array(2,$weeks)}  checked="true" {/if}> 周一</label>&nbsp;&nbsp;&nbsp;
+                        <label  class="radio-inline"><input type="checkbox" name="week[]" value="3"  {if in_array(3,$weeks)}  checked="true" {/if}> 周三</label>
+                        <label  class="radio-inline"><input type="checkbox" name="week[]" value="4"   {if in_array(4,$weeks)}  checked="true" {/if}> 周四</label>
+                        <label  class="radio-inline"><input type="checkbox" name="week[]" value="5"   {if in_array(5,$weeks)}  checked="true" {/if}> 周五</label>
+                        <label  class="radio-inline"><input type="checkbox" name="week[]" value="6"   {if in_array(6,$weeks)}  checked="true" {/if}> 周六</label>
+                        <label  class="radio-inline"><input type="checkbox" name="week[]" value="0"   {if in_array(0,$weeks)}  checked="true" {/if}> 周日</label>
                     </div>
                 </div>
             </div>

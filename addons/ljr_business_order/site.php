@@ -354,12 +354,8 @@ class Ljr_business_orderModuleSite extends WeModuleSite {
 			if($id > 0) {
 				$the_one = pdo_fetch("SELECT * FROM " . tablename('ljr_business_order_dishes') . " WHERE weid =" . $_W['uniacid'] . " AND id =" . $id);
 				if(!empty($the_one['week'])){
-					$the_one['status'] = 1;
-				}else{
-					$the_one['status'] = 0;
+					$weeks = explode(',',$the_one['week']);
 				}
-			}else{
-				$the_one['status'] = 1;
 			}
 
 			if(checksubmit('submit')){
@@ -369,8 +365,9 @@ class Ljr_business_orderModuleSite extends WeModuleSite {
 				$type_id = $_GPC['type_id'];
 				$status = $_GPC['status'];
 				$id = $_GPC['id'];
-				if($status == 1){
-					$week = date('w',$day);
+				$weeks = $_GPC['week'];
+				if(!empty($weeks)){
+					$week = implode(',',$weeks);
 				}
 				$insert = array(
 					'name' => $name,
@@ -715,7 +712,7 @@ class Ljr_business_orderModuleSite extends WeModuleSite {
 			}
 			$week = date('w',$day);
 			//查菜式
-			$dishes = pdo_fetchall("SELECT s.*,t.name as t_name FROM ".tablename('ljr_business_order_dishes')." AS s,".tablename('ljr_business_order_type')." AS t WHERE s.weid =".$_W['uniacid']." AND (s.day =".$day." OR s.week =".$week.") AND s.type_id = t.id ORDER BY type_id");
+			$dishes = pdo_fetchall("SELECT s.*,t.name as t_name FROM ".tablename('ljr_business_order_dishes')." AS s,".tablename('ljr_business_order_type')." AS t WHERE s.weid =".$_W['uniacid']." AND (s.day =".$day." OR s.week like '%".$week."%') AND s.type_id = t.id ORDER BY type_id");
 
 
 			$appointment = pdo_fetchall("SELECT * FROM ".tablename('ljr_business_order_appointment')." WHERE time =".$day." AND weid =".$_W['uniacid']." AND user_id =".$_SESSION['user_id']);
@@ -811,6 +808,38 @@ class Ljr_business_orderModuleSite extends WeModuleSite {
 
 
 
+	}
+
+	public function doMobilePc_appointment(){
+		global $_GPC, $_W;
+		$op = !empty($_GPC['op']) ? trim($_GPC['op']) : 'index';
+
+		if($op == 'index'){
+			if(empty($_SESSION['user_id'])){
+				message('请先登录',$this->createMobileUrl('pc_appointment',array('op' => 'login')),'error');
+			}
+
+
+			include $this->template('pc_index');
+		}
+
+		if($op == 'login'){
+
+			if(checksubmit('submit')){
+				$name = $_GPC['name'];
+				$password = $_GPC['password'];
+				$staff = pdo_fetch("SELECT * FROM ".tablename('ljr_business_order_staff')." WHERE weid =".$_W['uniacid']." AND name ='".$name."' AND password ='".md5($password)."' AND status = 1");
+				if(!empty($staff)){
+					$_SESSION['user_id'] = $staff['id'];
+					message('',$this->createMobileUrl('pc_appointment',array('op' => 'index')),'');
+				}else{
+					message('账号/密码错误，请重新输入！','','error');
+				}
+			}
+
+
+			include $this->template('pc_login');
+		}
 	}
 
 

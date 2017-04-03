@@ -22,7 +22,8 @@
 	</platform>
 	<bindings>
 		<cover>
-			<entry title="订单系统入口" do="appointment" />
+			<entry title="订单系统手机端入口" do="appointment" />
+			<entry title="订单系统PC端入口" do="pc_appointment" />
 		</cover>
 		<menu>
 			<entry title="部门管理" do="department" direct="false" />
@@ -128,7 +129,7 @@
 		  `name` varchar(255) NOT NULL,
 		  `day` varchar(255) NOT NULL,
 		  `image` varchar(255) NOT NULL,
-		  `week` int(11),
+		  `week` varchar(255) ,
 		  `content` varchar(255) NOT NULL,
 		  PRIMARY KEY (`id`)
 		) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
