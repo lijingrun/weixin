@@ -600,6 +600,15 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 			//查选择主类型
 			$type = pdo_fetch("SELECT * FROM ".tablename('lanyu_appointment_type')." WHERE id =".$type_id." AND weid =".$_W['uniacid']);
 			$total_price = $type['price'];
+			//计算预约订金数
+			$welcome = pdo_fetch("SELECT * FROM ".tablename('lanyu_appointment_welcome')." WHERE weid =".$_W['uniacid']);
+			$deposit = 0;
+			switch($welcome['c_type']){
+				case 1 : $deposit = $welcome['coe'];
+					break;
+				case 2 : $deposit = $welcome['coe']*$total_price;
+					break;
+			}
 			//套餐类型
 			if(!empty($o_type_ids)){
 				$o_type_ids = implode(',',$o_type_ids);
@@ -609,7 +618,7 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 				}
 			}
 			//查历史订单
-			$order = pdo_fetch("SELECT * FROM ".tablename('lanyu_appointment_data')." WHERE weid =".$_W['uniacid']." AND openid like '".$_W['openid']."'");
+			$order = pdo_fetch("SELECT * FROM ".tablename('lanyu_appointment_data')." WHERE weid =".$_W['uniacid']." AND openid like '".$_W['openid']."' ORDER BY id desc");
 			include $this->template('order_post');
 		}
 

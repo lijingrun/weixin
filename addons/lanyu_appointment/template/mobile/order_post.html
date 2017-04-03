@@ -65,7 +65,15 @@
             </div>
         </div>
     </div>
-    <div class="alert alert-success" role="alert" align="right">订单总价：￥{$total_price}</div>
+
+    <div class="alert alert-success" role="alert" align="right">
+        <p>订单总价：￥{$total_price}</p>
+        <p>需付订金：￥{$deposit}</p>
+
+    </div>
+    <div class="alert alert-warning" role="alert">
+        <a href="#" class="alert-link" style="font-size: 12px;">距离拍摄时间48小时以上联系客服取消预约，退50%订金!</a>
+    </div>
 </div>
 
     <input type="hidden" id="type_id" value="{$type_id}" />
