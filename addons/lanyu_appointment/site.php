@@ -55,15 +55,17 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 	public function doWebOrder(){
 		global $_GPC, $_W;
 		$op = !empty($_GPC['op']) ? trim($_GPC['op']) : 'index';
+		$pindex = max(1, intval($_GPC['page']));
+		$psize = 20;
 
 		if($op == 'index'){
 			$stores = pdo_fetchall("SELECT * FROM ".tablename('lanyu_appointment_store')." WHERE weid =".$_W['uniacid']);
-			$sql = "SELECT d.*,t.time,s.name as store_name FROM ".tablename('lanyu_appointment_data')." AS d,".tablename('lanyu_appointment_times')." AS t,".tablename('lanyu_appointment_store')." AS s WHERE d.weid =".$_W['uniacid']." AND d.store_id = s.id AND d.times_id = t.id";
+			$sql = " FROM ".tablename('lanyu_appointment_data')." AS d,".tablename('lanyu_appointment_times')." AS t,".tablename('lanyu_appointment_store')." AS s WHERE d.weid =".$_W['uniacid']." AND d.store_id = s.id AND d.times_id = t.id";
 			$store_id = $_GPC['store_id'];
 			$day = $_GPC['day'];
 			$phone = $_GPC['phone'];
 			$status = $_GPC['status'];
-			if( !empty($status)){
+			if( !empty($status) && $status >= 2){
 				$sql .= " AND d.status =".($status-2);
 			}
 			if($store_id > 0){
@@ -75,7 +77,10 @@ class Lanyu_appointmentModuleSite extends WeModuleSite {
 			if(!empty($phone)){
 				$sql .= " AND d.phone like '%".$phone."%'";
 			}
-			$list = pdo_fetchall($sql);
+			$total = pdo_fetchcolumn("SELECT COUNT(*)".$sql);
+			$pager = pagination($total,$pindex,$psize);
+			$sql .= " ORDER BY d.appointment_day desc,times_id LIMIT " . ($pindex - 1) * $psize . ',' . $psize;
+			$list = pdo_fetchall("SELECT d.*,t.time,s.name as store_name".$sql);
 			foreach($list as $key=>$l){
 				$types = pdo_fetchall("SELECT t.name FROM ".tablename('lanyu_appointment_to_type')." AS toa,".tablename('lanyu_appointment_type')." AS t WHERE toa.app_id = ".$l['id']." AND toa.type_id = t.id");
 				$list[$key]['types'] = $types;
